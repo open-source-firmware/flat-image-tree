@@ -1,0 +1,12 @@
+.. SPDX-License-Identifier: Apache-2.0
+
+.. Revision of the specification
+
+.. |fitspec-major| replace:: 0
+.. |fitspec-minor| replace:: 8
+
+.. General Macros
+
+.. |spec| replace:: FITSpec
+.. |spec-fullname| replace:: FIT Specification
+.. |dtspec| replace:: Devicetree Specification
