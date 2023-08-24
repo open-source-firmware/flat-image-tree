@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Flat Image Tree Specification unknown-rev documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="icon" href="_static/fit-favicon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="spec-fullname-specversion">
+<h1>FIT Specification unknown-rev<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<span id="document-license"></span><section id="license">
+<h2><span class="section-number">1. </span>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<section id="copyright">
+<h3><span class="section-number">1.1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h3>
+<div class="line-block">
+<div class="line">Copyright 2008 Marian Balakowicz &lt;<a class="reference external" href="mailto:m8&#37;&#52;&#48;semihalf&#46;com">m8<span>&#64;</span>semihalf<span>&#46;</span>com</a>&gt;</div>
+<div class="line">Copyright 2008 Bartlomiej Sieka &lt;<a class="reference external" href="mailto:tur&#37;&#52;&#48;semihalf&#46;com">tur<span>&#64;</span>semihalf<span>&#46;</span>com</a>&gt;</div>
+<div class="line">Copyright 2022 Simon Glass &lt;<a class="reference external" href="mailto:sjg&#37;&#52;&#48;chromium&#46;com">sjg<span>&#64;</span>chromium<span>&#46;</span>com</a>&gt;</div>
+</div>
+<p>THIS SPECIFICATION PROVIDED “AS IS” AND WITHOUT ANY WARRANTY
+OF ANY KIND, INCLUDING, WITHOUT LIMITATION, ANY EXPRESS OR IMPLIED
+WARRANTY OF NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
+PARTICULAR PURPOSE. IN NO EVENT SHALL LINARO OR ANY MEMBER OF
+LINARO BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, EXEMPLARY,
+PUNITIVE, OR CONSEQUENTIAL DAMAGES, INCLUDING, WITHOUT LIMITATION, LOST
+PROFITS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+<p>Questions pertaining to this document, or the terms or conditions of its
+provision, should be addressed to:</p>
+<div class="line-block">
+<div class="line">Open Source Firmware Foundation</div>
+<div class="line">530 Lawrence Expy</div>
+<div class="line">PMB 992</div>
+<div class="line">Sunnyvale, CA 94085</div>
+<div class="line">United States</div>
+</div>
+</section>
+<section id="license-information">
+<h3><span class="section-number">1.2. </span>License Information<a class="headerlink" href="#license-information" title="Link to this heading">¶</a></h3>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+</section>
+</section>
+<span id="document-acknowledgements"></span><section id="acknowledgements">
+<h2><span class="section-number">2. </span>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">¶</a></h2>
+<p>FIT (Flat Image Tree) was developed in 2008 by Marian Balakowicz and
+Bartlomiej Sieka of Semihalf, under the guidance of Wolfgang Denk,
+founder of Denx Software Engineering and creator of U-Boot.</p>
+<p>Since then, FIT has been maintained and extended by the U-Boot community
+to deal with the developing needs of Open Source firmware.</p>
+<p>This specification builds on this previous work.</p>
+<p>FIT has stood the test of time due to its simplicity and extensibility.
+THis specification aims to build on this work and provide a means for
+further improvement with a wider group of collaborators.</p>
+</section>
+<span id="document-revhistory"></span><section id="revision-history">
+<h2><span class="section-number">3. </span>Revision History<a class="headerlink" href="#revision-history" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">Revision History</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Revision</p></th>
+<th class="head"><p>Date</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0.8</p></td>
+<td><p>2023-AUG-9</p></td>
+<td><p>Initial prerelease version. Imported text from U-Boot
+source tree.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<span id="document-chapter1-introduction"></span><section id="introduction">
+<span id="chapter-introduction"></span><h2><span class="section-number">4. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
+<section id="purpose-and-scope">
+<h3><span class="section-number">4.1. </span>Purpose and Scope<a class="headerlink" href="#purpose-and-scope" title="Link to this heading">¶</a></h3>
+<p>The number of elements playing a role in the kernel booting process has
+increased over time and now typically includes the devicetree, kernel image and
+possibly a ramdisk image. Generally, all must be placed in the system memory and
+booted together.</p>
+<p>For firmware images a similar process has taken place, with various binaries
+loaded at different addresses, such as ARM’s ATF, OpenSBI, FPGA and U-Boot
+itself.</p>
+<p>FIT provides a flexible and extensible format to deal with this complexity. It
+provides support for multiple components. It also supports multiple
+configurations, so that the same FIT can be used to boot multiple boards, with
+some components in common (e.g. kernel) and some specific to that board (e.g.
+devicetree).</p>
+<p>This specification, the FIT Specification (FITSpec),
+provides a suitable format which can be used to describe any set of files
+along with grouping and selection mechanisms.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#chapter-introduction"><span class="std std-numref">Chapter 4</span></a> introduces the purpose and
+background of FITSpec.</p></li>
+<li><p><a class="reference internal" href="index.html#chapter-source-file-format"><span class="std std-numref">Chapter 5</span></a> introduces the FIT concept
+and describes its logical structure and standard properties.
+certain classes of devices and specific device types.</p></li>
+</ul>
+<p><strong>Conventions Used in this Document</strong></p>
+<p>The word <em>shall</em> is used to indicate mandatory requirements strictly to
+be followed in order to conform to the standard and from which no
+deviation is permitted (<em>shall</em> equals <em>is required to</em>).</p>
+<p>The word <em>should</em> is used to indicate that among several possibilities
+one is recommended as particularly suitable, without mentioning or
+excluding others; or that a certain course of action is preferred but
+not necessarily required; or that (in the negative form) a certain
+course of action is deprecated but not prohibited (<em>should</em> equals <em>is
+recommended that</em>).</p>
+<p>The word <em>may</em> is used to indicate a course of action permissible within
+the limits of the standard (<em>may</em> equals <em>is permitted</em>).</p>
+<p>Examples of devicetree constructs are frequently shown in <em>Devicetree
+Syntax</em> form. See <a class="reference internal" href="index.html#dtspec" id="id1"><span>[dtspec]</span></a> for a description of this.</p>
+</section>
+<section id="relationship-to-dtspec">
+<h3><span class="section-number">4.2. </span>Relationship to Devicetree Specification<a class="headerlink" href="#relationship-to-dtspec" title="Link to this heading">¶</a></h3>
+<p>FITSpec is based on the Devicetree Specification, in that it uses the
+same structure and shares some concepts.</p>
+</section>
+<section id="bit-and-64-bit-support">
+<h3><span class="section-number">4.3. </span>32-bit and 64-bit Support<a class="headerlink" href="#bit-and-64-bit-support" title="Link to this heading">¶</a></h3>
+<p>The FITSpec supports CPUs with both 32-bit and 64-bit addressing
+capabilities. Where applicable, sections of the FITSpec describe any
+requirements or considerations for 32-bit and 64-bit addressing.</p>
+</section>
+<section id="definition-of-terms">
+<h3><span class="section-number">4.4. </span>Definition of Terms<a class="headerlink" href="#definition-of-terms" title="Link to this heading">¶</a></h3>
+<dl class="simple glossary">
+<dt id="term-DTB">DTB<a class="headerlink" href="#term-DTB" title="Link to this term">¶</a></dt><dd><p>Devicetree blob. Compact binary representation of the devicetree.</p>
+</dd>
+<dt id="term-DTC">DTC<a class="headerlink" href="#term-DTC" title="Link to this term">¶</a></dt><dd><p>Devicetree compiler. An open source tool used to create DTB files
+from DTS files.</p>
+</dd>
+<dt id="term-DTS">DTS<a class="headerlink" href="#term-DTS" title="Link to this term">¶</a></dt><dd><p>Devicetree syntax. A textual representation of a devicetree
+consumed by the DTC. See Appendix A Devicetree Source Format
+(version 1).</p>
+</dd>
+</dl>
+</section>
+</section>
+<span id="document-chapter2-source-file-format"></span><section id="flattened-image-tree-fit-format">
+<span id="chapter-source-file-format"></span><h2><span class="section-number">5. </span>Flattened Image Tree (FIT) Format<a class="headerlink" href="#flattened-image-tree-fit-format" title="Link to this heading">¶</a></h2>
+<section id="introduction">
+<h3><span class="section-number">5.1. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h3>
+<p>FIT consists of a devicetree blob with nodes and properties following a certain
+schema. Therefore this document defines FIT by providing FDT (Flat Device Tree)
+bindings. These describe the final form of the FIT at the moment when it is
+used. The user perspective may be simpler, as some of the properties (like
+timestamps and hashes) are filled in automatically by available tooling, such
+as <cite>mkimage</cite>.</p>
+<p>To avoid confusion with the kernel FDT the following naming convention is used:</p>
+<dl class="simple">
+<dt>FIT</dt><dd><p>Flattened Image Tree</p>
+</dd>
+</dl>
+<p>FIT is formally a flattened devicetree (in the libfdt meaning), which conforms
+to bindings defined in this document.</p>
+<dl class="simple">
+<dt>.its</dt><dd><p>image tree source</p>
+</dd>
+<dt>.fit</dt><dd><p>flattened image tree blob</p>
+</dd>
+</dl>
+<section id="image-building-procedure">
+<h4><span class="section-number">5.1.1. </span>Image-building procedure<a class="headerlink" href="#image-building-procedure" title="Link to this heading">¶</a></h4>
+<p>The following picture shows how the FIT is prepared. Input consists of
+image source file (.its) and a set of data files. Image is created with the
+help of standard U-Boot mkimage tool which in turn uses dtc (device tree
+compiler) to produce image tree blob (.fit). The resulting .fit file is the
+actual binary of a new FIT:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tqm5200.its
++
+vmlinux.bin.gz     mkimage + dtc               xfer to target
+eldk-4.2-ramdisk  --------------&gt; tqm5200.fit --------------&gt; boot
+tqm5200.dtb                          /|\
+                                      |
+                                 &#39;new FIT&#39;
+</pre></div>
+</div>
+<p>Steps:</p>
+<ol class="arabic simple">
+<li><p>Create .its file, automatically filled-in properties are omitted</p></li>
+<li><p>Call mkimage tool on .its file</p></li>
+<li><p>mkimage calls dtc to create .fit image and assures that
+missing properties are added</p></li>
+<li><p>.fit (new FIT) is uploaded onto the target and used therein</p></li>
+</ol>
+</section>
+<section id="unique-identifiers">
+<h4><span class="section-number">5.1.2. </span>Unique identifiers<a class="headerlink" href="#unique-identifiers" title="Link to this heading">¶</a></h4>
+<p>To identify FIT sub-nodes representing images, hashes, configurations (which
+are defined in the following sections), the “unit name” of the given sub-node
+is used as it’s identifier as it assures uniqueness without additional
+checking required.</p>
+</section>
+<section id="external-data">
+<h4><span class="section-number">5.1.3. </span>External data<a class="headerlink" href="#external-data" title="Link to this heading">¶</a></h4>
+<p>FIT is normally built initially with image data in the ‘data’ property of each
+image node. It is also possible for this data to reside outside the FIT itself.
+This allows the ‘FDT’ part of the FIT to be quite small, so that it can be
+loaded and scanned without loading a large amount of data. Then when an image is
+needed it can be loaded from an external source.</p>
+<p>External FITs use ‘data-offset’ or ‘data-position’ instead of ‘data’.</p>
+<p>The mkimage tool can convert a FIT to use external data using the <cite>-E</cite> argument,
+optionally using <cite>-p</cite> to specific a fixed position.</p>
+<p>It is often desirable to align each image to a block size or cache-line size
+(e.g. 512 bytes), so that there is no need to copy it to an aligned address when
+reading the image data. The mkimage tool provides a <cite>-B</cite> argument to support
+this.</p>
+</section>
+</section>
+<section id="root-node-properties">
+<h3><span class="section-number">5.2. </span>Root-node properties<a class="headerlink" href="#root-node-properties" title="Link to this heading">¶</a></h3>
+<p>The root node of the FIT should have the following layout:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/ o image-tree
+    |- description = &quot;image description&quot;
+    |- timestamp = &lt;12399321&gt;
+    |- #address-cells = &lt;1&gt;
+    |
+    o images
+    | |
+    | o image-1 {...}
+    | o image-2 {...}
+    | ...
+    |
+    o configurations
+      |- default = &quot;conf-1&quot;
+      |
+      o conf-1 {...}
+      o conf-2 {...}
+      ...
+</pre></div>
+</div>
+<section id="optional-property">
+<h4><span class="section-number">5.2.1. </span>Optional property<a class="headerlink" href="#optional-property" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>description</dt><dd><p>Textual description of the FIT</p>
+</dd>
+</dl>
+</section>
+<section id="mandatory-property">
+<h4><span class="section-number">5.2.2. </span>Mandatory property<a class="headerlink" href="#mandatory-property" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>timestamp</dt><dd><p>Last image modification time being counted in seconds since
+1970-01-01 00:00:00 - to be automatically calculated by mkimage tool.</p>
+</dd>
+</dl>
+</section>
+<section id="conditionally-mandatory-property">
+<h4><span class="section-number">5.2.3. </span>Conditionally mandatory property<a class="headerlink" href="#conditionally-mandatory-property" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>#address-cells</dt><dd><p>Number of 32bit cells required to represent entry and
+load addresses supplied within sub-image nodes. May be omitted when no
+entry or load addresses are used.</p>
+</dd>
+</dl>
+</section>
+<section id="mandatory-nodes">
+<h4><span class="section-number">5.2.4. </span>Mandatory nodes<a class="headerlink" href="#mandatory-nodes" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>images</dt><dd><p>This node contains a set of sub-nodes, each of them representing
+single component sub-image (like kernel, ramdisk, etc.). At least one
+sub-image is required.</p>
+</dd>
+<dt>configurations</dt><dd><p>Contains a set of available configuration nodes and
+defines a default configuration.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="images-node">
+<h3><span class="section-number">5.3. </span>‘/images’ node<a class="headerlink" href="#images-node" title="Link to this heading">¶</a></h3>
+<p>This node is a container node for component sub-image nodes. Each sub-node of
+the ‘/images’ node should have the following layout:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o image-1
+    |- description = &quot;component sub-image description&quot;
+    |- data = /incbin/(&quot;path/to/data/file.bin&quot;)
+    |- type = &quot;sub-image type name&quot;
+    |- arch = &quot;ARCH name&quot;
+    |- os = &quot;OS name&quot;
+    |- compression = &quot;compression name&quot;
+    |- load = &lt;00000000&gt;
+    |- entry = &lt;00000000&gt;
+    |
+    o hash-1 {...}
+    o hash-2 {...}
+    ...
+</pre></div>
+</div>
+<section id="mandatory-properties">
+<h4><span class="section-number">5.3.1. </span>Mandatory properties<a class="headerlink" href="#mandatory-properties" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>description</dt><dd><p>Textual description of the component sub-image</p>
+</dd>
+<dt>type</dt><dd><p>Name of component sub-image type. Supported types are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sub-image type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>invalid</p></td>
+<td><p>Invalid Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>aisimage</p></td>
+<td><p>Davinci AIS image</p></td>
+</tr>
+<tr class="row-even"><td><p>atmelimage</p></td>
+<td><p>ATMEL ROM-Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>copro</p></td>
+<td><p>Coprocessor Image}</p></td>
+</tr>
+<tr class="row-even"><td><p>fdt_legacy</p></td>
+<td><p>legacy Image with Flat Device Tree</p></td>
+</tr>
+<tr class="row-odd"><td><p>filesystem</p></td>
+<td><p>Filesystem Image</p></td>
+</tr>
+<tr class="row-even"><td><p>firmware</p></td>
+<td><p>Firmware</p></td>
+</tr>
+<tr class="row-odd"><td><p>firmware_ivt</p></td>
+<td><p>Firmware with HABv4 IVT }</p></td>
+</tr>
+<tr class="row-even"><td><p>flat_dt</p></td>
+<td><p>Flat Device Tree</p></td>
+</tr>
+<tr class="row-odd"><td><p>fpga</p></td>
+<td><p>FPGA Image }</p></td>
+</tr>
+<tr class="row-even"><td><p>gpimage</p></td>
+<td><p>TI Keystone SPL Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>imx8image</p></td>
+<td><p>NXP i.MX8 Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>imx8mimage</p></td>
+<td><p>NXP i.MX8M Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>imximage</p></td>
+<td><p>Freescale i.MX Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>kernel</p></td>
+<td><p>Kernel Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>kernel_noload</p></td>
+<td><p>Kernel Image (no loading done)</p></td>
+</tr>
+<tr class="row-even"><td><p>kwbimage</p></td>
+<td><p>Kirkwood Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>lpc32xximage</p></td>
+<td><p>LPC32XX Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>mtk_image</p></td>
+<td><p>MediaTek BootROM loadable Image }</p></td>
+</tr>
+<tr class="row-odd"><td><p>multi</p></td>
+<td><p>Multi-File Image</p></td>
+</tr>
+<tr class="row-even"><td><p>mxsimage</p></td>
+<td><p>Freescale MXS Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>omapimage</p></td>
+<td><p>TI OMAP SPL With GP CH</p></td>
+</tr>
+<tr class="row-even"><td><p>pblimage</p></td>
+<td><p>Freescale PBL Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>pmmc</p></td>
+<td><p>TI Power Management Micro-Controller Firmware</p></td>
+</tr>
+<tr class="row-even"><td><p>ramdisk</p></td>
+<td><p>RAMDisk Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>rkimage</p></td>
+<td><p>Rockchip Boot Image }</p></td>
+</tr>
+<tr class="row-even"><td><p>rksd</p></td>
+<td><p>Rockchip SD Boot Image }</p></td>
+</tr>
+<tr class="row-odd"><td><p>rkspi</p></td>
+<td><p>Rockchip SPI Boot Image }</p></td>
+</tr>
+<tr class="row-even"><td><p>script</p></td>
+<td><p>Script</p></td>
+</tr>
+<tr class="row-odd"><td><p>socfpgaimage</p></td>
+<td><p>Altera SoCFPGA CV/AV preloader</p></td>
+</tr>
+<tr class="row-even"><td><p>socfpgaimage_v1</p></td>
+<td><p>Altera SoCFPGA A10 preloader</p></td>
+</tr>
+<tr class="row-odd"><td><p>spkgimage</p></td>
+<td><p>Renesas SPKG Image }</p></td>
+</tr>
+<tr class="row-even"><td><p>standalone</p></td>
+<td><p>Standalone Program</p></td>
+</tr>
+<tr class="row-odd"><td><p>stm32image</p></td>
+<td><p>STMicroelectronics STM32 Image }</p></td>
+</tr>
+<tr class="row-even"><td><p>sunxi_egon</p></td>
+<td><p>Allwinner eGON Boot Image }</p></td>
+</tr>
+<tr class="row-odd"><td><p>sunxi_toc0</p></td>
+<td><p>Allwinner TOC0 Boot Image }</p></td>
+</tr>
+<tr class="row-even"><td><p>tee</p></td>
+<td><p>Trusted Execution Environment Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>ublimage</p></td>
+<td><p>Davinci UBL image</p></td>
+</tr>
+<tr class="row-even"><td><p>vybridimage</p></td>
+<td><p>Vybrid Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>x86_setup</p></td>
+<td><p>x86 setup.bin</p></td>
+</tr>
+<tr class="row-even"><td><p>zynqimage</p></td>
+<td><p>Xilinx Zynq Boot Image }</p></td>
+</tr>
+<tr class="row-odd"><td><p>zynqmpbif</p></td>
+<td><p>Xilinx ZynqMP Boot Image (bif) }</p></td>
+</tr>
+<tr class="row-even"><td><p>zynqmpimage</p></td>
+<td><p>Xilinx ZynqMP Boot Image }</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>compression</dt><dd><p>Compression used by included data. If no compression is used, the
+compression property should be set to “none”. If the data is compressed but
+it should not be uncompressed by the loader (e.g. compressed ramdisk), this
+should also be set to “none”.</p>
+<p>Supported compression types are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Compression type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>none</p></td>
+<td><p>uncompressed</p></td>
+</tr>
+<tr class="row-odd"><td><p>bzip2</p></td>
+<td><p>bzip2 compressed</p></td>
+</tr>
+<tr class="row-even"><td><p>gzip</p></td>
+<td><p>gzip compressed</p></td>
+</tr>
+<tr class="row-odd"><td><p>lz4</p></td>
+<td><p>lz4 compressed</p></td>
+</tr>
+<tr class="row-even"><td><p>lzma</p></td>
+<td><p>lzma compressed</p></td>
+</tr>
+<tr class="row-odd"><td><p>lzo</p></td>
+<td><p>lzo compressed</p></td>
+</tr>
+<tr class="row-even"><td><p>zstd</p></td>
+<td><p>zstd compressed</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</section>
+<section id="id1">
+<h4><span class="section-number">5.3.2. </span>Conditionally mandatory property<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>data</dt><dd><p>Path to the external file which contains this node’s binary data. Within
+the FIT this is the contents of the file. This is mandatory unless
+external data is used.</p>
+</dd>
+<dt>data-size</dt><dd><p>size of the data in bytes. This is mandatory if external data is used.</p>
+</dd>
+<dt>data-offset</dt><dd><p>Offset of the data in a separate image store. The image store is placed
+immediately after the last byte of the device tree binary, aligned to a
+4-byte boundary. This is mandatory if external data is used, with an offset.</p>
+</dd>
+<dt>data-position</dt><dd><p>Machine address at which the data is to be found. This is a fixed address
+not relative to the loading of the FIT. This is mandatory if external data
+used with a fixed address.</p>
+</dd>
+<dt>os</dt><dd><p>OS name, mandatory for types “kernel”. Valid OS names are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>OS name</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>invalid</p></td>
+<td><p>Invalid OS</p></td>
+</tr>
+<tr class="row-odd"><td><p>4_4bsd</p></td>
+<td><p>4_4BSD</p></td>
+</tr>
+<tr class="row-even"><td><p>arm-trusted-firmware</p></td>
+<td><p>ARM Trusted Firmware</p></td>
+</tr>
+<tr class="row-odd"><td><p>dell</p></td>
+<td><p>Dell</p></td>
+</tr>
+<tr class="row-even"><td><p>efi</p></td>
+<td><p>EFI Firmware</p></td>
+</tr>
+<tr class="row-odd"><td><p>esix</p></td>
+<td><p>Esix</p></td>
+</tr>
+<tr class="row-even"><td><p>freebsd</p></td>
+<td><p>FreeBSD</p></td>
+</tr>
+<tr class="row-odd"><td><p>integrity</p></td>
+<td><p>INTEGRITY</p></td>
+</tr>
+<tr class="row-even"><td><p>irix</p></td>
+<td><p>Irix</p></td>
+</tr>
+<tr class="row-odd"><td><p>linux</p></td>
+<td><p>Linux</p></td>
+</tr>
+<tr class="row-even"><td><p>ncr</p></td>
+<td><p>NCR</p></td>
+</tr>
+<tr class="row-odd"><td><p>netbsd</p></td>
+<td><p>NetBSD</p></td>
+</tr>
+<tr class="row-even"><td><p>openbsd</p></td>
+<td><p>OpenBSD</p></td>
+</tr>
+<tr class="row-odd"><td><p>openrtos</p></td>
+<td><p>OpenRTOS</p></td>
+</tr>
+<tr class="row-even"><td><p>opensbi</p></td>
+<td><p>RISC-V OpenSBI</p></td>
+</tr>
+<tr class="row-odd"><td><p>ose</p></td>
+<td><p>Enea OSE</p></td>
+</tr>
+<tr class="row-even"><td><p>plan9</p></td>
+<td><p>Plan 9</p></td>
+</tr>
+<tr class="row-odd"><td><p>psos</p></td>
+<td><p>pSOS</p></td>
+</tr>
+<tr class="row-even"><td><p>qnx</p></td>
+<td><p>QNX</p></td>
+</tr>
+<tr class="row-odd"><td><p>rtems</p></td>
+<td><p>RTEMS</p></td>
+</tr>
+<tr class="row-even"><td><p>sco</p></td>
+<td><p>SCO</p></td>
+</tr>
+<tr class="row-odd"><td><p>solaris</p></td>
+<td><p>Solaris</p></td>
+</tr>
+<tr class="row-even"><td><p>svr4</p></td>
+<td><p>SVR4</p></td>
+</tr>
+<tr class="row-odd"><td><p>tee</p></td>
+<td><p>Trusted Execution Environment</p></td>
+</tr>
+<tr class="row-even"><td><p>u-boot</p></td>
+<td><p>U-Boot</p></td>
+</tr>
+<tr class="row-odd"><td><p>vxworks</p></td>
+<td><p>VxWorks</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>arch</dt><dd><p>Architecture name, mandatory for types: “standalone”, “kernel”,
+“firmware”, “ramdisk” and “fdt”. Valid architecture names are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Architecture type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>invalid</p></td>
+<td><p>Invalid ARCH</p></td>
+</tr>
+<tr class="row-odd"><td><p>alpha</p></td>
+<td><p>Alpha</p></td>
+</tr>
+<tr class="row-even"><td><p>arc</p></td>
+<td><p>ARC</p></td>
+</tr>
+<tr class="row-odd"><td><p>arm64</p></td>
+<td><p>AArch64</p></td>
+</tr>
+<tr class="row-even"><td><p>arm</p></td>
+<td><p>ARM</p></td>
+</tr>
+<tr class="row-odd"><td><p>avr32</p></td>
+<td><p>AVR32</p></td>
+</tr>
+<tr class="row-even"><td><p>blackfin</p></td>
+<td><p>Blackfin</p></td>
+</tr>
+<tr class="row-odd"><td><p>ia64</p></td>
+<td><p>IA64</p></td>
+</tr>
+<tr class="row-even"><td><p>m68k</p></td>
+<td><p>M68K</p></td>
+</tr>
+<tr class="row-odd"><td><p>microblaze</p></td>
+<td><p>MicroBlaze</p></td>
+</tr>
+<tr class="row-even"><td><p>mips64</p></td>
+<td><p>MIPS 64 Bit</p></td>
+</tr>
+<tr class="row-odd"><td><p>mips</p></td>
+<td><p>MIPS</p></td>
+</tr>
+<tr class="row-even"><td><p>nds32</p></td>
+<td><p>NDS32</p></td>
+</tr>
+<tr class="row-odd"><td><p>nios2</p></td>
+<td><p>NIOS II</p></td>
+</tr>
+<tr class="row-even"><td><p>or1k</p></td>
+<td><p>OpenRISC 1000</p></td>
+</tr>
+<tr class="row-odd"><td><p>powerpc</p></td>
+<td><p>PowerPC</p></td>
+</tr>
+<tr class="row-even"><td><p>ppc</p></td>
+<td><p>PowerPC</p></td>
+</tr>
+<tr class="row-odd"><td><p>riscv</p></td>
+<td><p>RISC-V</p></td>
+</tr>
+<tr class="row-even"><td><p>s390</p></td>
+<td><p>IBM S390</p></td>
+</tr>
+<tr class="row-odd"><td><p>sandbox</p></td>
+<td><p>Sandbox</p></td>
+</tr>
+<tr class="row-even"><td><p>sh</p></td>
+<td><p>SuperH</p></td>
+</tr>
+<tr class="row-odd"><td><p>sparc64</p></td>
+<td><p>SPARC 64 Bit</p></td>
+</tr>
+<tr class="row-even"><td><p>sparc</p></td>
+<td><p>SPARC</p></td>
+</tr>
+<tr class="row-odd"><td><p>x86_64</p></td>
+<td><p>AMD x86_64</p></td>
+</tr>
+<tr class="row-even"><td><p>x86</p></td>
+<td><p>Intel x86</p></td>
+</tr>
+<tr class="row-odd"><td><p>xtensa</p></td>
+<td><p>Xtensa</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>entry</dt><dd><p>entry point address, address size is determined by
+‘#address-cells’ property of the root node.
+Mandatory for types: “firmware”, and “kernel”.</p>
+</dd>
+<dt>load</dt><dd><p>load address, address size is determined by ‘#address-cells’
+property of the root node.
+Mandatory for types: “firmware”, and “kernel”.</p>
+</dd>
+<dt>compatible</dt><dd><p>compatible method for loading image.
+Mandatory for types: “fpga”, and images that do not specify a load address.
+Supported compatible methods:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Compatible string</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>u-boot,fpga-legacy</p></td>
+<td><p>Generic fpga loading routine.</p></td>
+</tr>
+<tr class="row-odd"><td><p>u-boot,zynqmp-fpga-ddrauth</p></td>
+<td><p>Signed non-encrypted FPGA bitstream for
+Xilinx Zynq UltraScale+ (ZymqMP) device.</p></td>
+</tr>
+<tr class="row-even"><td><p>u-boot,zynqmp-fpga-enc</p></td>
+<td><p>Encrypted FPGA bitstream for Xilinx Zynq
+UltraScale+ (ZynqMP) device.</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>phase</dt><dd><p>U-Boot phase for which the image is intended.</p>
+<dl class="simple">
+<dt>“spl”</dt><dd><p>image is an SPL image</p>
+</dd>
+<dt>“u-boot”</dt><dd><p>image is a U-Boot image</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Optional nodes:</p>
+<dl class="simple">
+<dt>hash-1</dt><dd><p>Each hash sub-node represents separate hash or checksum
+calculated for node’s data according to specified algorithm.</p>
+</dd>
+<dt>signature-1</dt><dd><p>Each signature sub-node represents separate signature
+calculated for node’s data according to specified algorithm.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="hash-nodes">
+<h3><span class="section-number">5.4. </span>Hash nodes<a class="headerlink" href="#hash-nodes" title="Link to this heading">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o hash-1
+    |- algo = &quot;hash or checksum algorithm name&quot;
+    |- value = [hash or checksum value]
+</pre></div>
+</div>
+<section id="id2">
+<h4><span class="section-number">5.4.1. </span>Mandatory properties<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>algo</dt><dd><p>Algorithm name. Supported algoriths and their value sizes are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sub-image type</p></th>
+<th class="head"><p>Size (bytes)</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>crc16-ccitt</p></td>
+<td><p>2</p></td>
+<td><p>Cyclic Redundancy Check 16-bit
+(Consultative Committee for International
+Telegraphy and Telephony)</p></td>
+</tr>
+<tr class="row-odd"><td><p>crc32</p></td>
+<td><p>4</p></td>
+<td><p>Cyclic Redundancy Check 32-bit</p></td>
+</tr>
+<tr class="row-even"><td><p>md5</p></td>
+<td><p>16</p></td>
+<td><p>Message Digest 5 (MD5)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha1</p></td>
+<td><p>20</p></td>
+<td><p>Secure Hash Algorithm 1 (SHA1)</p></td>
+</tr>
+<tr class="row-even"><td><p>sha256</p></td>
+<td><p>32</p></td>
+<td><p>Secure Hash Algorithm 2 (SHA256)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha384</p></td>
+<td><p>48</p></td>
+<td><p>Secure Hash Algorithm 2 (SHA384)</p></td>
+</tr>
+<tr class="row-even"><td><p>sha512</p></td>
+<td><p>64</p></td>
+<td><p>Secure Hash Algorithm 2 (SHA512)</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>value</dt><dd><p>Actual checksum or hash value.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="image-signature-nodes">
+<h3><span class="section-number">5.5. </span>Image-signature nodes<a class="headerlink" href="#image-signature-nodes" title="Link to this heading">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o signature-1
+    |- algo = &quot;algorithm name&quot;
+    |- key-name-hint = &quot;key name&quot;
+    |- value = [hash or checksum value]
+</pre></div>
+</div>
+<section id="id3">
+<h4><span class="section-number">5.5.1. </span>Mandatory properties<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p><span class="target" id="fit-algorithm">FIT Algorithm</span>:</p>
+<dl>
+<dt>algo</dt><dd><p>Algorithm name. Supported algoriths and their value sizes are shown below.
+Note that the hash is specified separately from the signing algorithm, so
+it is possible to mix and match any SHA algorithm with any signing
+algorithm. The size of the signature relates to the signing algorithm, not
+the hash, since it is the hash that is signed.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sub-image type</p></th>
+<th class="head"><p>Size (bytes)</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>sha1,rsa2048</p></td>
+<td><p>256</p></td>
+<td><p>SHA1 hash signed with 2048-bit
+Rivest–Shamir–Adleman algorithm</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha1,rsa3072</p></td>
+<td><p>384</p></td>
+<td><p>SHA1 hash signed with 2048-bit RSA</p></td>
+</tr>
+<tr class="row-even"><td><p>sha1,rsa4096</p></td>
+<td><p>512</p></td>
+<td><p>SHA1 hash signed with 2048-bit RSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha1,ecdsa256</p></td>
+<td><p>32</p></td>
+<td><p>SHA1 hash signed with 256-bit  Elliptic
+Curve Digital Signature Algorithm</p></td>
+</tr>
+<tr class="row-even"><td><p>sha256,…</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sha384,…</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sha512,…</p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>key-name-hint</dt><dd><p>Name of key to use for signing. The keys will normally be in
+a single directory (parameter -k to mkimage). For a given key &lt;name&gt;, its
+private key is stored in &lt;name&gt;.key and the certificate is stored in
+&lt;name&gt;.crt.</p>
+</dd>
+<dt>sign-images</dt><dd><p>A list of images to sign, each being a property of the conf
+node that contains then. The default is “kernel,fdt” which means that these
+two images will be looked up in the config and signed if present. This is
+used by mkimage to determine which images to sign.</p>
+</dd>
+</dl>
+<p>The following properies are added as part of signing, and are mandatory:</p>
+<dl>
+<dt>value</dt><dd><p>Actual signature value. This is added by mkimage.</p>
+</dd>
+<dt>hashed-nodes</dt><dd><p>A list of nodes which were hashed by the signer. Each is
+a string - the full path to node. A typical value might be:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>hashed-nodes = &quot;/&quot;, &quot;/configurations/conf-1&quot;, &quot;/images/kernel&quot;,
+    &quot;/images/kernel/hash-1&quot;, &quot;/images/fdt-1&quot;,
+    &quot;/images/fdt-1/hash-1&quot;;
+</pre></div>
+</div>
+</dd>
+<dt>hashed-strings</dt><dd><p>The start and size of the string region of the FIT that was hashed. The
+start is normally 0, indicating the first byte of the string table. The size
+indicates the number of bytes hashed as part of signing.</p>
+</dd>
+</dl>
+<p>The following properies are added as part of signing, and are optional:</p>
+<dl class="simple">
+<dt>timestamp</dt><dd><p>Time when image was signed (standard Unix time_t format)</p>
+</dd>
+<dt>signer-name</dt><dd><p>Name of the signer (e.g. “mkimage”)</p>
+</dd>
+<dt>signer-version</dt><dd><p>Version string of the signer (e.g. “2013.01”)</p>
+</dd>
+<dt>comment</dt><dd><p>Additional information about the signer or image</p>
+</dd>
+<dt>padding</dt><dd><p>The padding algorithm, it may be pkcs-1.5 or pss,
+if no value is provided we assume pkcs-1.5</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="configurations-node">
+<h3><span class="section-number">5.6. </span>‘/configurations’ node<a class="headerlink" href="#configurations-node" title="Link to this heading">¶</a></h3>
+<p>The ‘configurations’ node creates convenient, labeled boot configurations,
+which combine together kernel images with their ramdisks and fdt blobs.</p>
+<p>The ‘configurations’ node has the following structure:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o configurations
+    |- default = &quot;default configuration sub-node unit name&quot;
+    |
+    o config-1 {...}
+    o config-2 {...}
+    ...
+</pre></div>
+</div>
+<section id="id4">
+<h4><span class="section-number">5.6.1. </span>Optional property<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>default</dt><dd><p>Selects one of the configuration sub-nodes as a default configuration.</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h4><span class="section-number">5.6.2. </span>Mandatory nodes<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>configuration-sub-node-unit-name</dt><dd><p>At least one of the configuration sub-nodes is required.</p>
+</dd>
+</dl>
+</section>
+<section id="optional-nodes">
+<h4><span class="section-number">5.6.3. </span>Optional nodes<a class="headerlink" href="#optional-nodes" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>signature-1</dt><dd><p>Each signature sub-node represents separate signature
+calculated for the configuration according to specified algorithm.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="configuration-nodes">
+<h3><span class="section-number">5.7. </span>Configuration nodes<a class="headerlink" href="#configuration-nodes" title="Link to this heading">¶</a></h3>
+<p>Each configuration has the following structure:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o config-1
+    |- description = &quot;configuration description&quot;
+    |- kernel = &quot;kernel sub-node unit name&quot;
+    |- fdt = &quot;fdt sub-node unit-name&quot; [, &quot;fdt overlay sub-node unit-name&quot;, ...]
+    |- loadables = &quot;loadables sub-node unit-name&quot;
+    |- script = &quot;
+    |- compatible = &quot;vendor,board-style device tree compatible string&quot;
+    o signature-1 {...}
+</pre></div>
+</div>
+<section id="id6">
+<h4><span class="section-number">5.7.1. </span>Mandatory properties<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>description</dt><dd><p>Textual configuration description.</p>
+</dd>
+<dt>kernel or firmware</dt><dd><p>Unit name of the corresponding kernel or firmware
+(u-boot, op-tee, etc) image. If both “kernel” and “firmware” are specified,
+control is passed to the firmware image.</p>
+</dd>
+</dl>
+</section>
+<section id="optional-properties">
+<h4><span class="section-number">5.7.2. </span>Optional properties<a class="headerlink" href="#optional-properties" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>fdt</dt><dd><p>Unit name of the corresponding fdt blob (component image node of a
+“fdt type”). Additional fdt overlay nodes can be supplied which signify
+that the resulting device tree blob is generated by the first base fdt
+blob with all subsequent overlays applied.</p>
+</dd>
+<dt>fpga</dt><dd><p>Unit name of the corresponding fpga bitstream blob
+(component image node of a “fpga type”).</p>
+</dd>
+<dt>loadables</dt><dd><p>Unit name containing a list of additional binaries to be
+loaded at their given locations.  “loadables” is a comma-separated list
+of strings. U-Boot will load each binary at its given start-address and
+may optionally invoke additional post-processing steps on this binary based
+on its component image node type.</p>
+</dd>
+<dt>script</dt><dd><p>The image to use when loading a U-Boot script (for use with the
+source command).</p>
+</dd>
+<dt>compatible</dt><dd><p>The root compatible string of the U-Boot device tree that
+this configuration shall automatically match when CONFIG_FIT_BEST_MATCH is
+enabled. If this property is not provided, the compatible string will be
+extracted from the fdt blob instead. This is only possible if the fdt is
+not compressed, so images with compressed fdts that want to use compatible
+string matching must always provide this property.</p>
+</dd>
+</dl>
+<p>The FDT blob is required to properly boot FDT based kernel, so the minimal
+configuration for 2.6 FDT kernel is (kernel, fdt) pair.</p>
+<p>Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
+‘struct bd_info’ must be passed instead of FDT blob, thus fdt property <em>must
+not</em> be specified in a configuration node.</p>
+</section>
+</section>
+<section id="configuration-signature-nodes">
+<h3><span class="section-number">5.8. </span>Configuration-signature nodes<a class="headerlink" href="#configuration-signature-nodes" title="Link to this heading">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o signature-1
+    |- algo = &quot;algorithm name&quot;
+    |- key-name-hint = &quot;key name&quot;
+    |- sign-images = &quot;path1&quot;, &quot;path2&quot;;
+    |- value = [hash or checksum value]
+    |- hashed-strings = &lt;0 len&gt;
+</pre></div>
+</div>
+<section id="id7">
+<h4><span class="section-number">5.8.1. </span>Mandatory properties<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>algo</dt><dd><p>See <a class="reference internal" href="#fit-algorithm">FIT Algorithm</a>.</p>
+</dd>
+<dt>key-name-hint</dt><dd><p>Name of key to use for signing. The keys will normally be in
+a single directory (parameter -k to mkimage). For a given key &lt;name&gt;, its
+private key is stored in &lt;name&gt;.key and the certificate is stored in
+&lt;name&gt;.crt.</p>
+</dd>
+</dl>
+<p>The following properies are added as part of signing, and are mandatory:</p>
+<dl class="simple">
+<dt>value</dt><dd><p>Actual signature value. This is added by mkimage.</p>
+</dd>
+</dl>
+<p>The following properies are added as part of signing, and are optional:</p>
+<dl class="simple">
+<dt>timestamp</dt><dd><p>Time when image was signed (standard Unix time_t format)</p>
+</dd>
+<dt>signer-name</dt><dd><p>Name of the signer (e.g. “mkimage”)</p>
+</dd>
+<dt>signer-version</dt><dd><p>Version string of the signer (e.g. “2013.01”)</p>
+</dd>
+<dt>comment</dt><dd><p>Additional information about the signer or image</p>
+</dd>
+<dt>padding</dt><dd><p>The padding algorithm, it may be pkcs-1.5 or pss,
+if no value is provided we assume pkcs-1.5</p>
+</dd>
+</dl>
+</section>
+</section>
+</section>
+<span id="document-references"></span><section id="references">
+<h2><span class="section-number">6. </span>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="dtspec" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>dtspec<span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.devicetree.org/specifications/">https://www.devicetree.org/specifications/</a></p>
+</div>
+</div>
+</section>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/fit-logo.svg" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="#">Flat Image Tree Specification</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=open-source-firmware&repo=flat-image-tree&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-license">1. License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-acknowledgements">2. Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-revhistory">3. Revision History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-chapter1-introduction">4. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-chapter2-source-file-format">5. Flattened Image Tree (FIT) Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-references">6. References</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Marian Balakowicz <m8@semihalf.com>.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
