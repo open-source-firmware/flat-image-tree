@@ -1,11 +1,11 @@
-# Document master project for the Flat Image Tree Specification #
+# Document master project for the Flattened Image Tree Specification #
 
 The latest release of the specification can be found at
 https://github.com/open-source-firmware/flat-image-tree
 
 This [repository](https://github.com/open-source-firmware/flat-image-tree) holds
-the source for the generation of the Flat Image Tree Specification using Sphinx
-and LaTeX.
+the source for the generation of the Flattened Image Tree Specification using
+Sphinx and LaTeX.
 
 ## Mailing list: flat-image-tree@lists.osfw.foundation ##
    * Use this mailing list for submitting patches, questions and general discussion
@@ -92,13 +92,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 Please submit all patches to the mailing list at
 https://lists.osfw.foundation/g/flat-image-tree.
 
-Contributions to the Flat Image Tree Specification are managed by the
+Contributions to the Flattened Image Tree Specification are managed by the
 gatekeeper, Lean Sheng Tan <sheng.tan@9elements.com>
 
-Anyone can contribute to the Flat Image Tree Specification. Contributions to
-this project should conform to the `Developer Certificate of Origin` as defined
-at http://elinux.org/Developer_Certificate_Of_Origin. Commits to this project
-need to contain the following line to indicate the submitter accepts the DCO:
+Anyone can contribute to the Flattened Image Tree Specification. Contributions
+to this project should conform to the `Developer Certificate of Origin` as
+defined at http://elinux.org/Developer_Certificate_Of_Origin. Commits to this
+project need to contain the following line to indicate the submitter accepts the
+DCO:
 ```
 Signed-off-by: Your Name <your_email@domain.com>
 ```

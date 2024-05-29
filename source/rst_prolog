@@ -8,5 +8,5 @@
 .. General Macros
 
 .. |spec| replace:: FITSpec
-.. |spec-fullname| replace:: FIT Specification
+.. |spec-fullname| replace:: Flattened Image Tree Specification
 .. |dtspec| replace:: Devicetree Specification

@@ -3,7 +3,7 @@
 Acknowledgements
 ================
 
-FIT (Flat Image Tree) was developed in 2008 by Marian Balakowicz and
+FIT (Flattened Image Tree) was developed in 2008 by Marian Balakowicz and
 Bartlomiej Sieka of Semihalf, under the guidance of Wolfgang Denk,
 founder of Denx Software Engineering and creator of U-Boot.
 
