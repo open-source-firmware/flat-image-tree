@@ -1,4 +1,4 @@
-.. FIT Specification documentation master file
+.. Flattened Image Tree (FIT) Specification documentation master file
 
    SPDX-License-Identifier: Apache-2.0
 

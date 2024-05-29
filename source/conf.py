@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # -*- coding: utf-8 -*-
 #
-# FIT Specification documentation build configuration file
+# Flattened Image Tree (FIT) Specification documentation build configuration
+# file
 # Based on file in devicetree.org
 #
 # This file does only contain a selection of the most common options. For a
@@ -24,7 +25,7 @@ sys.path.append(os.path.abspath('extensions'))
 
 # -- Project information -----------------------------------------------------
 
-project = u'Flat Image Tree Specification'
+project = u'Flattened Image Tree Specification'
 copyright = u'2023, Marian Balakowicz <m8@semihalf.com>'
 author = u'Marian Balakowicz <m8@semihalf.com>'
 
@@ -187,7 +188,8 @@ if '-' in release:
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'fit-specification.tex', u'FIT Specification',
+    (master_doc, 'fit-specification.tex',
+     u'Flattened Image Tree (FIT) Specification',
      u'github.com/open-source-firmware/flat-image-tree', 'manual'),
 ]
 
@@ -200,7 +202,7 @@ latex_logo = "fit-logo.png"
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'fit-specification', u'FIT Specification',
+    (master_doc, 'fit-specification', u'Flattened Image Tree (FIT) Specification',
      [author], 1)
 ]
 
@@ -211,8 +213,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'fit-specification', u'Fit Specification',
-     author, 'FITSpecification', 'Flat Image Tree specification.',
+    (master_doc, 'fit-specification', u'Flattened Image Tree (FIT) Specification',
+     author, 'FITSpecification', 'Flattened Image Tree specification.',
      'Miscellaneous'),
 ]
 
