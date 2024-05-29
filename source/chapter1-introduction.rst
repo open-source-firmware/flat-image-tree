@@ -9,13 +9,14 @@ Purpose and Scope
 -----------------
 
 The number of elements playing a role in the kernel booting process has
-increased over time and now typically includes the devicetree, kernel image and
+increased over time and now typically includes the devicetree,
+:index:`kernel image <pair: kernel; image>` and
 possibly a ramdisk image. Generally, all must be placed in the system memory and
 booted together.
 
 For firmware images a similar process has taken place, with various binaries
-loaded at different addresses, such as ARM's ATF, OpenSBI, FPGA and U-Boot
-itself.
+loaded at different addresses, such as ARM's :index:`ATF`, :index:`OpenSBI`,
+:index:`FPGA` and :index:`U-Boot` itself.
 
 FIT provides a flexible and extensible format to deal with this complexity. It
 provides support for multiple components. It also supports multiple
@@ -55,14 +56,14 @@ Syntax* form. See [dtspec]_ for a description of this.
 Relationship to |dtspec|
 ------------------------
 
-|spec| is based on the Devicetree Specification, in that it uses the
+|spec| is based on the :index:`Devicetree Specification`, in that it uses the
 same structure and shares some concepts.
 
 32-bit and 64-bit Support
 -------------------------
 
-The |spec| supports CPUs with both 32-bit and 64-bit addressing
-capabilities. Where applicable, sections of the |spec| describe any
+The |spec| supports CPUs with both :index:`32-bit` and :index:`64-bit`
+addressing capabilities. Where applicable, sections of the |spec| describe any
 requirements or considerations for 32-bit and 64-bit addressing.
 
 
