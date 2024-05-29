@@ -15,28 +15,31 @@ used. The user perspective may be simpler, as some of the properties (like
 timestamps and hashes) are filled in automatically by available tooling, such
 as `mkimage`.
 
-To avoid confusion with the kernel FDT the following naming convention is used:
+To avoid confusion with the index:`kernel FDT <pair: kernel; FDT>` the following
+naming convention is used:
 
 FIT
     Flattened Image Tree
 
-FIT is formally a flattened devicetree (in the libfdt meaning), which conforms
-to bindings defined in this document.
+    FIT is formally a flattened devicetree (in the libfdt meaning), which
+    conforms to bindings defined in this document.
 
-.its
+:index:`.its`
     image tree source
 
-.fit
+:index:`.fit`
     flattened image tree blob
+
+    This was previously known as :index:`.itb` but has been renamed to `.fit`.
 
 Image-building procedure
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following picture shows how the FIT is prepared. Input consists of
 image source file (.its) and a set of data files. Image is created with the
-help of standard U-Boot mkimage tool which in turn uses dtc (device tree
-compiler) to produce image tree blob (.fit). The resulting .fit file is the
-actual binary of a new FIT::
+help of standard :index:`U-Boot mkimage <pair: U-Boot; mkimage>` tool which in
+turn uses dtc (device tree compiler) to produce image tree blob (.fit). The
+resulting .fit file is the actual binary of a new FIT::
 
     tqm5200.its
     +
@@ -50,7 +53,7 @@ Steps:
 
 #. Create .its file, automatically filled-in properties are omitted
 
-#. Call mkimage tool on .its file
+#. Call :index:`mkimage` tool on .its file
 
 #. mkimage calls dtc to create .fit image and assures that
    missing properties are added
@@ -66,6 +69,7 @@ are defined in the following sections), the "unit name" of the given sub-node
 is used as it's identifier as it assures uniqueness without additional
 checking required.
 
+.. index:: External data
 
 External data
 ~~~~~~~~~~~~~
@@ -78,13 +82,13 @@ needed it can be loaded from an external source.
 
 External FITs use 'data-offset' or 'data-position' instead of 'data'.
 
-The mkimage tool can convert a FIT to use external data using the `-E` argument,
-optionally using `-p` to specific a fixed position.
+The :index:`mkimage` tool can convert a FIT to use external data using the `-E`
+argument, optionally using `-p` to specific a fixed position.
 
 It is often desirable to align each image to a block size or cache-line size
-(e.g. 512 bytes), so that there is no need to copy it to an aligned address when
-reading the image data. The mkimage tool provides a `-B` argument to support
-this.
+(e.g. 512 bytes), so that there is no need to copy it to an
+:index:`aligned address` when reading the image data. The mkimage tool provides
+a `-B` argument to support this.
 
 Root-node properties
 --------------------
@@ -118,14 +122,14 @@ description
 Mandatory property
 ~~~~~~~~~~~~~~~~~~
 
-timestamp
+:index:`timestamp`
     Last image modification time being counted in seconds since
     1970-01-01 00:00:00 - to be automatically calculated by mkimage tool.
 
 Conditionally mandatory property
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#address-cells
+:index:`#address-cells`
     Number of 32bit cells required to represent entry and
     load addresses supplied within sub-image nodes. May be omitted when no
     entry or load addresses are used.
@@ -133,12 +137,12 @@ Conditionally mandatory property
 Mandatory nodes
 ~~~~~~~~~~~~~~~
 
-images
+:index:`images`
     This node contains a set of sub-nodes, each of them representing
-    single component sub-image (like kernel, ramdisk, etc.). At least one
-    sub-image is required.
+    single component sub-image (like :index:`kernel`, :index:`ramdisk`, etc.).
+    At least one sub-image is required.
 
-configurations
+:index:`configurations`
     Contains a set of available configuration nodes and
     defines a default configuration.
 
@@ -169,7 +173,7 @@ Mandatory properties
 description
     Textual description of the component sub-image
 
-type
+:index:`type`
     Name of component sub-image type. Supported types are:
 
     ====================  ==================
@@ -221,9 +225,10 @@ type
     ====================  ==================
 
 compression
-    Compression used by included data. If no compression is used, the
+    :index:`Compression` used by included data. If no compression is used, the
     compression property should be set to "none". If the data is compressed but
-    it should not be uncompressed by the loader (e.g. compressed ramdisk), this
+    it should not be uncompressed by the loader
+    (e.g. :index:`compressed ramdisk <pair: ramdisk; compressed`), this
     should also be set to "none".
 
     Supported compression types are:
@@ -249,7 +254,8 @@ data
     external data is used.
 
 data-size
-    size of the data in bytes. This is mandatory if external data is used.
+    size of the data in bytes. This is mandatory if :index:`external data` is
+    used.
 
 data-offset
     Offset of the data in a separate image store. The image store is placed
@@ -258,11 +264,11 @@ data-offset
 
 data-position
     Machine address at which the data is to be found. This is a fixed address
-    not relative to the loading of the FIT. This is mandatory if external data
-    used with a fixed address.
+    not relative to the loading of the FIT. This is mandatory if
+    :index:`external data` is used with a fixed address.
 
 os
-    OS name, mandatory for types "kernel". Valid OS names are:
+    :index:`OS` name, mandatory for types "kernel". Valid OS names are:
 
     ====================  ==================
     OS name               Meaning
@@ -296,7 +302,7 @@ os
     ====================  ==================
 
 arch
-    Architecture name, mandatory for types: "standalone", "kernel",
+    :index:`Architecture` name, mandatory for types: "standalone", "kernel",
     "firmware", "ramdisk" and "fdt". Valid architecture names are:
 
     ====================  ==================
@@ -340,7 +346,7 @@ load
     property of the root node.
     Mandatory for types: "firmware", and "kernel".
 
-compatible
+:index:`compatible`
     compatible method for loading image.
     Mandatory for types: "fpga", and images that do not specify a load address.
     Supported compatible methods:
@@ -359,8 +365,8 @@ compatible
     The compatible here is not derived from the fdt, nor is it used to identify
     the fdt. Such usage belongs in the configuration node.
 
-phase
-    U-Boot phase for which the image is intended.
+:index:`phase`
+    :index:`U-Boot phase <pair: U-Boot; phase>` for which the image is intended.
 
     "spl"
         image is an SPL image
@@ -378,6 +384,7 @@ signature-1
     Each signature sub-node represents separate signature
     calculated for node's data according to specified algorithm.
 
+.. index:: Hash nodes
 
 Hash nodes
 ----------
@@ -392,7 +399,7 @@ Mandatory properties
 ~~~~~~~~~~~~~~~~~~~~
 
 algo
-    Algorithm name. Supported algoriths and their value sizes are:
+    :index:`Algorithm` name. Supported algoriths and their value sizes are:
 
     ==================== ============ =========================================
     Sub-image type       Size (bytes) Meaning
@@ -428,11 +435,11 @@ Mandatory properties
 _`FIT Algorithm`:
 
 algo
-    Algorithm name. Supported algoriths and their value sizes are shown below.
-    Note that the hash is specified separately from the signing algorithm, so
-    it is possible to mix and match any SHA algorithm with any signing
-    algorithm. The size of the signature relates to the signing algorithm, not
-    the hash, since it is the hash that is signed.
+    :index:`Algorithm` name. Supported algorithms and their value sizes are
+    shown below. Note that the hash is specified separately from the signing
+    algorithm, so it is possible to mix and match any SHA algorithm with any
+    signing algorithm. The size of the signature relates to the signing
+    algorithm, not the hash, since it is the hash that is signed.
 
     ==================== ============ =========================================
     Sub-image type       Size (bytes) Meaning
@@ -466,17 +473,18 @@ value
     Actual signature value. This is added by mkimage.
 
 hashed-nodes
-    A list of nodes which were hashed by the signer. Each is
-    a string - the full path to node. A typical value might be::
+    A list of nodes which were :index:`hashed <pair: nodes; hashed>` by the
+    signer. Each is a string - the full path to node. A typical value might be::
 
 	hashed-nodes = "/", "/configurations/conf-1", "/images/kernel",
 	    "/images/kernel/hash-1", "/images/fdt-1",
 	    "/images/fdt-1/hash-1";
 
 hashed-strings
-    The start and size of the string region of the FIT that was hashed. The
-    start is normally 0, indicating the first byte of the string table. The size
-    indicates the number of bytes hashed as part of signing.
+    The start and size of the :index:`string <pair: strings; hashed>` region of
+    the FIT that was hashed. The start is normally 0, indicating the first byte
+    of the string table. The size indicates the number of bytes hashed as part
+    of signing.
 
 The following properies are added as part of signing, and are optional:
 
@@ -500,8 +508,10 @@ padding
 '/configurations' node
 ----------------------
 
-The 'configurations' node creates convenient, labeled boot configurations,
-which combine together kernel images with their ramdisks and fdt blobs.
+The 'configurations' node creates convenient, labeled
+:index:`boot configurations <pair: boot; configurations>`,
+which combine together :index:`kernel images <pair: kernel; image>` with their
+:index:`ramdisks` and fdt blobs.
 
 The 'configurations' node has the following structure::
 
@@ -554,7 +564,7 @@ description
     Textual configuration description.
 
 kernel or firmware
-    Unit name of the corresponding kernel or firmware
+    Unit name of the corresponding :index:`kernel` or :index:`firmware`
     (u-boot, op-tee, etc) image. If both "kernel" and "firmware" are specified,
     control is passed to the firmware image.
 
@@ -574,23 +584,24 @@ fpga
 loadables
     Unit name containing a list of additional binaries to be
     loaded at their given locations.  "loadables" is a comma-separated list
-    of strings. U-Boot will load each binary at its given start-address and
-    may optionally invoke additional post-processing steps on this binary based
-    on its component image node type.
+    of strings. :index:`U-Boot` will load each binary at its given start-address
+    and may optionally invoke additional post-processing steps on this binary
+    based on its component image node type.
 
 script
-    The image to use when loading a U-Boot script (for use with the
+    The image to use when loading a :index:`U-Boot` script (for use with the
     source command).
 
 compatible
     The root compatible string of the U-Boot device tree that
-    this configuration shall automatically match when CONFIG_FIT_BEST_MATCH is
+    this configuration shall automatically match when
+    :index:`CONFIG_FIT_BEST_MATCH` is
     enabled. If this property is not provided, the compatible string will be
     extracted from the fdt blob instead. This is only possible if the fdt is
     not compressed, so images with compressed fdts that want to use compatible
     string matching must always provide this property.
 
-The FDT blob is required to properly boot FDT based kernel, so the minimal
+The FDT blob is required to properly boot FDT-based kernel, so the minimal
 configuration for 2.6 FDT kernel is (kernel, fdt) pair.
 
 Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
