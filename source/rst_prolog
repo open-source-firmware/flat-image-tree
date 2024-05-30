@@ -10,3 +10,4 @@
 .. |spec| replace:: FITSpec
 .. |spec-fullname| replace:: Flattened Image Tree Specification
 .. |dtspec| replace:: Devicetree Specification
+.. |VBE| replace:: Verified Boot for Embedded (VBE)
