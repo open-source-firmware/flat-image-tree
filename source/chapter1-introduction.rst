@@ -33,6 +33,8 @@ along with grouping and selection mechanisms.
 * :numref:`Chapter %s <chapter-source-file-format>` introduces the FIT concept
   and describes its logical structure and standard properties.
   certain classes of devices and specific device types.
+* :numref:`Chapter %s <chapter-usage>` describes how FIT is used in bootloaders
+  to handle booting Operating Systems as well as firmware.
 
 **Conventions Used in this Document**
 

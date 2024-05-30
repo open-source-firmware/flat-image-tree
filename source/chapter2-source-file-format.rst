@@ -71,6 +71,8 @@ checking required.
 
 .. index:: External data
 
+.. _ExternalData:
+
 External data
 ~~~~~~~~~~~~~
 
@@ -341,6 +343,8 @@ entry
     '#address-cells' property of the root node.
     Mandatory for types: "firmware", and "kernel".
 
+.. _prop_load:
+
 load
     load address, address size is determined by '#address-cells'
     property of the root node.
@@ -364,6 +368,8 @@ load
     *Note* For fdt images, the node should not have a compatible for the model.
     The compatible here is not derived from the fdt, nor is it used to identify
     the fdt. Such usage belongs in the configuration node.
+
+.. _prop_phase:
 
 :index:`phase`
     :index:`U-Boot phase <pair: U-Boot; phase>` for which the image is intended.
@@ -593,15 +599,17 @@ script
     source command).
 
 compatible
-    The root compatible string of the U-Boot device tree that
-    this configuration shall automatically match when
-    :index:`CONFIG_FIT_BEST_MATCH` is
-    enabled. If this property is not provided, the compatible string will be
+    The root compatible string of the bootloader device tree that
+    this configuration shall automatically match. If this property is not
+    provided, the compatible string will be
     extracted from the fdt blob instead. This is only possible if the fdt is
     not compressed, so images with compressed fdts that want to use compatible
     string matching must always provide this property.
 
-The FDT blob is required to properly boot FDT-based kernel, so the minimal
+    Note that U-Boot requires the :index:`CONFIG_FIT_BEST_MATCH` option to be
+    enabled for this matching to work.
+
+The FDT blob is required to properly boot FDT based kernel, so the minimal
 configuration for 2.6 FDT kernel is (kernel, fdt) pair.
 
 Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases

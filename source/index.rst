@@ -14,6 +14,7 @@
    revhistory
    chapter1-introduction
    chapter2-source-file-format
+   chapter3-usage
    references
 
 ..
