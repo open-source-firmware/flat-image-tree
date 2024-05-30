@@ -94,6 +94,47 @@ second string, this isn't as good a match as ``fdt1``.
 In U-Boot this algorithm is handled by ``fit_conf_find_compat()`` and enabled
 by the ``CONFIG_FIT_BEST_MATCH`` option.
 
+Sometime models have multiple PCB revisions or different minor variants, often
+referred to as SKUs. For this reason, bootloaders may want to select
+configurations in a finer-grained way. In this case, rather than using the
+compatible stringlist in its devicetree, if any, it constructs a single string
+using the base name along with any available suffixes, each beginning with a
+hyphen. The best match algorithm is then run using that string.
+
+The following compatible-string suffixes may be used to this end. They must be
+provided in this order (<n> is an integer >= 0):
+
+``-rev<n>``
+    Board revision number, typically referring to a revision of the PCB to fix
+    a problem or adjust component selection. The intention is that the board is
+    the same design, just with some minor fixes or improvements. The first
+    revision is typically ``rev0``.
+
+``-sku<n>``
+    Board variant, called a SKU (Stock-Keeping Unit) which is a unique code that
+    identifies a model variant. This may encode differences in the display,
+    WiFi and the like, but where the same PCB design (and revision) is used.
+    The base SKU is typically ``sku0``.
+
+Examples::
+
+    compatible = "google,kevin-rev15";
+    compatible = "google,kevin-rev15-sku2";
+
+When matching, the bootloader should build the most specific string it can using
+any available revision / SKU information, then try to match that. If the most
+specific string fails (e.g. ``"google,kevin-rev15-sku2"``), it should fall back
+to just ``"google,kevin-rev15"`` and then ``"google,kevin-sku2"``. If nothing
+matches, then it should try without any additions, i.e. ``"google,kevin"``.
+
+This multi-stage process uses the same 'best match' approach as above. Each
+attempt finds the best match given the compatible string being searched. Where
+a stage does not find any match, the next stage begins. As soon as a match is
+found, searching stops, using the best match found in the stage.
+
+Other suffixes may be added in future.
+
+
 Load the images from the selected configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
