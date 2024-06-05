@@ -190,7 +190,7 @@ description
     firmware              Firmware
     firmware_ivt          Firmware with HABv4 IVT
     flat_dt               Flat Device Tree
-    fpga                  FPGA Image
+    fpga                  FPGA Device Image (bitstream file, vendor specific)
     gpimage               TI Keystone SPL Image
     imx8image             NXP i.MX8 Boot Image
     imx8mimage            NXP i.MX8M Boot Image
