@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v0.8-9-g4774091 documentation</title>
+    <title>Flattened Image Tree Specification v0.8-11-gc749139 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
@@ -33,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v0.8-9-g4774091<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v0.8-11-gc749139<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><p><strong>Copyright</strong></p>
 <div class="line-block">
@@ -336,7 +336,7 @@ the ‘/images’ node should have the following layout:</p>
 <td><p>ATMEL ROM-Boot Image</p></td>
 </tr>
 <tr class="row-odd"><td><p>copro</p></td>
-<td><p>Coprocessor Image}</p></td>
+<td><p>Coprocessor Image</p></td>
 </tr>
 <tr class="row-even"><td><p>fdt_legacy</p></td>
 <td><p>legacy Image with Flat Device Tree</p></td>
@@ -348,13 +348,13 @@ the ‘/images’ node should have the following layout:</p>
 <td><p>Firmware</p></td>
 </tr>
 <tr class="row-odd"><td><p>firmware_ivt</p></td>
-<td><p>Firmware with HABv4 IVT }</p></td>
+<td><p>Firmware with HABv4 IVT</p></td>
 </tr>
 <tr class="row-even"><td><p>flat_dt</p></td>
 <td><p>Flat Device Tree</p></td>
 </tr>
 <tr class="row-odd"><td><p>fpga</p></td>
-<td><p>FPGA Image }</p></td>
+<td><p>FPGA Device Image (bitstream file, vendor specific)</p></td>
 </tr>
 <tr class="row-even"><td><p>gpimage</p></td>
 <td><p>TI Keystone SPL Image</p></td>
@@ -381,7 +381,7 @@ the ‘/images’ node should have the following layout:</p>
 <td><p>LPC32XX Boot Image</p></td>
 </tr>
 <tr class="row-even"><td><p>mtk_image</p></td>
-<td><p>MediaTek BootROM loadable Image }</p></td>
+<td><p>MediaTek BootROM loadable Image</p></td>
 </tr>
 <tr class="row-odd"><td><p>multi</p></td>
 <td><p>Multi-File Image</p></td>
@@ -402,13 +402,13 @@ the ‘/images’ node should have the following layout:</p>
 <td><p>RAMDisk Image</p></td>
 </tr>
 <tr class="row-odd"><td><p>rkimage</p></td>
-<td><p>Rockchip Boot Image }</p></td>
+<td><p>Rockchip Boot Image</p></td>
 </tr>
 <tr class="row-even"><td><p>rksd</p></td>
-<td><p>Rockchip SD Boot Image }</p></td>
+<td><p>Rockchip SD Boot Image</p></td>
 </tr>
 <tr class="row-odd"><td><p>rkspi</p></td>
-<td><p>Rockchip SPI Boot Image }</p></td>
+<td><p>Rockchip SPI Boot Image</p></td>
 </tr>
 <tr class="row-even"><td><p>script</p></td>
 <td><p>Script</p></td>
@@ -420,19 +420,19 @@ the ‘/images’ node should have the following layout:</p>
 <td><p>Altera SoCFPGA A10 preloader</p></td>
 </tr>
 <tr class="row-odd"><td><p>spkgimage</p></td>
-<td><p>Renesas SPKG Image }</p></td>
+<td><p>Renesas SPKG Image</p></td>
 </tr>
 <tr class="row-even"><td><p>standalone</p></td>
 <td><p>Standalone Program</p></td>
 </tr>
 <tr class="row-odd"><td><p>stm32image</p></td>
-<td><p>STMicroelectronics STM32 Image }</p></td>
+<td><p>STMicroelectronics STM32 Image</p></td>
 </tr>
 <tr class="row-even"><td><p>sunxi_egon</p></td>
-<td><p>Allwinner eGON Boot Image }</p></td>
+<td><p>Allwinner eGON Boot Image</p></td>
 </tr>
 <tr class="row-odd"><td><p>sunxi_toc0</p></td>
-<td><p>Allwinner TOC0 Boot Image }</p></td>
+<td><p>Allwinner TOC0 Boot Image</p></td>
 </tr>
 <tr class="row-even"><td><p>tee</p></td>
 <td><p>Trusted Execution Environment Image</p></td>
@@ -447,13 +447,13 @@ the ‘/images’ node should have the following layout:</p>
 <td><p>x86 setup.bin</p></td>
 </tr>
 <tr class="row-even"><td><p>zynqimage</p></td>
-<td><p>Xilinx Zynq Boot Image }</p></td>
+<td><p>Xilinx Zynq Boot Image</p></td>
 </tr>
 <tr class="row-odd"><td><p>zynqmpbif</p></td>
-<td><p>Xilinx ZynqMP Boot Image (bif) }</p></td>
+<td><p>Xilinx ZynqMP Boot Image (bif)</p></td>
 </tr>
 <tr class="row-even"><td><p>zynqmpimage</p></td>
-<td><p>Xilinx ZynqMP Boot Image }</p></td>
+<td><p>Xilinx ZynqMP Boot Image</p></td>
 </tr>
 </tbody>
 </table>
