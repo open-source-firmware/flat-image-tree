@@ -143,4 +143,8 @@ By making a contribution to this project, I certify that:
     this project or the open source license(s) involved.
 ```
 
+## Automatic publication
+
+This document is automatically published to the Open Source Firmware Foundation website at https://fitspec.osfw.foundation/. 
+
 <!-- SPDX-License-Identifier: Apache-2.0 -->
