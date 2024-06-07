@@ -34,3 +34,7 @@ latexdiff: latex
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+check:
+	python validate/fit_validate_test.py
+	pylint validate/*.py
