@@ -280,6 +280,7 @@ os
     arm-trusted-firmware  ARM Trusted Firmware
     dell                  Dell
     efi                   EFI Firmware
+    elf                   ELF Image
     esix                  Esix
     freebsd               FreeBSD
     integrity             INTEGRITY
