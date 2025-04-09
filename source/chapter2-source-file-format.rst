@@ -365,9 +365,10 @@ load
                                 UltraScale+ (ZynqMP) device.
     ==========================  =========================================
 
-    *Note* For fdt images, the node should not have a compatible for the model.
-    The compatible here is not derived from the fdt, nor is it used to identify
-    the fdt. Such usage belongs in the configuration node.
+    .. note::
+       For fdt images, the node should not have a compatible for the model.
+       The compatible here is not derived from the fdt, nor is it used to identify
+       the fdt. Such usage belongs in the configuration node.
 
 .. _prop_phase:
 
