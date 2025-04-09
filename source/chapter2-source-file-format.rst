@@ -66,7 +66,7 @@ Unique identifiers
 
 To identify FIT sub-nodes representing images, hashes, configurations (which
 are defined in the following sections), the "unit name" of the given sub-node
-is used as it's identifier as it assures uniqueness without additional
+is used as its identifier as it assures uniqueness without additional
 checking required.
 
 .. index:: External data
@@ -247,8 +247,8 @@ compression
     zstd                  zstd compressed
     ====================  ==================
 
-Conditionally mandatory property
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Conditionally mandatory properties
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 data
     Path to the external file which contains this node's binary data. Within
@@ -256,7 +256,7 @@ data
     external data is used.
 
 data-size
-    size of the data in bytes. This is mandatory if :index:`external data` is
+    Size of the data in bytes. This is mandatory if :index:`external data` is
     used.
 
 data-offset
@@ -339,19 +339,19 @@ arch
     ====================  ==================
 
 entry
-    entry point address, address size is determined by
+    Entry point address, address size is determined by
     '#address-cells' property of the root node.
     Mandatory for types: "firmware", and "kernel".
 
 .. _prop_load:
 
 load
-    load address, address size is determined by '#address-cells'
+    Load address, address size is determined by '#address-cells'
     property of the root node.
     Mandatory for types: "firmware", and "kernel".
 
 :index:`compatible`
-    compatible method for loading image.
+    Compatible method for loading image.
     Mandatory for types: "fpga", and images that do not specify a load address.
     Supported compatible methods:
 
@@ -383,11 +383,11 @@ load
 Optional nodes:
 
 hash-1
-    Each hash sub-node represents separate hash or checksum
+    Each hash sub-node represents a separate hash or checksum
     calculated for node's data according to specified algorithm.
 
 signature-1
-    Each signature sub-node represents separate signature
+    Each signature sub-node represents a separate signature
     calculated for node's data according to specified algorithm.
 
 .. index:: Hash nodes
@@ -405,7 +405,7 @@ Mandatory properties
 ~~~~~~~~~~~~~~~~~~~~
 
 algo
-    :index:`Algorithm` name. Supported algoriths and their value sizes are:
+    :index:`Algorithm` name. Supported algorithms and their value sizes are:
 
     ==================== ============ =========================================
     Sub-image type       Size (bytes) Meaning
@@ -469,11 +469,11 @@ key-name-hint
 
 sign-images
     A list of images to sign, each being a property of the conf
-    node that contains then. The default is "kernel,fdt" which means that these
+    node that contains them. The default is "kernel,fdt" which means that these
     two images will be looked up in the config and signed if present. This is
     used by mkimage to determine which images to sign.
 
-The following properies are added as part of signing, and are mandatory:
+The following properties are added as part of signing, and are mandatory:
 
 value
     Actual signature value. This is added by mkimage.
@@ -492,7 +492,7 @@ hashed-strings
     of the string table. The size indicates the number of bytes hashed as part
     of signing.
 
-The following properies are added as part of signing, and are optional:
+The following properties are added as part of signing, and are optional:
 
 timestamp
     Time when image was signed (standard Unix time_t format)
@@ -539,13 +539,13 @@ Mandatory nodes
 ~~~~~~~~~~~~~~~
 
 configuration-sub-node-unit-name
-    At least one of the configuration sub-nodes is required.
+    At least one configuration sub-node is required.
 
 Optional nodes
 ~~~~~~~~~~~~~~
 
 signature-1
-    Each signature sub-node represents separate signature
+    Each signature sub-node represents a separate signature
     calculated for the configuration according to specified algorithm.
 
 
@@ -609,7 +609,7 @@ compatible
     Note that U-Boot requires the :index:`CONFIG_FIT_BEST_MATCH` option to be
     enabled for this matching to work.
 
-The FDT blob is required to properly boot FDT based kernel, so the minimal
+The FDT blob is required to properly boot FDT-based kernel, so the minimal
 configuration for 2.6 FDT kernel is (kernel, fdt) pair.
 
 Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
@@ -641,12 +641,12 @@ key-name-hint
     private key is stored in <name>.key and the certificate is stored in
     <name>.crt.
 
-The following properies are added as part of signing, and are mandatory:
+The following properties are added as part of signing, and are mandatory:
 
 value
     Actual signature value. This is added by mkimage.
 
-The following properies are added as part of signing, and are optional:
+The following properties are added as part of signing, and are optional:
 
 timestamp
     Time when image was signed (standard Unix time_t format)
