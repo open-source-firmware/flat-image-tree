@@ -381,7 +381,8 @@ load
     "u-boot"
         image is a U-Boot image
 
-Optional nodes:
+Optional nodes
+~~~~~~~~~~~~~~
 
 hash-1
     Each hash sub-node represents a separate hash or checksum
