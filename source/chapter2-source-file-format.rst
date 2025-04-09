@@ -592,10 +592,10 @@ fpga
 
 loadables
     Unit name containing a list of additional binaries to be
-    loaded at their given locations.  "loadables" is a comma-separated list
-    of strings. :index:`U-Boot` will load each binary at its given start-address
-    and may optionally invoke additional post-processing steps on this binary
-    based on its component image node type.
+    loaded at their given locations. "loadables" is a comma-separated list
+    of strings. :index:`U-Boot` will load each binary at its given load address
+    (see :ref:`prop_load`) and may optionally invoke additional post-processing
+    steps on this binary based on its component image node type.
 
 ramdisk
     Unit name of the corresponding ramdisk to be loaded at the given location.
