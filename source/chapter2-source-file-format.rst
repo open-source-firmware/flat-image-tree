@@ -253,7 +253,7 @@ Conditionally mandatory properties
 data
     Path to the external file which contains this node's binary data. Within
     the FIT this is the contents of the file. This is mandatory unless
-    external data is used.
+    :index:`external data` is used.
 
 data-size
     Size of the data in bytes. This is mandatory if :index:`external data` is
@@ -262,7 +262,7 @@ data-size
 data-offset
     Offset of the data in a separate image store. The image store is placed
     immediately after the last byte of the device tree binary, aligned to a
-    4-byte boundary. This is mandatory if external data is used, with an offset.
+    4-byte boundary. This is mandatory if :index:`external data` is used, with an offset.
 
 data-position
     Machine address at which the data is to be found. This is a fixed address
