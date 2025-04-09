@@ -15,7 +15,7 @@ used. The user perspective may be simpler, as some of the properties (like
 timestamps and hashes) are filled in automatically by available tooling, such
 as `mkimage`.
 
-To avoid confusion with the index:`kernel FDT <pair: kernel; FDT>` the following
+To avoid confusion with the :index:`kernel FDT <pair: kernel; FDT>` the following
 naming convention is used:
 
 FIT
