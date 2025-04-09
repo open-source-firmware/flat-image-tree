@@ -1,6 +1,7 @@
 .. SPDX-License-Identifier: Apache-2.0
 
-**Acknowledgements**
+Acknowledgements
+================
 
 FIT (Flattened Image Tree) was developed in 2008 by Marian Balakowicz and
 Bartlomiej Sieka of :index:`Semihalf`, under the guidance of Wolfgang Denk,
