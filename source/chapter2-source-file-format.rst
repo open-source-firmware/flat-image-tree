@@ -218,6 +218,7 @@ description
     sunxi_egon            Allwinner eGON Boot Image
     sunxi_toc0            Allwinner TOC0 Boot Image
     tee                   Trusted Execution Environment Image
+    tfa-bl31              Trusted Firmware-A BL31 Image
     ublimage              Davinci UBL image
     vybridimage           Vybrid Boot Image
     x86_setup             x86 setup.bin
