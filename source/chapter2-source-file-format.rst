@@ -555,12 +555,13 @@ Configuration nodes
 Each configuration has the following structure::
 
     o config-1
-        |- description = "configuration description"
-        |- kernel = "kernel sub-node unit name"
-        |- fdt = "fdt sub-node unit-name" [, "fdt overlay sub-node unit-name", ...]
-        |- loadables = "loadables sub-node unit-name"
-        |- script = "
-        |- compatible = "vendor,board-style device tree compatible string"
+        |- description = "configuration description";
+        |- kernel = "kernel sub-node unit name";
+        |- fdt = "fdt sub-node unit-name" [, "fdt overlay sub-node unit-name", ...];
+        |- ramdisk = "ramdisk sub-node unit-name";
+        |- loadables = "loadables sub-node unit-name" [, ...];
+        |- script = "script sub-node unit-name";
+        |- compatible = "vendor,board-style device tree compatible string";
         o signature-1 {...}
 
 Mandatory properties
@@ -593,6 +594,9 @@ loadables
     of strings. :index:`U-Boot` will load each binary at its given start-address
     and may optionally invoke additional post-processing steps on this binary
     based on its component image node type.
+
+ramdisk
+    Unit name of the corresponding ramdisk to be loaded at the given location.
 
 script
     The image to use when loading a :index:`U-Boot` script (for use with the
