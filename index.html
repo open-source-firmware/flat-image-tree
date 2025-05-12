@@ -5,13 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v0.8-11-gc749139 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
-    <script src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>Flattened Image Tree Specification v0.8-12-gde39361 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=2c4f372b"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="icon" href="_static/fit-favicon.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -33,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v0.8-11-gc749139<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v0.8-12-gde39361<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><p><strong>Copyright</strong></p>
 <div class="line-block">
@@ -117,10 +118,10 @@ along with grouping and selection mechanisms.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#chapter-introduction"><span class="std std-numref">Chapter 1</span></a> introduces the purpose and
 background of FITSpec.</p></li>
-<li><p><a class="reference internal" href="index.html#chapter-source-file-format"><span class="std std-numref">Chapter 2</span></a> introduces the FIT concept
+<li><p><a class="reference internal" href="#document-chapter2-source-file-format#chapter-source-file-format"><span class="std std-numref">Chapter 2</span></a> introduces the FIT concept
 and describes its logical structure and standard properties.
 certain classes of devices and specific device types.</p></li>
-<li><p><a class="reference internal" href="index.html#chapter-usage"><span class="std std-numref">Chapter 3</span></a> describes how FIT is used in bootloaders
+<li><p><a class="reference internal" href="#document-chapter3-usage#chapter-usage"><span class="std std-numref">Chapter 3</span></a> describes how FIT is used in bootloaders
 to handle booting Operating Systems as well as firmware.</p></li>
 </ul>
 <p><strong>Conventions Used in this Document</strong></p>
@@ -136,7 +137,7 @@ recommended that</em>).</p>
 <p>The word <em>may</em> is used to indicate a course of action permissible within
 the limits of the standard (<em>may</em> equals <em>is permitted</em>).</p>
 <p>Examples of devicetree constructs are frequently shown in <em>Devicetree
-Syntax</em> form. See <a class="reference internal" href="index.html#dtspec" id="id1"><span>[dtspec]</span></a> for a description of this.</p>
+Syntax</em> form. See <a class="reference internal" href="#document-references#dtspec" id="id1"><span>[dtspec]</span></a> for a description of this.</p>
 </section>
 <section id="relationship-to-dtspec">
 <h3><span class="section-number">1.2. </span>Relationship to Devicetree Specification<a class="headerlink" href="#relationship-to-dtspec" title="Link to this heading">¶</a></h3>
@@ -1079,14 +1080,14 @@ System. To do this, it follows these steps:</p>
 <p>The bootloader provides a way to select a FIT to load into memory. This is
 typically on boot media available to the bootloader, such as eMMC or UFS.</p>
 <p>There may be multiple FITs available. The mechanism for locating and selecting
-a FIT is not defined by this specification. See for example <a class="reference internal" href="index.html#vbe" id="id1"><span>[VBE]</span></a>.</p>
+a FIT is not defined by this specification. See for example <a class="reference internal" href="#document-references#vbe" id="id1"><span>[VBE]</span></a>.</p>
 <p>The bootloader may load the entire FIT into memory at once, before processing
 it. For simple applications where there are just a few images, this is the
 easiest approach.</p>
 <p>Where there are many configuration and several images, such that only a subset
 of the available images will actually be used on any one boot, it is inefficient
 to load the entire FIT, since most of the loaded data will not be used. In this
-case, an external-data FIT can be used. See <a class="reference internal" href="index.html#externaldata"><span class="std std-ref">External data</span></a>.</p>
+case, an external-data FIT can be used. See <a class="reference internal" href="#document-chapter2-source-file-format#externaldata"><span class="std std-ref">External data</span></a>.</p>
 <p>In this case, the bootloader reads the FDT header (say 64 bytes), checks that
 it is valid, then reads enough more bytes to bring in <code class="docutils literal notranslate"><span class="pre">totalsize</span></code> bytes
 (<code class="docutils literal notranslate"><span class="pre">totalsize</span></code> is the second 32-bit word in the header). Typically this will be
@@ -1094,7 +1095,7 @@ a few KB of data, consisting just of the FIT metadata. Later, the bootloader can
 read more data from the FIT as it needs to load each image.</p>
 <p>Another case that sometimes comes up is loading images from a FIT into internal
 SRAM, which may be very limited. In that case it may be useful to align images
-on a storage-device’s block boundary (see <code class="docutils literal notranslate"><span class="pre">-B</span></code> flag in <a class="reference internal" href="index.html#externaldata"><span class="std std-ref">External data</span></a>).
+on a storage-device’s block boundary (see <code class="docutils literal notranslate"><span class="pre">-B</span></code> flag in <a class="reference internal" href="#document-chapter2-source-file-format#externaldata"><span class="std std-ref">External data</span></a>).
 The bootloader can then avoid needing bounce buffers and other complications.</p>
 </section>
 <section id="select-a-configuration-to-boot">
@@ -1176,7 +1177,7 @@ a ramdisk (or initrd) which provides an initial root disk for the OS to use,
 before it is able to access the real root disk.</p>
 <p>The bootloader reads each image from the FIT and ‘loads’ it to the correct
 address. This address may be provided by the image’s <code class="docutils literal notranslate"><span class="pre">load</span></code> property
-(see <a class="reference internal" href="index.html#prop-load"><span class="std std-ref">load</span></a>), but if not provided, the bootloader can load it to any
+(see <a class="reference internal" href="#document-chapter2-source-file-format#prop-load"><span class="std std-ref">load</span></a>), but if not provided, the bootloader can load it to any
 suitable address. In some cases it may be possible to avoid loading the image
 and just refer to the image data within the FIT itself.</p>
 </section>
@@ -1203,7 +1204,7 @@ purpose.</p>
 <h3><span class="section-number">3.3. </span>Firmware usage<a class="headerlink" href="#firmware-usage" title="Link to this heading">¶</a></h3>
 <p>As firmware has become more complex, with multiple binaries loaded at each
 phase of the boot, it has become common to use FIT to load firmware.</p>
-<p>In this case, there is the concept of a boot phase (see <a class="reference internal" href="index.html#prop-phase"><span class="std std-ref">phase</span></a>),
+<p>In this case, there is the concept of a boot phase (see <a class="reference internal" href="#document-chapter2-source-file-format#prop-phase"><span class="std std-ref">phase</span></a>),
 indicating which phase each image is for.</p>
 <p>In this case the bootloader itself is likely split into multiple phases. For
 U-Boot, a common approach is for SPL (Secondary Program Loader) to load U-Boot
@@ -1252,10 +1253,10 @@ listed at <a class="reference external" href="https://elinux.org/Boot_Loaders#U-
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="#">
-              <img class="logo" src="_static/fit-logo.svg" alt="Logo"/>
+              <img class="logo" src="_static/fit-logo.svg" alt="Logo of Flattened Image Tree Specification"/>
             </a></p>
 <h1 class="logo"><a href="#">Flattened Image Tree Specification</a></h1>
 
@@ -1295,8 +1296,8 @@ listed at <a class="reference external" href="https://elinux.org/Boot_Loaders#U-
       &#169;2023, Marian Balakowicz <m8@semihalf.com>.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.3.7</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
     </div>
 
