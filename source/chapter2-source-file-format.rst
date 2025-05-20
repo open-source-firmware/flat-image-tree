@@ -560,6 +560,7 @@ Each configuration has the following structure::
     o config-1
         |- description = "configuration description";
         |- kernel = "kernel sub-node unit name";
+        |- cmdline = "command line for next boot stage";
         |- fdt = "fdt sub-node unit-name" [, "fdt overlay sub-node unit-name", ...];
         |- ramdisk = "ramdisk sub-node unit-name";
         |- loadables = "loadables sub-node unit-name" [, ...];
@@ -580,6 +581,10 @@ kernel or firmware
 
 Optional properties
 ~~~~~~~~~~~~~~~~~~~
+
+cmdline
+    Command line passed to the next boot stage, e.g. the operating system
+    kernel. The value is an UTF-8 encoded string.
 
 fdt
     Unit name of the corresponding fdt blob (component image node of a
