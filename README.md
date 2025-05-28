@@ -82,6 +82,28 @@ Make commands:
 
 Output goes in ./build subdirectory.
 
+## FIT Validation ##
+
+A simple validator is included to check FIT-format files. This is
+work-in-progress, in that it does not include the full schema.
+
+To use it:
+
+>```
+>pip install dtoc
+>validate/fit_validate.py <filename>
+>'''
+
+where <filename> is the FIT file to validate.
+
+The files are as follows:
+
+* fit_validate.py       - FIT validator
+* fdt_validate.py       - Generic devicetree validator
+* schema.py             - FIT schema
+* elements.py           - Generic elements used by the schema
+* fit_validate_test.py  - tests for the FIT validator
+
 ## License ##
 This project is licensed under the Apache V2 license. More information can be found 
 in the LICENSE and NOTICE file or online at:
