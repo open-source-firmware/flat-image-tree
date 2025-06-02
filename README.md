@@ -8,8 +8,9 @@ the source for the generation of the Flattened Image Tree Specification using
 Sphinx and LaTeX.
 
 ## Mailing list: flat-image-tree@lists.osfw.foundation ##
-   * Use this mailing list for submitting patches, questions and general discussion
+   * Use this mailing list for submitting questions and general discussion
    * Sign up to the mailing list at https://lists.osfw.foundation/g/flat-image-tree
+   * For patches, please read the [Contributions section](#contributions)
 
 ## Build Instructions
 
@@ -89,8 +90,8 @@ in the LICENSE and NOTICE file or online at:
 http://www.apache.org/licenses/LICENSE-2.0
 
 ## Contributions ##
-Please submit all patches to the mailing list at
-https://lists.osfw.foundation/g/flat-image-tree.
+Patches should be submitted via a pull request at
+https://github.com/open-source-firmware/flat-image-tree/pull
 
 Contributions to the Flattened Image Tree Specification are managed by the
 gatekeeper, Lean Sheng Tan <sheng.tan@9elements.com>
