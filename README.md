@@ -83,6 +83,39 @@ Make commands:
 
 Output goes in ./build subdirectory.
 
+## FIT Validation ##
+
+A simple validator is included to check FIT-format files. This is
+work-in-progress, in that it does not include the full schema.
+
+To use it:
+
+>```
+>pip install dtoc
+>fit_validate/validate.py <filename>
+>'''
+
+Example output:
+>```
+>/fit_validate/validate.py ~/u/build-sandbox/test.fit
+>/home/sglass/u/build-sandbox/test.fit:
+>/images/kernel-1: Required property 'description' missing
+>/images/kernel-2: Required property 'description' missing
+>/images/fdt-1: Required property 'os' missing
+>/images/fdt-1: Unexpected subnode 'signature-1', valid list is ()
+>/configurations/conf-1: Required property 'description' missing
+>```
+
+where <filename> is the FIT file to validate.
+
+The files are as follows:
+
+* validate.py        - FIT validator
+* fdt_validate.py    - Generic devicetree validator
+* schema.py          - FIT schema
+* elements.py        - Generic elements used by the schema
+* validate_test.py   - tests for the FIT validator
+
 ## License ##
 This project is licensed under the Apache V2 license. More information can be found 
 in the LICENSE and NOTICE file or online at:
