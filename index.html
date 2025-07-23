@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v0.8-23-gdecd707 documentation</title>
+    <title>Flattened Image Tree Specification v0.8-24-g0d5f7dd documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <script src="_static/documentation_options.js?v=2e79edc2"></script>
+    <script src="_static/documentation_options.js?v=98835e02"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="icon" href="_static/fit-favicon.png"/>
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v0.8-23-gdecd707<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v0.8-24-g0d5f7dd<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><section id="copyright">
 <h2><span class="section-number">1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h2>
@@ -988,14 +988,20 @@ calculated for the configuration according to specified algorithm.</p>
 <dl class="simple">
 <dt>description</dt><dd><p>Textual configuration description.</p>
 </dd>
+</dl>
+</section>
+<section id="id7">
+<h4><span class="section-number">5.7.2. </span>Conditionally mandatory property<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<dl class="simple">
 <dt>kernel or firmware</dt><dd><p>Unit name of the corresponding <span class="target" id="index-35"></span>kernel or <span class="target" id="index-36"></span>firmware
 (u-boot, op-tee, etc) image. If both “kernel” and “firmware” are specified,
-control is passed to the firmware image.</p>
+control is passed to the firmware image. For <a class="reference internal" href="#load-only">load_only</a> images, these two
+properties are optional.</p>
 </dd>
 </dl>
 </section>
 <section id="optional-properties">
-<h4><span class="section-number">5.7.2. </span>Optional properties<a class="headerlink" href="#optional-properties" title="Link to this heading">¶</a></h4>
+<h4><span class="section-number">5.7.3. </span>Optional properties<a class="headerlink" href="#optional-properties" title="Link to this heading">¶</a></h4>
 <dl>
 <dt>cmdline</dt><dd><p>Command line passed to the next boot stage, e.g. the operating system
 kernel. The value is an UTF-8 encoded string.</p>
@@ -1029,6 +1035,13 @@ string matching must always provide this property.</p>
 enabled for this matching to work.</p>
 </dd>
 </dl>
+<dl class="simple" id="load-only">
+<dt>load-only</dt><dd><p>Indicates that this configuration does not contain an executable image,
+i.e. kernel or firmware. The configuration may be loaded into memory for
+use by the executable image, which comes from another configuration or FIT.
+See see <a class="reference internal" href="#document-chapter3-usage#multi-step"><span class="std std-ref">Multi-step loading</span></a>.</p>
+</dd>
+</dl>
 <p>The FDT blob is required to properly boot FDT-based kernel, so the minimal
 configuration for 2.6 FDT kernel is (kernel, fdt) pair.</p>
 <p>Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
@@ -1046,8 +1059,8 @@ not</em> be specified in a configuration node.</p>
     |- hashed-strings = &lt;0 len&gt;
 </pre></div>
 </div>
-<section id="id7">
-<h4><span class="section-number">5.8.1. </span>Mandatory properties<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<section id="id8">
+<h4><span class="section-number">5.8.1. </span>Mandatory properties<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
 <dl class="simple">
 <dt>algo</dt><dd><p>See <a class="reference internal" href="#fit-algorithm">FIT Algorithm</a>.</p>
 </dd>
@@ -1240,8 +1253,31 @@ before SPL), then TPL will only load images with a phase of “spl”. This allo
 all images to be provided in a single FIT, with each phase pulling out what is
 needed as the boot proceeds.</p>
 </section>
+<section id="multi-step-loading">
+<span id="multi-step"></span><h3><span class="section-number">6.4. </span>Multi-step loading<a class="headerlink" href="#multi-step-loading" title="Link to this heading">¶</a></h3>
+<p>The most common use of a FIT is where each configuration contains everything
+needed to boot. For example, on ARM systems a configuration contains a kernel,
+devicetree(s) and a ramdisk if needed. This approach is widely used on embedded
+systems.</p>
+<p>This approach is not always desirable, however, particularly when the firmware
+and the OS are supplied by different parties. In that case, the devicetree may
+be provided by the firmware with the other pieces coming from the OS. This
+means that FIT may omit the devicetree images.</p>
+<p>With devicetree in particular, it is common for the OS to provide its own
+version, or perhaps a devicetree overlay to add some new nodes and properties.</p>
+<p>Obviously if the OS has to provide a devicetree for every device, the OS files
+would become very large. A middle path could be that the hardware vendor
+provides a FIT on a boot partition, containing devicetrees for hardware
+supported by that vendor. Then the bootloader can load that FIT to get just the
+devicetree, followed by the main FIT to load the OS.</p>
+<p>To enable this last case, add a <a class="reference internal" href="#document-chapter2-source-file-format#load-only"><span class="std std-ref">load-only</span></a> property to the configuration.
+This signals to the bootloader that it should not require an executable (i.e.
+kernel or firmware), nor should it try to boot with this configuration. Booting
+then becomes a two-step process: load one FIT to obtain the devicetree, then
+another to obtain the OS. Only the second FIT is booted.</p>
+</section>
 <section id="security">
-<h3><span class="section-number">6.4. </span>Security<a class="headerlink" href="#security" title="Link to this heading">¶</a></h3>
+<h3><span class="section-number">6.5. </span>Security<a class="headerlink" href="#security" title="Link to this heading">¶</a></h3>
 <p>FIT has robust security features. When enabled, each FIT configuration has
 one or more signatures. These protect the configuration and the images it
 refers to. The bootloader must check the signatures against a public key which
