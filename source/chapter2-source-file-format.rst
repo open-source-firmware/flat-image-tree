@@ -574,10 +574,15 @@ Mandatory properties
 description
     Textual configuration description.
 
+Conditionally mandatory property
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 kernel or firmware
     Unit name of the corresponding :index:`kernel` or :index:`firmware`
     (u-boot, op-tee, etc) image. If both "kernel" and "firmware" are specified,
-    control is passed to the firmware image.
+    control is passed to the firmware image. For `load_only`_ images, these two
+    properties are optional.
+
 
 Optional properties
 ~~~~~~~~~~~~~~~~~~~
@@ -621,12 +626,21 @@ compatible
     Note that U-Boot requires the :index:`CONFIG_FIT_BEST_MATCH` option to be
     enabled for this matching to work.
 
+.. _load_only:
+
+load-only
+    Indicates that this configuration does not necessarily contain an executable
+    image, i.e. kernel or firmware. The configuration's images may be loaded
+    into memory for use by the executable image, which comes from another
+    configuration or FIT. See see :ref:`multi_step`.
+
 The FDT blob is required to properly boot FDT-based kernel, so the minimal
 configuration for 2.6 FDT kernel is (kernel, fdt) pair.
 
 Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
 'struct bd_info' must be passed instead of FDT blob, thus fdt property *must
 not* be specified in a configuration node.
+
 
 Configuration-signature nodes
 -----------------------------

@@ -192,6 +192,48 @@ before SPL), then TPL will only load images with a phase of "spl". This allows
 all images to be provided in a single FIT, with each phase pulling out what is
 needed as the boot proceeds.
 
+.. _multi_step:
+
+Multi-step loading
+------------------
+
+The most common use of a FIT is where each configuration contains everything
+needed to boot. For example, on ARM systems a configuration contains a kernel,
+devicetree(s) and a ramdisk if needed. This approach is widely used on embedded
+systems.
+
+This approach is not always desirable, however, particularly when the firmware
+and the OS are supplied by different parties. In that case, the devicetree may
+be provided by the firmware with the other pieces coming from the OS. This
+means that FIT may omit the devicetree images.
+
+With devicetree in particular, it is common for the OS to provide its own
+version, or perhaps a devicetree overlay to add some new nodes and properties.
+
+Obviously if the OS has to provide a devicetree for every device, the OS files
+would become very large. A middle path could be that the hardware vendor
+provides a FIT on a boot partition, containing devicetrees for hardware
+supported by that vendor. Then the bootloader can load that FIT to get just the
+devicetree, followed by the main FIT to load the OS.
+
+To enable this last case, add a :ref:`load_only` property to the configuration.
+This signals to the bootloader that it should not require an executable (i.e.
+kernel or firmware), nor should it try to boot with this configuration. Booting
+then becomes a two-step process: load one FIT to obtain the devicetree, then
+another to obtain the OS. Only the second FIT is booted.
+
+Specifically, the 'load-only' property adjusts the meaning of loading a FIT, so
+that implementors should follow the following behaviour:
+
+===================  ==================  ====================
+'load-only' present  Executable present  Behaviour
+===================  ==================  ====================
+no                   no                  Raise an error
+yes                  no                  Only load the images
+no                   yes                 Execute binary
+yes                  yes                 Execute binary
+===================  ==================  ====================
+
 Security
 --------
 
