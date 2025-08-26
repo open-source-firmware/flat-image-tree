@@ -13,3 +13,7 @@ References
    https://libpng.org/pub/png/spec/1.2/PNG-Contents.html
 .. [svg] Scalable Vector Graphics
    https://www.w3.org/TR/SVG11/
+.. [osrelease] os-release - Operating system identification
+   https://www.freedesktop.org/software/systemd/man/latest/os-release.html
+.. [icontheme] Icon Theme Specification
+   https://standards.freedesktop.org/icon-theme-spec/latest

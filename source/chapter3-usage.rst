@@ -138,8 +138,12 @@ Boot menu
 ~~~~~~~~~
 
 In some cases it may desirable to show a menu of boot options and wait for the
-user to select one. The :ref:`logos_prop` property provides logos which can be
-shown in the case of a graphical menu.
+user to select one. In this case the :ref:`os_info` provides information which
+can be presented to the user to aid this choice. The :ref:`logos_prop` property
+provides logos which can be shown in the case of a graphical menu.
+
+The OS Information can also be useful for a fully automated boot, such as to
+select a particular version of the OS.
 
 The bootloader must support at least logos in BMP format, if it supports a
 graphical display.

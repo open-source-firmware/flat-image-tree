@@ -168,6 +168,7 @@ the '/images' node should have the following layout::
         o hash-1 {...}
         o hash-2 {...}
         o logo-info {...}
+        o os-info {...}
         ...
 
 Mandatory properties
@@ -399,6 +400,11 @@ logo-info
     Contains information about the logo image, to help describe characteristics
     such as image dimensions.
 
+os-info
+    Contains information about the OS image, to help identify it. This
+    can be useful for displaying a menu for the user. The information is
+    generally only useful for image nodes which contain an OS.
+
 .. index:: Hash nodes
 
 Hash nodes
@@ -612,6 +618,310 @@ background
     ===============  ===================================================
 
 .. _os_info:
+
+OS Information node
+-------------------
+
+The 'os-info' node provides information about an image, specifically targeting
+images which constitute an operation system. The properties are based on the
+freedesktop.org os-release specification [osrelease]_.
+
+The 'os-info' node has the following structure::
+
+    o os-info
+        |- ansi-color = "OS console presentation color"
+        |- architecture = "OS userspace architecture"
+        |- bug-report-url = "OS bug report URL"
+        |- build-id = "OS build identifier"
+        |- confext-level = "OS configuration extensions level"
+        |- cpe-name = "OS Common Platform-Enumeration name"
+        |- default-hostname = "OS default hostname"
+        |- documentation-url = "OS documentation URL"
+        |- home-url = "OS homepage URL"
+        |- id = "OS identifier"
+        |- id-like = "OS inherited from", ...
+        |- image-id = "OS image identifier"
+        |- image-version = "OS image version"
+        |- logo-name = "OS logo icon name"
+        |- name = "OS name"
+        |- pretty-name = "OS pretty name"
+        |- privacy-policy-url = "OS privacy policy URL"
+        |- release-type = "OS release type"
+        |- support-end = "OS support end date"
+        |- support-url = "OS support URL"
+        |- sysext-level = "OS system extensions level"
+        |- variant = "OS variant"
+        |- variant-id = "variant identifier"
+        |- vendor-name = "OS vendor name"
+        |- vendor-url = "OS vendor URL"
+        |- version = "OS version"
+        |- version-codename = "OS version codename"
+        |- version-id = "OS version identifier"
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+If an 'os-info' node is included, these properties are mandatory:
+
+name
+    A string identifying the operating system, without a version component,
+    and suitable for presentation to the user.
+
+    Examples::
+        name = "Fedora Linux";
+
+        name = "Ubuntu";
+
+version
+    A string identifying the operating system version, excluding any OS name
+    information, possibly including a release code name, and suitable for
+    presentation to the user.
+
+    Examples::
+        version = "32 (Workstation Edition)";
+
+        version = "20.04.1 LTS (Focal Fossa)";
+
+Conditionally mandatory property
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+color
+    A suggested presentation color when showing the OS name on the console, in
+    the format 0x00bbggrr. This is mandatory if 'ansi-color' is provided.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+ansi-color
+    A suggested presentation color when showing the OS name on the console.
+    This should be specified as string suitable for inclusion in the ESC [ m
+    ANSI/ECMA-48 escape code for setting graphical rendition. See also color.
+
+    Examples::
+        // red
+        ansi-color = "0;31";
+
+        // light blue
+        ansi-color = "1;34";
+
+        // Fedora blue
+        ansi-color = "0;38;2;60;110;180";
+
+architecture
+    A string that specifies the CPU architecture the userspace binaries
+    require.
+
+    Examples::
+        architecture = "x86_64";
+
+        architecture = "arm64";
+
+bug-report-url
+    Link to the main bug reporting page for the operating system, if there
+    is one.
+
+    Example::
+        bug-report-url = "https://bugzilla.redhat.com/";
+
+build-id
+    A string uniquely identifying the system image originally used as the
+    installation base. In most cases, VERSION_ID or IMAGE_ID are updated
+    when the entire system image is replaced during an update. BUILD_ID may
+    be used in distributions where the original installation image version
+    is important.
+
+    Example::
+        build-id = "2013-03-20.3";
+
+confext-level
+    A lower-case string identifying the operating system configuration
+    extensions support level, used to specify extension-release
+    compatibility.
+
+    Examples::
+        confext-level = "2";
+
+        confext-level = "15.14";
+
+cpe-name
+    A CPE name for the operating system, in URI binding syntax, following
+    the Common Platform Enumeration Specification.
+
+    Example::
+        cpe-name = "cpe:/o:fedoraproject:fedora:17";
+
+default-hostname
+    A string specifying the hostname if hostname(5) is not present and no
+    other configuration source specifies the hostname.
+
+    Example::
+        default-hostname = "localhost";
+
+documentation-url
+    Link to the main documentation page for this operating system.
+
+    Example::
+        documentation-url = "https://docs.fedoraproject.org/";
+
+home-url
+    Link to the homepage for the operating system, or alternatively a
+    homepage of the specific version of the operating system.
+
+    Example::
+        home-url = "https://fedoraproject.org/";
+
+id
+    A lower-case string identifying the operating system, excluding version
+    information and without spaces or other characters outside of 0-9, a-z,
+    ".", "_" and "-".
+
+    Examples::
+        id = "fedora";
+
+        id = "debian";
+
+id-like
+    A list of operating system identifiers in the same syntax as id. This should
+    list identifiers of operating systems that are closely related to the local
+    operating system in regards to packaging and programming interfaces.
+
+    Examples::
+        id-like = "rhel", "centos", "fedora";
+
+        id-like = "debian";
+
+image-id
+    A lower-case string identifying a specific image of the operating system.
+
+    Examples::
+        image-id = "vendorx-cashier-system";
+
+        image-id = "netbook-image";
+
+image-version
+    A lower-case string identifying the OS image version.
+
+    Example::
+        image-version = "33";
+
+        image-version = "47.1rc1"
+
+logo-name
+    A string specifying the name of an icon suitable to represent this
+    operating system in a logo format. The file for the logo should be
+    available within the root file system used by the operating system.
+
+    See the Icon Theme Specification [icontheme]_.
+
+    Examples::
+        logo-name = "fedora-logo-icon";
+
+        logo-name = "ubuntu-logo";
+
+pretty-name
+    A pretty operating system name in a format suitable for presentation to
+    the user. May or may not contain a release code name or OS version of
+    some kind.
+
+    Examples::
+        pretty-name = "Fedora Linux 32 (Workstation Edition)";
+
+        pretty-name = "Ubuntu 20.04.1 LTS";
+
+privacy-policy-url
+    Link to the privacy policy page for the operating system, if there is
+    one.
+
+    Example::
+        privacy-policy-url = "https://fedoraproject.org/wiki/Legal:PrivacyPolicy";
+
+release-type
+    Describes the release type of the operating system. May be one of:
+    stable, lts, development, experiment.
+
+    Examples::
+        release-type = "stable";
+
+        release-type = "lts";
+
+        release-type = "development";
+
+support-end
+    The time at which support for this version of the OS ends. When
+    specified, this should be in 64-bit Unix time format, i.e. the number of
+    seconds since 1.1.1970, 0:0:0.
+
+    Example::
+        support-end = /bits 64/ <1756212516>;
+
+support-url
+    Link to the main support page for the operating system, if there is one.
+
+    Example::
+        support-url = "https://fedoraproject.org/wiki/Communicating_and_getting_help";
+
+sysext-level
+    A lower-case string identifying the operating system extensions support
+    level, used to specify extension-release compatibility.
+
+    Examples::
+        sysext-level = "2";
+
+        sysext-level = "15.14";
+
+variant
+    A string identifying a specific variant or edition of the operating
+    system suitable for presentation to the user.
+
+    Examples::
+        variant = "Workstation Edition";
+
+        variant = "Server Edition";
+
+variant-id
+    A lower-case string identifying a specific variant or edition of the
+    operating system.
+
+    Examples::
+        variant-id = "workstation";
+
+        variant-id = "server";
+
+vendor-name
+    The name of the operating system vendor.
+
+    Examples::
+        vendor-name = "Fedora Project";
+
+        vendor-name = "Canonical Ltd.";
+
+vendor-url
+    Link to the vendor homepage.
+
+    Examples::
+        vendor-url = "https://fedoraproject.org/";
+
+        vendor-url = "https://canonical.com/";
+
+version-codename
+    A lower-case string identifying the operating system release code name,
+    excluding any OS name information or release version, and suitable for
+    processing by scripts or usage in generated filenames.
+
+    Examples::
+        version-codename = "focal";
+
+        version-codename = "jammy";
+
+version-id
+    A lower-case string identifying the operating system release, excluding
+    any OS name information or release code name, and suitable for processing
+    by scripts or usage in generated filenames.
+
+    Examples::
+        version-id = "32";
+
+        version-id = "20.04";
 
 
 '/configurations' node
