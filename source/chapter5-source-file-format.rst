@@ -168,6 +168,7 @@ the '/images' node should have the following layout::
         o hash-1 {...}
         o hash-2 {...}
         o dm-verity {...}
+        o logo-info {...}
         ...
 
 Mandatory properties
@@ -200,6 +201,7 @@ description
     kernel                Kernel Image
     kernel_noload         Kernel Image (no loading done)
     kwbimage              Kirkwood Boot Image
+    logo                  Logo or other graphical image
     lpc32xximage          LPC32XX Boot Image
     mtk_image             MediaTek BootROM loadable Image
     multi                 Multi-File Image
@@ -424,6 +426,10 @@ dm-verity
     Merkle-tree metadata so that the bootloader can construct kernel
     command-line parameters for integrity-verified boot.
     See `dm-verity nodes`_.
+
+logo-info
+    Contains information about the logo image, to help describe characteristics
+    such as image dimensions.
 
 .. index:: Hash nodes
 
@@ -660,6 +666,99 @@ kernel command line (see :ref:`verity-usage`).
 Both the filesystem payload data and the dm-verity Merkle-tree hash data are
 expected to reside inside the same sub-image.
 
+.. _logos:
+
+Logo Information node
+---------------------
+
+This node is mandatory for images of type 'logo'.
+
+Graphical logos can be used in boot menus to provide a visual indication of
+what is being booted. Logos are stored within the FIT as images, referred to
+by the :ref:`logos_prop` property in the configuration node.
+
+For the image, compression may be used, but if the file format itself supports
+compression this is not recommended.
+
+The 'logo-info' node has the following structure::
+
+    o logo-info
+       |- format = "bmp";
+       |- width = <128>;
+       |- height = <128>;
+       |- depth-log2 = <4>;
+       |- colour = "rgb";
+       |- alpha-channel;
+
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+:index:`format`
+    File format of the graphical image. This must be provided for images of
+    type :index:`logo`. See :ref:`logos`.
+
+    The following formats are defined. Support for logos is optional. If logos
+    are supported, BMP must be supported. Other formats are optional.
+
+    ==============  =========  =====================================
+    Format type     Support    Meaning
+    ==============  =========  =====================================
+    bmp             Mandatory  Windows bitmap; see [windowsbmp]_
+    png             Optional   Portable Network Graphics; see [png]_
+    svg             Optional   Scalable Vector Graphics; see [svg]_
+    ==============  =========  =====================================
+
+
+Conditionally mandatory property
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+width:
+    Width of the logo in pixels. This property is mandatory for logos which
+    contain bitmaps, i.e. BMP and PNG.
+
+height
+    Height of the logo in pixels. This property is mandatory for logos which
+    contain bitmaps, i.e. BMP and PNG.
+
+depth-log2
+    log (base 2) of the logo depth. For example, for a 32bpp images this should
+    be 5. This property is mandatory for logos which define a colour depth,
+    i.e. BMP and PNG.
+
+color
+    Type of color provided, as a string. This property is mandatory for logos
+    which contain bitmaps, i.e. BMP and PNG.
+
+    Valid values are:
+
+    ==============  =============================================
+    Color type      Meaning
+    ==============  =============================================
+    indexed         A palette is used to define colours
+    grayscale       The image supports luminance only
+    rgb             The image supports red/green/blue true colour
+    ==============  =============================================
+
+alpha-channel
+    Indicates that the image has an alpha channel, i.e. supports transparency.
+    This boolean property must be present if the image includes transparency
+    information.
+
+background
+    String indicateing the type of background the image targets.
+
+    Valid values are:
+
+    ===============  ===================================================
+    Background type  Meaning
+    ===============  ===================================================
+    light            The image looks best on a white or light background
+    dark             The image looks best on a black or dark background
+    ===============  ===================================================
+
+.. _os_info:
+
 .. _shared-image-data:
 
 Shared image data
@@ -793,6 +892,7 @@ Each configuration has the following structure::
         |- loadables = "loadables sub-node unit-name" [, ...];
         |- script = "script sub-node unit-name";
         |- compatible = "vendor,board-style device tree compatible string";
+        |- logos = "log sub-node unit-name" [, ...];
         o signature-1 {...}
 
 Mandatory properties
@@ -860,6 +960,16 @@ load-only
     image, i.e. kernel or firmware. The configuration's images may be loaded
     into memory for use by the executable image, which comes from another
     configuration or FIT. See see :ref:`multi_step`.
+
+.. _logos_prop:
+
+logos
+    Unit names of the corresponding image blobs containing a logo for this
+    operating system. Logos are listed in order of preference.
+
+    Multiple logos can be provided to ensure the widest possible bootloader
+    support. If any logos are provide, at least one must be in BMP format.
+    See :ref:`logos`.
 
 The FDT blob is required to properly boot FDT-based kernel, so the minimal
 configuration for 2.6 FDT kernel is (kernel, fdt) pair.
