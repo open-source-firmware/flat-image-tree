@@ -513,6 +513,36 @@ padding
     The padding algorithm, it may be pkcs-1.5 or pss,
     if no value is provided we assume pkcs-1.5
 
+For RSA signing the following properties are added by the signer and are
+mandatory:
+
+rsa,num-bits
+    Number of bits used by the RSA key (e.g. 2048)
+
+rsa,modulus
+    Modulus (N) as a big-endian multi-word integer
+
+rsa,exponent
+    Public exponent (E) as a 64 bit unsigned integer
+
+rsa,r-squared
+    (2^num-bits)^2 as a big-endian multi-word integer
+
+rsa,n0-inverse
+    -1 / modulus[0] mod 2^32
+
+For ECDSA signing the following properties are added by the signer and are
+mandatory:
+
+ecdsa,curve
+    Name of ECDSA curve. Value values are "prime256v1" and "brainpool256"
+
+ecdsa,x-point
+    Public key X coordinate as a big-endian multi-word integer
+
+ecdsa,y-point
+    Public key Y coordinate as a big-endian multi-word integer
+
 
 '/configurations' node
 ----------------------
