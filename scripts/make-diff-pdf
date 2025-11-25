@@ -1,0 +1,76 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+#
+# Generate a PDF showing the changes in the working tree since the current
+# branch left BASE (default origin/main). Additions are underlined and
+# deletions struck through.
+#
+# The old version is built in a temporary worktree, so the working tree,
+# including any uncommitted changes, is left alone. Both versions are built
+# from scratch in temporary directories, since an incremental build in
+# build/ can reuse doctrees from a different branch.
+
+set -e
+
+BASE=${BASE:-origin/main}
+TEX=fit-specification.tex
+
+ROOT_DIR=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+LOG_DIR="$ROOT_DIR/build/branchdiff"
+
+cd "$ROOT_DIR"
+
+if ! MERGE_BASE=$(git merge-base "$BASE" HEAD); then
+    echo "Error: Cannot find where HEAD left $BASE (set BASE=<ref>?)" >&2
+    exit 1
+fi
+
+TMP_DIR=$(mktemp -d)
+cleanup() {
+    git -C "$ROOT_DIR" worktree remove --force "$TMP_DIR/base" 2>/dev/null ||
+        true
+    rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+# Run a command with its output in a log, showing the end of it on failure
+run() {
+    local log="$LOG_DIR/$1"
+
+    shift
+    if ! "$@" > "$log" 2>&1; then
+        echo "Error: '$*' failed, see $log" >&2
+        tail -20 "$log" >&2
+        exit 1
+    fi
+}
+
+mkdir -p "$LOG_DIR"
+echo "Comparing against $BASE at $(git log -1 --format='%h %s' "$MERGE_BASE")"
+
+echo "Building the old version..."
+git worktree add --quiet --detach "$TMP_DIR/base" "$MERGE_BASE"
+run old.log make -C "$TMP_DIR/base" latex BUILDDIR="$TMP_DIR/old"
+
+echo "Building the working tree..."
+run new.log make latex BUILDDIR="$TMP_DIR/new"
+
+# Without VERBATIMENV, latexdiff marks up inside code blocks and breaks them.
+# The cost is that changes within a code block are not highlighted.
+# VERBATIMLINEENV would show them, but adds a listings option which the
+# fancyvrb-based sphinxVerbatim rejects.
+echo "Running latexdiff..."
+latexdiff --type=UNDERLINE --config VERBATIMENV=sphinxVerbatim \
+    "$TMP_DIR/old/latex/$TEX" "$TMP_DIR/new/latex/$TEX" \
+    > "$TMP_DIR/new/latex/diff.tex" 2> "$LOG_DIR/latexdiff.log"
+
+# Compile next to the Sphinx class files, twice so that cross-references
+# resolve
+echo "Compiling the PDF..."
+cd "$TMP_DIR/new/latex"
+run pdflatex.log pdflatex -interaction=nonstopmode -halt-on-error diff.tex
+run pdflatex.log pdflatex -interaction=nonstopmode -halt-on-error diff.tex
+
+mv diff.pdf "$ROOT_DIR/"
+
+echo "Done: $ROOT_DIR/diff.pdf"

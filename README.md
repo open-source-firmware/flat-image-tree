@@ -79,9 +79,30 @@ Make commands:
 >$ make latexpdf # For generating pdf
 >$ make html # For generating a hierarchy of html pages
 >$ make singlehtml # For generating a single html page
+>$ make branchdiff # For generating a diff PDF against the main branch
 >```
 
 Output goes in ./build subdirectory.
+
+## Reviewing Changes
+
+When working on a branch, you can generate a PDF showing the changes since
+the branch left origin/main, including any uncommitted changes:
+
+>```
+>$ make branchdiff
+>```
+
+This produces `diff.pdf` in the top-level directory with additions underlined
+and deletions struck through. Changes inside code blocks are not highlighted.
+Requires `latexdiff` to be installed.
+
+To compare against a different branch, for example if the upstream remote is
+not called origin:
+
+>```
+>$ make branchdiff BASE=upstream/main
+>```
 
 ## License ##
 This project is licensed under the Apache V2 license. More information can be found 
