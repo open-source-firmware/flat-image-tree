@@ -551,6 +551,10 @@ signature-1
     Each signature sub-node represents a separate signature
     calculated for the configuration according to specified algorithm.
 
+pcr-1
+    Each PCR-prediction sub-node represents an expected PCR value
+    for a particular TPM bank. See :ref:`pcr_prediction_nodes`.
+
 
 Configuration nodes
 -------------------
@@ -567,6 +571,7 @@ Each configuration has the following structure::
         |- script = "script sub-node unit-name";
         |- compatible = "vendor,board-style device tree compatible string";
         o signature-1 {...}
+        o pcr-1 {...}
 
 Mandatory properties
 ~~~~~~~~~~~~~~~~~~~~
@@ -689,6 +694,98 @@ comment
 padding
     The padding algorithm, it may be pkcs-1.5 or pss,
     if no value is provided we assume pkcs-1.5
+
+
+.. index:: PCR-prediction nodes
+
+.. _pcr_prediction_nodes:
+
+PCR-prediction nodes
+--------------------
+
+PCR-prediction nodes allow a FIT to include expected Platform Configuration
+Register (PCR) values.
+These values represent what the PCR should contain after the bootloader has
+measured the configuration's images into the TPM.
+This enables TPM policy binding,
+where secrets sealed to expected PCR values can only be unsealed when the
+correct images are loaded.
+
+::
+
+    o pcr-1
+        |- description = "PCR11 sha256 bank"
+        |- pcr = <11>;
+        |- algo = "sha256";
+        |- value = [expected PCR value]
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+pcr
+    The PCR index.
+    PCR 11 is conventionally used for kernel and related components.
+
+algo
+    Hash algorithm for this PCR bank.
+    Supported algorithms are:
+
+    =========== ============ ==========================================
+    Algorithm   Size (bytes) Meaning
+    =========== ============ ==========================================
+    sha256      32           Secure Hash Algorithm 2 (SHA256)
+    sha384      48           Secure Hash Algorithm 2 (SHA384)
+    sha512      64           Secure Hash Algorithm 2 (SHA512)
+    =========== ============ ==========================================
+
+value
+    Expected PCR value after all images have been measured.
+    This is computed by the signing tool based on the measurement algorithm
+    described in :ref:`measured_boot`.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+description
+    Textual description of this PCR prediction.
+
+Multiple PCR-prediction nodes may be present to support different TPM banks
+(e.g., both sha256 and sha384).
+
+Signing PCR predictions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+PCR-prediction nodes can be signed using a standard configuration signature
+node to enable remote attestation and TPM policy binding.
+The signature covers the PCR-prediction node values,
+allowing a remote party to verify the expected measurements were produced by
+a trusted authority.
+
+To sign PCR predictions, include the PCR-prediction nodes in the signature's
+``hashed-nodes`` property::
+
+    o config-1
+        |- description = "Boot configuration with PCR predictions";
+        |- kernel = "kernel";
+        |- fdt = "fdt-1";
+        o pcr-1
+            |- pcr = <11>;
+            |- algo = "sha256";
+            |- value = [expected PCR value for sha256 bank]
+        o pcr-2
+            |- pcr = <11>;
+            |- algo = "sha384";
+            |- value = [expected PCR value for sha384 bank]
+        o signature-1
+            |- algo = "sha256,rsa2048";
+            |- key-name-hint = "pcr-policy-key";
+            |- hashed-nodes = "/configurations/config-1/pcr-1",
+                    "/configurations/config-1/pcr-2";
+            |- value = [signature value]
+
+In this example, the signature covers two PCR-prediction nodes for different
+TPM banks (sha256 and sha384),
+allowing a single signature to attest to all bank predictions.
 
 
 .. sectionauthor:: Marian Balakowicz <m8@semihalf.com>
