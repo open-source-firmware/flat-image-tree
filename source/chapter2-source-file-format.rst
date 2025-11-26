@@ -645,13 +645,24 @@ not* be specified in a configuration node.
 Configuration-signature nodes
 -----------------------------
 
-::
+Direct format (default)::
 
     o signature-1
         |- algo = "algorithm name"
         |- key-name-hint = "key name"
         |- sign-images = "path1", "path2";
-        |- value = [hash or checksum value]
+        |- value = [signature value]
+        |- hashed-strings = <0 len>
+
+PKCS#7 format::
+
+    o signature-1
+        |- algo = "algorithm name"
+        |- format = "pkcs7"
+        |- compatible = "vendor,product-signing"
+        |- generation = <1>
+        |- sign-images = "path1", "path2";
+        |- value = [PKCS#7 SignedData]
         |- hashed-strings = <0 len>
 
 
@@ -660,6 +671,34 @@ Mandatory properties
 
 algo
     See `FIT Algorithm`_.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+format
+    Signature format. Supported values:
+
+    =========== ==============================================================
+    Format      Meaning
+    =========== ==============================================================
+    direct      Direct signature verification (default). The public key is
+                stored in the bootloader.
+    pkcs7       PKCS#7/CMS SignedData structure (Authenticode-compatible).
+                The certificate chain is embedded in the ``value`` property.
+    =========== ==============================================================
+
+compatible
+    Identifies the signing authority for generation-based revocation.
+    The bootloader maintains a minimum acceptable generation per compatible
+    string, allowing different signing authorities to manage revocation
+    independently.
+    See :ref:`certificate_revocation`.
+
+generation
+    Integer generation number for revocation purposes.
+    The bootloader maintains a minimum acceptable generation per ``compatible``
+    value; signatures with a generation below this minimum are rejected.
+    See :ref:`certificate_revocation`.
 
 key-name-hint
     Name of key to use for signing. The keys will normally be in
