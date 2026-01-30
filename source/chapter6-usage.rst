@@ -159,8 +159,7 @@ Logos should be selected based on the following criteria:
 
     #. The logo format must be supported by the bootloader
 
-    #. SVG is preferred (if supported), followed by PNG (also if supported)
-       and then BMP
+    #. PNG is preferred (if supported), followed by BMP
 
     #. Larger logos are preferred, so long as they fit into the screen space
        available to the bootloader
