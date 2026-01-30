@@ -543,70 +543,37 @@ compression this is not recommended.
 The 'logo-info' node has the following structure::
 
     o logo-info
-       |- format = "bmp";
-       |- width = <128>;
-       |- height = <128>;
-       |- depth-log2 = <4>;
-       |- colour = "rgb";
-       |- alpha-channel;
+       |- format = "image/bmp";
+       |- background = "dark";
 
 
 Mandatory properties
 ~~~~~~~~~~~~~~~~~~~~
 
 :index:`format`
-    File format of the graphical image. This must be provided for images of
-    type :index:`logo`. See :ref:`logos`.
+    IANA media type [mediatypes]_ of the graphical image. This must be provided
+    for images of type :index:`logo`. See :ref:`logos`.
 
     The following formats are defined. Support for logos is optional. If logos
     are supported, BMP must be supported. Other formats are optional.
 
     ==============  =========  =====================================
-    Format type     Support    Meaning
+    Media type      Support    Meaning
     ==============  =========  =====================================
-    bmp             Mandatory  Windows bitmap; see [windowsbmp]_
-    png             Optional   Portable Network Graphics; see [png]_
-    svg             Optional   Scalable Vector Graphics; see [svg]_
+    image/bmp       Mandatory  Windows bitmap; see [windowsbmp]_
+    image/png       Optional   Portable Network Graphics; see [png]_
     ==============  =========  =====================================
 
+    Image properties such as width, height, depth, and colour type are encoded
+    within the image file itself and need not be duplicated here.
 
-Conditionally mandatory property
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-width:
-    Width of the logo in pixels. This property is mandatory for logos which
-    contain bitmaps, i.e. BMP and PNG.
-
-height
-    Height of the logo in pixels. This property is mandatory for logos which
-    contain bitmaps, i.e. BMP and PNG.
-
-depth-log2
-    log (base 2) of the logo depth. For example, for a 32bpp images this should
-    be 5. This property is mandatory for logos which define a colour depth,
-    i.e. BMP and PNG.
-
-color
-    Type of color provided, as a string. This property is mandatory for logos
-    which contain bitmaps, i.e. BMP and PNG.
-
-    Valid values are:
-
-    ==============  =============================================
-    Color type      Meaning
-    ==============  =============================================
-    indexed         A palette is used to define colours
-    grayscale       The image supports luminance only
-    rgb             The image supports red/green/blue true colour
-    ==============  =============================================
-
-alpha-channel
-    Indicates that the image has an alpha channel, i.e. supports transparency.
-    This boolean property must be present if the image includes transparency
-    information.
+Optional properties
+~~~~~~~~~~~~~~~~~~~
 
 background
-    String indicateing the type of background the image targets.
+    String indicating the type of background the image targets. This helps the
+    boot menu select an appropriate logo variant.
 
     Valid values are:
 
@@ -623,40 +590,21 @@ OS Information node
 -------------------
 
 The 'os-info' node provides information about an image, specifically targeting
-images which constitute an operation system. The properties are based on the
-freedesktop.org os-release specification [osrelease]_.
+images which constitute an operating system. The properties are based on a
+subset of the freedesktop.org os-release specification [osrelease]_, limited
+to fields useful for display in a boot menu.
 
 The 'os-info' node has the following structure::
 
     o os-info
-        |- ansi-color = "OS console presentation color"
-        |- architecture = "OS userspace architecture"
-        |- bug-report-url = "OS bug report URL"
-        |- build-id = "OS build identifier"
-        |- confext-level = "OS configuration extensions level"
-        |- cpe-name = "OS Common Platform-Enumeration name"
-        |- default-hostname = "OS default hostname"
-        |- documentation-url = "OS documentation URL"
-        |- home-url = "OS homepage URL"
-        |- id = "OS identifier"
-        |- id-like = "OS inherited from", ...
-        |- image-id = "OS image identifier"
-        |- image-version = "OS image version"
-        |- logo-name = "OS logo icon name"
         |- name = "OS name"
-        |- pretty-name = "OS pretty name"
-        |- privacy-policy-url = "OS privacy policy URL"
-        |- release-type = "OS release type"
-        |- support-end = "OS support end date"
-        |- support-url = "OS support URL"
-        |- sysext-level = "OS system extensions level"
-        |- variant = "OS variant"
-        |- variant-id = "variant identifier"
-        |- vendor-name = "OS vendor name"
-        |- vendor-url = "OS vendor URL"
         |- version = "OS version"
-        |- version-codename = "OS version codename"
+        |- pretty-name = "OS pretty name"
+        |- id = "OS identifier"
         |- version-id = "OS version identifier"
+        |- home-url = "OS homepage URL"
+        |- vendor-name = "OS vendor name"
+
 
 Mandatory properties
 ~~~~~~~~~~~~~~~~~~~~
@@ -668,6 +616,7 @@ name
     and suitable for presentation to the user.
 
     Examples::
+
         name = "Fedora Linux";
 
         name = "Ubuntu";
@@ -678,97 +627,14 @@ version
     presentation to the user.
 
     Examples::
+
         version = "32 (Workstation Edition)";
 
         version = "20.04.1 LTS (Focal Fossa)";
 
-Conditionally mandatory property
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-color
-    A suggested presentation color when showing the OS name on the console, in
-    the format 0x00bbggrr. This is mandatory if 'ansi-color' is provided.
 
 Optional properties
 ~~~~~~~~~~~~~~~~~~~
-
-ansi-color
-    A suggested presentation color when showing the OS name on the console.
-    This should be specified as string suitable for inclusion in the ESC [ m
-    ANSI/ECMA-48 escape code for setting graphical rendition. See also color.
-
-    Examples::
-        // red
-        ansi-color = "0;31";
-
-        // light blue
-        ansi-color = "1;34";
-
-        // Fedora blue
-        ansi-color = "0;38;2;60;110;180";
-
-architecture
-    A string that specifies the CPU architecture the userspace binaries
-    require.
-
-    Examples::
-        architecture = "x86_64";
-
-        architecture = "arm64";
-
-bug-report-url
-    Link to the main bug reporting page for the operating system, if there
-    is one.
-
-    Example::
-        bug-report-url = "https://bugzilla.redhat.com/";
-
-build-id
-    A string uniquely identifying the system image originally used as the
-    installation base. In most cases, VERSION_ID or IMAGE_ID are updated
-    when the entire system image is replaced during an update. BUILD_ID may
-    be used in distributions where the original installation image version
-    is important.
-
-    Example::
-        build-id = "2013-03-20.3";
-
-confext-level
-    A lower-case string identifying the operating system configuration
-    extensions support level, used to specify extension-release
-    compatibility.
-
-    Examples::
-        confext-level = "2";
-
-        confext-level = "15.14";
-
-cpe-name
-    A CPE name for the operating system, in URI binding syntax, following
-    the Common Platform Enumeration Specification.
-
-    Example::
-        cpe-name = "cpe:/o:fedoraproject:fedora:17";
-
-default-hostname
-    A string specifying the hostname if hostname(5) is not present and no
-    other configuration source specifies the hostname.
-
-    Example::
-        default-hostname = "localhost";
-
-documentation-url
-    Link to the main documentation page for this operating system.
-
-    Example::
-        documentation-url = "https://docs.fedoraproject.org/";
-
-home-url
-    Link to the homepage for the operating system, or alternatively a
-    homepage of the specific version of the operating system.
-
-    Example::
-        home-url = "https://fedoraproject.org/";
 
 id
     A lower-case string identifying the operating system, excluding version
@@ -776,6 +642,7 @@ id
     ".", "_" and "-".
 
     Examples::
+
         id = "fedora";
 
         id = "debian";
@@ -786,6 +653,7 @@ id-like
     operating system in regards to packaging and programming interfaces.
 
     Examples::
+
         id-like = "rhel", "centos", "fedora";
 
         id-like = "debian";
@@ -794,6 +662,7 @@ image-id
     A lower-case string identifying a specific image of the operating system.
 
     Examples::
+
         image-id = "vendorx-cashier-system";
 
         image-id = "netbook-image";
@@ -801,22 +670,11 @@ image-id
 image-version
     A lower-case string identifying the OS image version.
 
-    Example::
+    Examples::
+
         image-version = "33";
 
-        image-version = "47.1rc1"
-
-logo-name
-    A string specifying the name of an icon suitable to represent this
-    operating system in a logo format. The file for the logo should be
-    available within the root file system used by the operating system.
-
-    See the Icon Theme Specification [icontheme]_.
-
-    Examples::
-        logo-name = "fedora-logo-icon";
-
-        logo-name = "ubuntu-logo";
+        image-version = "47.1rc1";
 
 pretty-name
     A pretty operating system name in a format suitable for presentation to
@@ -824,65 +682,35 @@ pretty-name
     some kind.
 
     Examples::
+
         pretty-name = "Fedora Linux 32 (Workstation Edition)";
 
         pretty-name = "Ubuntu 20.04.1 LTS";
 
-privacy-policy-url
-    Link to the privacy policy page for the operating system, if there is
-    one.
+home-url
+    Link to the homepage for the operating system. This may be displayed as
+    a QR code or stored for informational purposes.
 
     Example::
-        privacy-policy-url = "https://fedoraproject.org/wiki/Legal:PrivacyPolicy";
 
-release-type
-    Describes the release type of the operating system. May be one of:
-    stable, lts, development, experiment.
+        home-url = "https://fedoraproject.org/";
 
-    Examples::
-        release-type = "stable";
-
-        release-type = "lts";
-
-        release-type = "development";
-
-support-end
-    The time at which support for this version of the OS ends. When
-    specified, this should be in 64-bit Unix time format, i.e. the number of
-    seconds since 1.1.1970, 0:0:0.
-
-    Example::
-        support-end = /bits 64/ <1756212516>;
-
-support-url
-    Link to the main support page for the operating system, if there is one.
-
-    Example::
-        support-url = "https://fedoraproject.org/wiki/Communicating_and_getting_help";
-
-sysext-level
-    A lower-case string identifying the operating system extensions support
-    level, used to specify extension-release compatibility.
-
-    Examples::
-        sysext-level = "2";
-
-        sysext-level = "15.14";
-
-variant
+os-variant
     A string identifying a specific variant or edition of the operating
     system suitable for presentation to the user.
 
     Examples::
-        variant = "Workstation Edition";
 
-        variant = "Server Edition";
+        os-variant = "Workstation Edition";
+
+        os-variant = "Server Edition";
 
 variant-id
     A lower-case string identifying a specific variant or edition of the
     operating system.
 
     Examples::
+
         variant-id = "workstation";
 
         variant-id = "server";
@@ -891,14 +719,17 @@ vendor-name
     The name of the operating system vendor.
 
     Examples::
+
         vendor-name = "Fedora Project";
 
         vendor-name = "Canonical Ltd.";
 
 vendor-url
-    Link to the vendor homepage.
+    Link to the vendor homepage. This may be displayed as a QR code or stored
+    for informational purposes.
 
     Examples::
+
         vendor-url = "https://fedoraproject.org/";
 
         vendor-url = "https://canonical.com/";
@@ -909,6 +740,7 @@ version-codename
     processing by scripts or usage in generated filenames.
 
     Examples::
+
         version-codename = "focal";
 
         version-codename = "jammy";
@@ -919,6 +751,7 @@ version-id
     by scripts or usage in generated filenames.
 
     Examples::
+
         version-id = "32";
 
         version-id = "20.04";
