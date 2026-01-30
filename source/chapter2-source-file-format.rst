@@ -371,6 +371,9 @@ load
        The compatible here is not derived from the fdt, nor is it used to identify
        the fdt. Such usage belongs in the configuration node.
 
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
 .. _prop_phase:
 
 :index:`phase`
@@ -381,6 +384,39 @@ load
 
     "u-boot"
         image is a U-Boot image
+
+.. _prop_variant:
+
+:index:`variant`
+    Identifies a group of :index:`mutually exclusive <pair: images; mutually exclusive>`
+    images. Images sharing the same variant value will not all be loaded
+    simultaneously; the boot firmware selects at most one at runtime based on
+    platform-specific criteria (e.g. device security state).
+
+    This property is used by tooling to suppress false-positive overlap warnings
+    when multiple images in a configuration share the same load address but are
+    never loaded together.
+
+    Example: A platform may include firmware stubs for different security
+    levels::
+
+        tifsstub-hs {
+            description = "TIFSSTUB for HS devices";
+            type = "firmware";
+            load = <0x9dc00000>;
+            variant = "tifsstub";
+        };
+        tifsstub-fs {
+            description = "TIFSSTUB for FS devices";
+            type = "firmware";
+            load = <0x9dc00000>;
+            variant = "tifsstub";
+        };
+
+    At runtime, the boot firmware loads only the appropriate stub based on the
+    detected security state. Because both images declare ``variant = "tifsstub"``,
+    overlap-detection tools understand that the shared load address is
+    intentional.
 
 Optional nodes
 ~~~~~~~~~~~~~~
