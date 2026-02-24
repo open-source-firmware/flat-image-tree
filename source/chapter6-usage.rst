@@ -234,4 +234,150 @@ no                   yes                 Execute binary
 yes                  yes                 Execute binary
 ===================  ==================  ====================
 
+.. _verity-usage:
+
+dm-verity for filesystem images
+-------------------------------
+
+A FIT may contain ``filesystem``-type sub-images that carry a ``dm-verity``
+child node (see :ref:`dm-verity-nodes`). Such images bundle both the
+filesystem payload and the dm-verity Merkle-tree hash data inside the same
+sub-image. A Linux block driver exposes each loadable sub-image as
+``/dev/fit0``, ``/dev/fit1``, etc.
+
+When a ``dm-verity`` node is present, the bootloader should translate its
+properties into kernel command-line parameters so that the kernel can activate
+a dm-verity integrity target at boot, before mounting the root filesystem.
+Two parameters are needed:
+
+``dm-mod.waitfor``
+    Tells ``dm-init`` to wait for the block device to appear before creating
+    mapped devices. The bootloader should list the ``/dev/fitN`` device that
+    corresponds to the sub-image::
+
+        dm-mod.waitfor=/dev/fit0
+
+``dm-mod.create``
+    Defines a device-mapper table using the ``--concise`` format accepted by
+    ``dmsetup``. The general form for a verity target is::
+
+        <name>,<uuid>,<minor>,ro,
+          0 <num_sectors> verity <version>
+          <dev> <hash_dev>
+          <data_block_size> <hash_block_size>
+          <num_data_blocks> <hash_start_block>
+          <algorithm> <digest> <salt>
+          [<#opt_params> <opt_params>]
+
+    Because both the filesystem data and the hash tree reside inside the same
+    ``/dev/fitN`` device, ``<dev>`` and ``<hash_dev>`` are identical and shall
+    be set by the bootloader. The ``<version>`` is always ``1``.
+
+Field mapping
+~~~~~~~~~~~~~
+
+The following table shows how each dm-verity construction parameter
+is derived from the ``dm-verity`` node properties.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - dm-verity parameter
+     - Source
+   * - ``<name>``
+     - The unit name of the ``/images`` sub-node that contains the
+       ``dm-verity`` child node.
+   * - ``<uuid>``
+     - May be left empty (``""``).
+   * - ``<minor>``
+     - May be left empty (``""``).
+   * - ``<num_sectors>``
+     - ``num-data-blocks * (data-block-size / 512)``
+   * - ``<version>``
+     - Always ``1``.
+   * - ``<dev>``, ``<hash_dev>``
+     - Both set to the ``/dev/fitN`` block device that the uImage.FIT block
+       driver creates for this sub-image.
+   * - ``<data_block_size>``
+     - ``data-block-size`` from the ``dm-verity`` node.
+   * - ``<hash_block_size>``
+     - ``hash-block-size`` from the ``dm-verity`` node.
+   * - ``<num_data_blocks>``
+     - ``num-data-blocks`` from the ``dm-verity`` node.
+   * - ``<hash_start_block>``
+     - ``hash-start-block`` from the ``dm-verity`` node.
+   * - ``<algorithm>``
+     - ``algo`` from the ``dm-verity`` node.
+   * - ``<digest>``
+     - ``digest`` from the ``dm-verity`` node, hex-encoded.
+   * - ``<salt>``
+     - ``salt`` from the ``dm-verity`` node, hex-encoded.
+   * - ``<opt_params>``
+     - Constructed from the boolean option properties present in the
+       ``dm-verity`` node (e.g. ``restart-on-corruption``,
+       ``panic-on-error``). The bootloader collects every option property that
+       is present, converts the property name from hyphenated to underscored
+       form (e.g. ``restart-on-corruption`` becomes ``restart_on_corruption``),
+       counts them, and appends ``<count> <option> [<option> ...]`` to the
+       target line.
+
+Example
+~~~~~~~
+
+Given a ``filesystem`` sub-image node named ``rootfs-1``,
+exposed as ``/dev/fit0``, whose ``dm-verity`` node contains::
+
+    dm-verity {
+        data-block-size = <4096>;
+        hash-block-size = <4096>;
+        num-data-blocks = <204800>;
+        hash-start-block = <204800>;
+        algo = "sha256";
+        digest = [ac 87 db 56 30 3c 9c 1d a4 33 d7 20 9b 5a 6e f3
+                  e4 77 9d f1 41 20 0c bd 7c 15 7d cb 8d d8 9c 42];
+        salt = [5e bf e8 7f 7d f3 23 5b 80 a1 17 eb c4 07 8e 44
+                f5 50 45 48 7a d4 a9 65 81 d1 ad b5 64 61 5b 51];
+        panic-on-corruption;
+        panic-on-error;
+    };
+
+The bootloader constructs::
+
+    dm-mod.waitfor=/dev/fit0
+
+    dm-mod.create="rootfs-1,,, ro,
+      0 1638400 verity 1
+      /dev/fit0 /dev/fit0
+      4096 4096 204800 204800 sha256
+      ac87db56303c9c1da433d7209b5a6ef3e4779df141200cbd7c157dcb8dd89c42
+      5ebfe87f7df3235b80a117ebc4078e44f55045487ad4a96581d1adb564615b51
+      2 panic_on_corruption panic_on_error"
+
+.. note::
+
+   The newlines inside the ``dm-mod.create`` value above are
+   for readability only. The actual kernel command-line
+   parameter must be a single line.
+
+Here ``num_sectors`` = 204800 × (4096 / 512) = 1638400. ``<name>`` is the image
+unit name ``rootfs-1``; ``<uuid>`` and ``<minor>`` are left empty; ``ro``
+indicates a read-only target. ``<dev>`` and ``<hash_dev>`` are both
+``/dev/fit0`` because the filesystem data and the Merkle tree reside in the same
+sub-image. The two boolean properties ``panic-on-corruption`` and
+``panic-on-error`` become the optional-parameter suffix ``2 panic_on_corruption
+panic_on_error`` (count followed by underscore-separated names). The remaining
+fields map directly from the ``dm-verity`` node properties.
+
+.. note::
+
+   When preparing the sub-image with ``veritysetup format``, pass
+   ``--no-superblock`` so that the hash tree starts directly after
+   the data blocks. By default ``veritysetup`` writes a one-block
+   on-disk superblock between data and hash tree, which would shift
+   ``hash-start-block`` to ``num-data-blocks + 1``. The kernel
+   dm-verity target never reads this superblock — all parameters
+   are supplied via ``dm-mod.create`` — so it is unnecessary when
+   the metadata is already stored in the FIT ``dm-verity`` node.
+
 .. sectionauthor:: Simon Glass <sjg@chromium.org>

@@ -167,6 +167,7 @@ the '/images' node should have the following layout::
         |
         o hash-1 {...}
         o hash-2 {...}
+        o dm-verity {...}
         ...
 
 Mandatory properties
@@ -393,6 +394,12 @@ signature-1
     Each signature sub-node represents a separate signature
     calculated for node's data according to specified algorithm.
 
+dm-verity
+    For images of type ``filesystem``, this sub-node carries dm-verity
+    Merkle-tree metadata so that the bootloader can construct kernel
+    command-line parameters for integrity-verified boot.
+    See `dm-verity nodes`_.
+
 .. index:: Hash nodes
 
 Hash nodes
@@ -516,6 +523,110 @@ padding
     The padding algorithm, it may be pkcs-1.5 or pss,
     if no value is provided we assume pkcs-1.5
 
+
+.. index:: dm-verity nodes
+
+.. _dm-verity-nodes:
+
+dm-verity nodes
+---------------
+
+Image nodes whose type is ``filesystem`` may contain an optional ``dm-verity``
+child node. The bootloader uses this metadata to construct ``dm-mod.create``
+and ``dm-mod.waitfor`` kernel command-line parameters so that the kernel can set
+up a `dm-verity
+<https://docs.kernel.org/admin-guide/device-mapper/verity.html>`_ integrity
+target over the corresponding block device at boot.
+
+See :ref:`verity-usage` for details on how a bootloader should translate these
+properties into kernel command-line parameters.
+
+::
+
+    o dm-verity
+        |- data-block-size = <data block size in bytes>
+        |- hash-block-size = <hash block size in bytes>
+        |- num-data-blocks = <number of data blocks>
+        |- hash-start-block = <hash tree start block>
+        |- algo = "hash algorithm name"
+        |- digest = [root hash bytes]
+        |- salt = [salt bytes]
+
+The property names are intentionally aligned with the `dm-verity construction
+parameters <https://docs.kernel.org/admin-guide/device-mapper/verity.html>`_
+defined by the Linux kernel. The ``<version>`` parameter is always ``1``, and
+``<dev>`` / ``<hash_dev>`` both implicitly refer to the ``/dev/fitN`` block
+device that the Linux uImage.FIT block driver creates for this sub-image.
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+data-block-size
+    The block size on the data device in bytes. Each block corresponds to one
+    digest in the hash tree. Must be a power of two and at least 512;
+    typically 4096.
+
+hash-block-size
+    The size of a hash block in bytes. Must be a power of two and at least 512;
+    typically 4096.
+
+num-data-blocks
+    The number of data blocks on the data device. This corresponds to the
+    ``<num_data_blocks>`` dm-verity parameter and the value reported by
+    ``veritysetup format``.
+
+hash-start-block
+    Offset in ``hash-block-size``-sized blocks from the start of the sub-image
+    to the root block of the hash tree. Corresponds to the
+    ``<hash_start_block>`` dm-verity parameter.
+
+algo
+    The cryptographic hash algorithm used for dm-verity, e.g. ``"sha256"``.
+
+digest
+    The root hash of the dm-verity Merkle tree, stored as a raw byte array.
+    The length must match the output size of ``algo``.
+
+salt
+    Salt value, stored as a raw byte array.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+restart-on-corruption
+    Boolean. Restart the system when a corrupted block is discovered.
+    Corresponds to ``restart_on_corruption``.
+
+panic-on-corruption
+    Boolean. Panic the system when a corrupted block is discovered. Not
+    compatible with ``restart-on-corruption``. Corresponds to
+    ``panic_on_corruption``.
+
+restart-on-error
+    Boolean. Restart the system when an I/O error is detected. Corresponds to
+    ``restart_on_error``.
+
+panic-on-error
+    Boolean. Panic the system when an I/O error is detected. Not compatible
+    with ``restart-on-error``. Corresponds to ``panic_on_error``.
+
+check-at-most-once
+    Boolean. Verify data blocks only the first time they are read, reducing
+    overhead on constrained systems at the cost of not detecting online
+    tampering. Corresponds to ``check_at_most_once``.
+
+When none of the error-handling properties are present, the kernel default
+behaviour (return I/O error) applies.
+
+Additional optional parameters defined by the kernel's `dm-verity target
+<https://docs.kernel.org/admin-guide/device-mapper/verity.html>`_ may be added
+as properties in future revisions of this specification.
+
+These values correspond to the parameters passed to ``dm-mod.create`` on the
+kernel command line (see :ref:`verity-usage`).
+
+Both the filesystem payload data and the dm-verity Merkle-tree hash data are
+expected to reside inside the same sub-image.
 
 '/configurations' node
 ----------------------

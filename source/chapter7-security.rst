@@ -14,9 +14,11 @@ refers to. The bootloader must check the signatures against a public key which
 it has stored elsewhere.
 
 If any configuration fails its signature check, then it must be ignored. Images
-must each include a suitable hash node, so that images are actually protected
-against modification. Once each image is loaded, its hash must be computed and
-checked against the hash in the FIT.
+must each include a suitable hash node so that they are protected against
+modification. Once each image is loaded, its hash must be computed and checked
+against the hash in the FIT. The exception is ``filesystem``-type images that
+carry a ``dm-verity`` node: their integrity is delegated to the kernel's
+dm-verity target rather than verified by the bootloader.
 
 For more information on FIT security, see
 `U-Boot's documentation <https://docs.u-boot.org/en/latest/usage/fit/signature.html>`_.
@@ -48,7 +50,8 @@ configuration signature covers:
 
 - the configuration node itself (including its references to images),
 - each image node referenced by the configuration,
-- the hash sub-nodes of those images, and
+- the hash sub-nodes of those images,
+- the ``dm-verity`` sub-nodes of those images (where present), and
 - the root (``/``) node of the FIT.
 
 Because the signature covers the hash sub-nodes, the image data is
@@ -88,12 +91,20 @@ The bootloader verifies a configuration as follows:
 #. The signature covers certain FDT nodes and a region of the string table
    (see :ref:`hash_contents` below). Rebuild the list of nodes that should
    have been signed (the root node, the configuration node, each referenced
-   image node and its hash sub-nodes) and verify that the hash of those nodes
+   image node, its hash sub-nodes, and any ``dm-verity`` sub-node) and verify
+   that the hash of those nodes
    matches the signature.
 #. For each image referenced by the configuration, compute the hash of the
    image data and compare it against the ``value`` in the image's hash
    sub-node. This step may be deferred until the image is actually loaded,
    which can be some time after the configuration is selected.
+
+   For ``filesystem``-type images that carry a ``dm-verity`` child node and
+   are being used to launch Linux, the bootloader *may* omit loading the
+   image into RAM and skip this hash check entirely. Instead, the bootloader
+   shall derive kernel command-line parameters from the ``dm-verity`` node as
+   described in :ref:`verity-usage`, delegating integrity verification to the
+   kernel's dm-verity target at mount time.
 
 If any step fails, the configuration must be rejected.
 
@@ -122,8 +133,10 @@ contains:
 - each image node referenced by the configuration
   (e.g. ``/images/kernel``, ``/images/fdt-1``),
 - the hash sub-nodes of those image nodes
-  (e.g. ``/images/kernel/hash-1``, ``/images/fdt-1/hash-1``), and
-- any cipher sub-nodes of those image nodes (e.g. ``/images/kernel/cipher-1``).
+  (e.g. ``/images/kernel/hash-1``, ``/images/fdt-1/hash-1``),
+- any cipher sub-nodes of those image nodes (e.g. ``/images/kernel/cipher-1``), and
+- the ``dm-verity`` sub-node of any ``filesystem``-type image node that carries one
+  (e.g. ``/images/rootfs-1/dm-verity``).
 
 The signer walks the FDT structure block sequentially and includes or excludes
 each token according to the following rules:
