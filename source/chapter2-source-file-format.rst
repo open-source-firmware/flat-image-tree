@@ -92,6 +92,98 @@ It is often desirable to align each image to a block size or cache-line size
 :index:`aligned address` when reading the image data. The mkimage tool provides
 a `-B` argument to support this.
 
+.. index:: FDT header
+
+.. _FDTHeaderUsage:
+
+FDT header usage
+~~~~~~~~~~~~~~~~
+
+A FIT image is a valid FDT blob and therefore starts with the standard FDT
+header as defined by [dtspec]_::
+
+    struct fdt_header {
+        fdt32_t magic;              /* magic word FDT_MAGIC (0xd00dfeed) */
+        fdt32_t totalsize;          /* total size of DT block */
+        fdt32_t off_dt_struct;      /* offset to structure */
+        fdt32_t off_dt_strings;     /* offset to strings */
+        fdt32_t off_mem_rsvmap;     /* offset to memory reserve map */
+        fdt32_t version;            /* format version */
+        fdt32_t last_comp_version;  /* last compatible version */
+        fdt32_t boot_cpuid_phys;    /* repurposed: FIT flags */
+        fdt32_t size_dt_strings;    /* size of the strings block */
+        fdt32_t size_dt_struct;     /* size of the structure block */
+    };
+
+Only the first two fields (``magic`` and ``totalsize``) have traditionally been
+used by FIT consumers. The remaining structural fields (``off_dt_struct``,
+``off_dt_strings``, ``off_mem_rsvmap``, ``version``, ``last_comp_version``,
+``size_dt_strings``, ``size_dt_struct``) retain their standard FDT meaning and
+shall be set by the tooling that creates the FIT (e.g. dtc via mkimage).
+
+.. index:: FIT flags, boot_cpuid_phys
+
+.. _FITFlags:
+
+``boot_cpuid_phys`` — FIT flags
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``boot_cpuid_phys`` field at offset 28 in the FDT header has no meaningful
+use for FIT images: it identifies the physical boot CPU in a platform devicetree,
+which is irrelevant in the context of an image-packaging format. FIT therefore
+repurposes this field as **FIT flags** (``fit_flags``).
+
+The field is a big-endian 32-bit unsigned integer interpreted as a bitmask.
+Undefined bits are reserved and shall be set to zero by producers; consumers
+shall ignore bits they do not understand.
+
+.. tabularcolumns:: | p{1.5cm} p{3cm} p{10cm} |
+.. list-table:: FIT flags bits
+   :header-rows: 1
+   :widths: 5 20 75
+
+   * - Bit
+     - Name
+     - Meaning
+   * - 0
+     - ``FIT_FLAG_EXTERNAL_DATA``
+     - When set, the FIT image uses **only** external data (i.e. every image
+       node uses ``data-offset`` or ``data-position`` instead of ``data``).
+       A consumer may rely on this guarantee to load only the compact FDT
+       structure initially.
+
+       When clear, the consumer shall **not** draw any conclusion about the
+       data layout.  In particular, the image may still use external data
+       exclusively — many existing external-data images predate this flag and
+       are perfectly valid.  The consumer must inspect the image nodes
+       (``data`` vs. ``data-offset``/``data-position``) or use other methods
+       to determine the layout.
+   * - 1-31
+     - *Reserved*
+     - Reserved, shall be zero.
+
+A value of ``0x00000000`` indicates that the producer did not set any flags.
+This is the case for **all** images created before this specification change,
+regardless of whether they use embedded data, external data, or a mix of both.
+Such images are valid and conforming.  The relationship between the flag and
+the actual data layout is intentionally **asymmetric**:
+
+* Bit 0 **set** → the image is guaranteed to use only external data.
+* Bit 0 **clear** → no guarantee either way; the consumer shall fall back to
+  existing behaviour (e.g. inspecting ``totalsize`` or scanning image nodes for
+  ``data``/``data-offset`` properties).
+
+Producers (e.g. :index:`mkimage`) that create an external-data-only image
+should set bit 0.  Producers that create images with embedded data, or a mix
+of embedded and external data, shall leave bit 0 clear.  Older producers that
+are unaware of this flag will naturally leave the field at zero, which is the
+safe default.
+
+This mechanism allows a consumer to determine the data layout of a FIT by
+reading only the first 32 bytes of the image (the FDT header), without
+resorting to heuristics such as comparing ``totalsize`` against an arbitrary
+threshold.
+
 Root-node properties
 --------------------
 
