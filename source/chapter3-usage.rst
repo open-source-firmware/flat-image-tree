@@ -49,6 +49,17 @@ it is valid, then reads enough more bytes to bring in ``totalsize`` bytes
 a few KB of data, consisting just of the FIT metadata. Later, the bootloader can
 read more data from the FIT as it needs to load each image.
 
+The bootloader can inspect the ``fit_flags`` field in the FDT header
+(see :ref:`FITFlags`) to determine the data layout early.  If bit 0
+(``FIT_FLAG_EXTERNAL_DATA``) is set, the bootloader knows with certainty that
+the image uses only external data, so only the compact FDT structure needs to
+be loaded initially.
+
+If the flag is clear, no assumption can be made: the image may use embedded
+data, external data, or a mix — many valid external-data images predate this
+flag.  In that case the bootloader should fall back to other methods (e.g.
+inspecting ``totalsize`` or scanning image nodes) to determine the layout.
+
 Another case that sometimes comes up is loading images from a FIT into internal
 SRAM, which may be very limited. In that case it may be useful to align images
 on a storage-device's block boundary (see ``-B`` flag in :ref:`Externaldata`).
