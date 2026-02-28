@@ -163,6 +163,19 @@ in use.
 The fixups required depend on the OS and its expectations. The result is a
 devicetree slightly modified from the FIT version.
 
+When the root node of the FIT contains an ``install-uuid`` property, the
+bootloader should copy it into the OS devicetree as
+``/chosen/u-boot,fit-install-uuid``. This lets the running operating system
+determine which installed image - and which location on storage - it was
+booted from, which is particularly valuable for system-update agents that need
+to identify the active image before writing a new one.
+
+An all-zero ``install-uuid`` (16 bytes of ``0x00``) may be used as a
+placeholder at build time. Tooling that writes the FIT to persistent storage
+must replace an all-zero value with a freshly generated random UUID before the
+image is considered installed. Bootloaders should treat an all-zero
+``install-uuid`` as absent and not propagate it to the OS devicetree.
+
 Jump to the OS
 ~~~~~~~~~~~~~~
 

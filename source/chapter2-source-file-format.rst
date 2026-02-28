@@ -101,6 +101,7 @@ The root node of the FIT should have the following layout::
         |- description = "image description"
         |- timestamp = <12399321>
         |- #address-cells = <1>
+        |- install-uuid = [4e 30 74 52 65 41 4c 4c 92 72 61 6e 64 30 6d 21]
         |
         o images
         | |
@@ -115,11 +116,19 @@ The root node of the FIT should have the following layout::
           o conf-2 {...}
           ...
 
-Optional property
-~~~~~~~~~~~~~~~~~
+Optional properties
+~~~~~~~~~~~~~~~~~~~
 
 description
     Textual description of the FIT
+
+install-uuid
+    A 16-byte UUID (:RFC:`4122`) that uniquely identifies a particular
+    installation of this FIT image. Tooling should generate a fresh UUID each
+    time the image is written to persistent storage. UUIDv4 (random) is
+    recommended for systems that lack a reliable time source; UUIDv1
+    (time-based) may be used when an RTC or NTP-synchronized clock is
+    available.
 
 Mandatory property
 ~~~~~~~~~~~~~~~~~~
