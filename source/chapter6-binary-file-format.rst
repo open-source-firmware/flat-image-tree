@@ -27,6 +27,12 @@ needed it can be loaded from an external source.
 
 External FITs use 'data-offset' or 'data-position' instead of 'data'.
 
+When ``data-offset`` is used, the offset is relative to the end of the FDT blob,
+rounded up to a 4-byte boundary:
+``(fdt_header::totalsize + 3) & ~3``.
+The external data area starts at this aligned boundary,
+and all ``data-offset`` values are relative to it.
+
 The :index:`mkimage` tool can convert a FIT to use external data using the `-E`
 argument, optionally using `-p` to specific a fixed position.
 
