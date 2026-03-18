@@ -12,9 +12,9 @@
    license
    acknowledgements
    revhistory
-   chapter1-introduction
-   chapter2-source-file-format
-   chapter3-usage
+   chapter4-introduction
+   chapter5-source-file-format
+   chapter6-usage
    references
 
 ..
