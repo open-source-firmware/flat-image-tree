@@ -179,4 +179,241 @@ over the image's ``data`` property value only (i.e. the raw image content,
 not any FDT metadata). The algorithm is given by the hash node's ``algo``
 property and the resulting digest is stored in its ``value`` property.
 
+Worked example
+~~~~~~~~~~~~~~
+
+This section walks through a concrete FIT to show exactly which bytes are
+included in a configuration signature hash.
+
+Source
+^^^^^^
+
+Consider the following minimal FIT source::
+
+    / {
+        description = "Example FIT";
+        #address-cells = <1>;
+
+        images {
+            kernel {
+                data = /incbin/("vmlinuz");
+                type = "kernel";
+                arch = "arm64";
+                os = "linux";
+                compression = "none";
+                load = <0x40000000>;
+                entry = <0x40000000>;
+                hash-1 {
+                    algo = "sha256";
+                };
+            };
+            fdt-1 {
+                data = /incbin/("board.dtb");
+                type = "flat_dt";
+                arch = "arm64";
+                compression = "none";
+                hash-1 {
+                    algo = "sha256";
+                };
+            };
+        };
+        configurations {
+            default = "conf-1";
+            conf-1 {
+                description = "Boot Linux";
+                compatible = "vendor,board";
+                kernel = "kernel";
+                fdt = "fdt-1";
+                signature-1 {
+                    algo = "sha256,rsa2048";
+                    key-name-hint = "dev";
+                    sign-images = "kernel", "fdt";
+                };
+            };
+        };
+    };
+
+After signing
+^^^^^^^^^^^^^
+
+During signing, the signer adds a ``value`` property to each hash node
+containing the image digest, and adds ``value``, ``hashed-nodes``,
+``hashed-strings`` and other properties to the signature node. The
+resulting FIT looks like this::
+
+    / {
+        description = "Example FIT";
+        timestamp = <0x67d96bac>;
+        #address-cells = <1>;
+
+        images {
+            kernel {
+                data = <...kernel data...>;
+                type = "kernel";
+                arch = "arm64";
+                os = "linux";
+                compression = "none";
+                load = <0x40000000>;
+                entry = <0x40000000>;
+                hash-1 {
+                    algo = "sha256";
+                    value = <...32-byte SHA-256 digest of kernel data...>;
+                };
+            };
+            fdt-1 {
+                data = <...devicetree data...>;
+                type = "flat_dt";
+                arch = "arm64";
+                compression = "none";
+                hash-1 {
+                    algo = "sha256";
+                    value = <...32-byte SHA-256 digest of devicetree data...>;
+                };
+            };
+        };
+        configurations {
+            default = "conf-1";
+            conf-1 {
+                description = "Boot Linux";
+                compatible = "vendor,board";
+                kernel = "kernel";
+                fdt = "fdt-1";
+                signature-1 {
+                    algo = "sha256,rsa2048";
+                    key-name-hint = "dev";
+                    sign-images = "kernel", "fdt";
+                    value = <...256-byte RSA-2048 signature...>;
+                    hashed-nodes = "/", "/configurations/conf-1",
+                        "/images/kernel", "/images/kernel/hash-1",
+                        "/images/fdt-1", "/images/fdt-1/hash-1";
+                    hashed-strings = <0x00000000 0x000000d4>;
+                    timestamp = <0x67d96bac>;
+                    signer-name = "mkimage";
+                    signer-version = "2025.04-rc3";
+                };
+            };
+        };
+    };
+
+Node list
+^^^^^^^^^
+
+For the configuration signature ``/configurations/conf-1/signature-1``, the
+node list is:
+
+- ``/``
+- ``/configurations/conf-1``
+- ``/images/kernel``
+- ``/images/kernel/hash-1``
+- ``/images/fdt-1``
+- ``/images/fdt-1/hash-1``
+
+What is hashed
+^^^^^^^^^^^^^^
+
+The following shows the signed FIT with **bold** indicating the parts that are
+included in the configuration signature hash. Lines in normal weight are not
+hashed. Note that node braces (``{`` and ``}``) represent ``FDT_BEGIN_NODE``
+and ``FDT_END_NODE`` tokens respectively; these are included whenever the node
+or its parent is in the node list.
+
+.. parsed-literal::
+
+   **/ {**
+       **description = "Example FIT";**
+       **timestamp = <0x67d96bac>;**
+       **#address-cells = <1>;**
+
+       **images {**
+           **kernel {**
+               data = <...kernel data...>;
+               **type = "kernel";**
+               **arch = "arm64";**
+               **os = "linux";**
+               **compression = "none";**
+               **load = <0x40000000>;**
+               **entry = <0x40000000>;**
+               **hash-1 {**
+                   **algo = "sha256";**
+                   **value = <...32-byte SHA-256 digest...>;**
+               **};**
+           **};**
+           **fdt-1 {**
+               data = <...devicetree data...>;
+               **type = "flat_dt";**
+               **arch = "arm64";**
+               **compression = "none";**
+               **hash-1 {**
+                   **algo = "sha256";**
+                   **value = <...32-byte SHA-256 digest...>;**
+               **};**
+           **};**
+       **};**
+       **configurations {**
+           default = "conf-1";
+           **conf-1 {**
+               **description = "Boot Linux";**
+               **compatible = "vendor,board";**
+               **kernel = "kernel";**
+               **fdt = "fdt-1";**
+               **signature-1 {**
+                   algo = "sha256,rsa2048";
+                   key-name-hint = "dev";
+                   sign-images = "kernel", "fdt";
+                   value = <...256-byte RSA-2048 signature...>;
+                   hashed-nodes = "/", "/configurations/conf-1", ...;
+                   hashed-strings = <0x00000000 0x000000d4>;
+                   timestamp = <0x67d96bac>;
+                   signer-name = "mkimage";
+                   signer-version = "2025.04-rc3";
+               **};**
+           **};**
+       **};**
+   **};**
+
+   Strings block:
+   **description\\0**
+   **timestamp\\0**
+   **#address-cells\\0**
+   **type\\0**
+   **arch\\0**
+   **os\\0**
+   **compression\\0**
+   **load\\0**
+   **entry\\0**
+   **algo\\0**
+   **value\\0**
+   **compatible\\0**
+   **kernel\\0**
+   **fdt\\0**
+   default\\0
+   padding\\0
+
+Key points to note:
+
+- The ``data`` properties of both image nodes are excluded since image-data
+  integrity is verified separately through the hash nodes.
+- The ``default`` property of the ``configurations`` node is not hashed because
+  that node is not in the node list (only its parent ``/`` is). This is safe
+  because the bootloader selects a configuration by its own logic, not by
+  trusting the default.
+- All properties of ``signature-1`` are excluded because that node is not in the
+  node list. Its braces are included because its parent ``conf-1`` is. This is
+  safe because the signature itself is verified against a trusted public key,
+  not by hashing.
+- The ``images`` and ``configurations`` nodes have no properties of their own,
+  but their braces are included because their parent ``/`` is in the node list.
+  This serves as a structural sanity check, ensuring that an attacker cannot
+  inject unexpected nodes into the tree without detection.
+- The strings-block region contains the property name strings referenced by the
+  hashed nodes. Although the string-table offset in each ``FDT_PROP`` token is
+  hashed, the string at that offset must also be protected; otherwise an
+  attacker could rename a property (e.g. changing ``algo`` to something
+  unrecognised) to trick the bootloader into skipping verification. The hashed
+  region should therefore always start at offset 0.
+
+The complete byte sequence (structure-block regions plus strings-block region)
+is hashed with SHA-256. The resulting digest is then signed with the RSA-2048
+private key to produce the signature ``value``.
+
 .. sectionauthor:: Simon Glass <sjg@chromium.org>
