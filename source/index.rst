@@ -15,6 +15,7 @@
    chapter4-introduction
    chapter5-source-file-format
    chapter6-usage
+   chapter7-security
    references
 
 ..
