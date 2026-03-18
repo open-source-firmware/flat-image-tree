@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v0.8-25-g1776470 documentation</title>
+    <title>Flattened Image Tree Specification v0.8-29-g4c59b97 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <script src="_static/documentation_options.js?v=c166502f"></script>
+    <script src="_static/documentation_options.js?v=89a06235"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="icon" href="_static/fit-favicon.png"/>
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v0.8-25-g1776470<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v0.8-29-g4c59b97<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><section id="copyright">
 <h2><span class="section-number">1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h2>
@@ -103,7 +103,7 @@ source tree.</p></td>
 </tbody>
 </table>
 </section>
-<span id="document-chapter1-introduction"></span><section id="introduction">
+<span id="document-chapter4-introduction"></span><section id="introduction">
 <span id="chapter-introduction"></span><h2><span class="section-number">4. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
 <section id="purpose-and-scope">
 <h3><span class="section-number">4.1. </span>Purpose and Scope<a class="headerlink" href="#purpose-and-scope" title="Link to this heading">¶</a></h3>
@@ -126,10 +126,10 @@ along with grouping and selection mechanisms.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#chapter-introduction"><span class="std std-numref">Chapter 4</span></a> introduces the purpose and
 background of FITSpec.</p></li>
-<li><p><a class="reference internal" href="#document-chapter2-source-file-format#chapter-source-file-format"><span class="std std-numref">Chapter 5</span></a> introduces the FIT concept
+<li><p><a class="reference internal" href="#document-chapter5-source-file-format#chapter-source-file-format"><span class="std std-numref">Chapter 5</span></a> introduces the FIT concept
 and describes its logical structure and standard properties.
 certain classes of devices and specific device types.</p></li>
-<li><p><a class="reference internal" href="#document-chapter3-usage#chapter-usage"><span class="std std-numref">Chapter 6</span></a> describes how FIT is used in bootloaders
+<li><p><a class="reference internal" href="#document-chapter6-usage#chapter-usage"><span class="std std-numref">Chapter 6</span></a> describes how FIT is used in bootloaders
 to handle booting Operating Systems as well as firmware.</p></li>
 </ul>
 <p><strong>Conventions Used in this Document</strong></p>
@@ -173,7 +173,7 @@ consumed by the DTC. See Appendix A Devicetree Source Format
 </dl>
 </section>
 </section>
-<span id="document-chapter2-source-file-format"></span><section id="flattened-image-tree-fit-format">
+<span id="document-chapter5-source-file-format"></span><section id="flattened-image-tree-fit-format">
 <span id="chapter-source-file-format"></span><h2><span class="section-number">5. </span>Flattened Image Tree (FIT) Format<a class="headerlink" href="#flattened-image-tree-fit-format" title="Link to this heading">¶</a></h2>
 <section id="introduction">
 <h3><span class="section-number">5.1. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h3>
@@ -1042,7 +1042,7 @@ enabled for this matching to work.</p>
 <dt>load-only</dt><dd><p>Indicates that this configuration does not necessarily contain an executable
 image, i.e. kernel or firmware. The configuration’s images may be loaded
 into memory for use by the executable image, which comes from another
-configuration or FIT. See see <a class="reference internal" href="#document-chapter3-usage#multi-step"><span class="std std-ref">Multi-step loading</span></a>.</p>
+configuration or FIT. See see <a class="reference internal" href="#document-chapter6-usage#multi-step"><span class="std std-ref">Multi-step loading</span></a>.</p>
 </dd>
 </dl>
 <p>The FDT blob is required to properly boot FDT-based kernel, so the minimal
@@ -1095,7 +1095,7 @@ if no value is provided we assume pkcs-1.5</p>
 </section>
 </section>
 </section>
-<span id="document-chapter3-usage"></span><section id="flattened-image-tree-fit-usage">
+<span id="document-chapter6-usage"></span><section id="flattened-image-tree-fit-usage">
 <span id="chapter-usage"></span><h2><span class="section-number">6. </span>Flattened Image Tree (FIT) Usage<a class="headerlink" href="#flattened-image-tree-fit-usage" title="Link to this heading">¶</a></h2>
 <section id="introduction">
 <h3><span class="section-number">6.1. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h3>
@@ -1126,7 +1126,7 @@ easiest approach.</p>
 <p>Where there are many configuration and several images, such that only a subset
 of the available images will actually be used on any one boot, it is inefficient
 to load the entire FIT, since most of the loaded data will not be used. In this
-case, an external-data FIT can be used. See <a class="reference internal" href="#document-chapter2-source-file-format#externaldata"><span class="std std-ref">External data</span></a>.</p>
+case, an external-data FIT can be used. See <a class="reference internal" href="#document-chapter5-source-file-format#externaldata"><span class="std std-ref">External data</span></a>.</p>
 <p>In this case, the bootloader reads the FDT header (say 64 bytes), checks that
 it is valid, then reads enough more bytes to bring in <code class="docutils literal notranslate"><span class="pre">totalsize</span></code> bytes
 (<code class="docutils literal notranslate"><span class="pre">totalsize</span></code> is the second 32-bit word in the header). Typically this will be
@@ -1134,7 +1134,7 @@ a few KB of data, consisting just of the FIT metadata. Later, the bootloader can
 read more data from the FIT as it needs to load each image.</p>
 <p>Another case that sometimes comes up is loading images from a FIT into internal
 SRAM, which may be very limited. In that case it may be useful to align images
-on a storage-device’s block boundary (see <code class="docutils literal notranslate"><span class="pre">-B</span></code> flag in <a class="reference internal" href="#document-chapter2-source-file-format#externaldata"><span class="std std-ref">External data</span></a>).
+on a storage-device’s block boundary (see <code class="docutils literal notranslate"><span class="pre">-B</span></code> flag in <a class="reference internal" href="#document-chapter5-source-file-format#externaldata"><span class="std std-ref">External data</span></a>).
 The bootloader can then avoid needing bounce buffers and other complications.</p>
 </section>
 <section id="select-a-configuration-to-boot">
@@ -1216,7 +1216,7 @@ a ramdisk (or initrd) which provides an initial root disk for the OS to use,
 before it is able to access the real root disk.</p>
 <p>The bootloader reads each image from the FIT and ‘loads’ it to the correct
 address. This address may be provided by the image’s <code class="docutils literal notranslate"><span class="pre">load</span></code> property
-(see <a class="reference internal" href="#document-chapter2-source-file-format#prop-load"><span class="std std-ref">load</span></a>), but if not provided, the bootloader can load it to any
+(see <a class="reference internal" href="#document-chapter5-source-file-format#prop-load"><span class="std std-ref">load</span></a>), but if not provided, the bootloader can load it to any
 suitable address. In some cases it may be possible to avoid loading the image
 and just refer to the image data within the FIT itself.</p>
 </section>
@@ -1243,7 +1243,7 @@ purpose.</p>
 <h3><span class="section-number">6.3. </span>Firmware usage<a class="headerlink" href="#firmware-usage" title="Link to this heading">¶</a></h3>
 <p>As firmware has become more complex, with multiple binaries loaded at each
 phase of the boot, it has become common to use FIT to load firmware.</p>
-<p>In this case, there is the concept of a boot phase (see <a class="reference internal" href="#document-chapter2-source-file-format#prop-phase"><span class="std std-ref">phase</span></a>),
+<p>In this case, there is the concept of a boot phase (see <a class="reference internal" href="#document-chapter5-source-file-format#prop-phase"><span class="std std-ref">phase</span></a>),
 indicating which phase each image is for.</p>
 <p>In this case the bootloader itself is likely split into multiple phases. For
 U-Boot, a common approach is for SPL (Secondary Program Loader) to load U-Boot
@@ -1273,7 +1273,7 @@ would become very large. A middle path could be that the hardware vendor
 provides a FIT on a boot partition, containing devicetrees for hardware
 supported by that vendor. Then the bootloader can load that FIT to get just the
 devicetree, followed by the main FIT to load the OS.</p>
-<p>To enable this last case, add a <a class="reference internal" href="#document-chapter2-source-file-format#load-only"><span class="std std-ref">load-only</span></a> property to the configuration.
+<p>To enable this last case, add a <a class="reference internal" href="#document-chapter5-source-file-format#load-only"><span class="std std-ref">load-only</span></a> property to the configuration.
 This signals to the bootloader that it should not require an executable (i.e.
 kernel or firmware), nor should it try to boot with this configuration. Booting
 then becomes a two-step process: load one FIT to obtain the devicetree, then
@@ -1307,8 +1307,11 @@ that implementors should follow the following behaviour:</p>
 </tbody>
 </table>
 </section>
-<section id="security">
-<h3><span class="section-number">6.5. </span>Security<a class="headerlink" href="#security" title="Link to this heading">¶</a></h3>
+</section>
+<span id="document-chapter7-security"></span><section id="security">
+<span id="chapter-security"></span><h2><span class="section-number">7. </span>Security<a class="headerlink" href="#security" title="Link to this heading">¶</a></h2>
+<section id="introduction">
+<h3><span class="section-number">7.1. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h3>
 <p>FIT has robust security features. When enabled, each FIT configuration has
 one or more signatures. These protect the configuration and the images it
 refers to. The bootloader must check the signatures against a public key which
@@ -1322,9 +1325,374 @@ checked against the hash in the FIT.</p>
 The mechanism is also widely covered in conference talks, some of which are
 listed at <a class="reference external" href="https://elinux.org/Boot_Loaders#U-Boot">elinux.org</a>.</p>
 </section>
+<section id="architecture">
+<h3><span class="section-number">7.2. </span>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h3>
+<p>FIT security uses a two-level scheme: image hashing and configuration signing.</p>
+<section id="image-hashing">
+<h4><span class="section-number">7.2.1. </span>Image hashing<a class="headerlink" href="#image-hashing" title="Link to this heading">¶</a></h4>
+<p>Each image node contains one or more hash sub-nodes. Each hash sub-node holds
+the algorithm name (e.g. <code class="docutils literal notranslate"><span class="pre">sha256</span></code>) and the resulting digest of the image
+data. The hash covers the image content only, so the loader can verify that the
+image data has not been modified after the hash was computed.</p>
+<p>Hashing alone does not provide authentication, since an attacker who can modify
+the image data can also replace the hash. Authentication comes from the
+configuration signature, described next.</p>
+</section>
+<section id="configuration-signing">
+<h4><span class="section-number">7.2.2. </span>Configuration signing<a class="headerlink" href="#configuration-signing" title="Link to this heading">¶</a></h4>
+<p>Each configuration node may contain one or more signature sub-nodes. A
+configuration signature covers:</p>
+<ul class="simple">
+<li><p>the configuration node itself (including its references to images),</p></li>
+<li><p>each image node referenced by the configuration,</p></li>
+<li><p>the hash sub-nodes of those images, and</p></li>
+<li><p>the root (<code class="docutils literal notranslate"><span class="pre">/</span></code>) node of the FIT.</p></li>
+</ul>
+<p>Because the signature covers the hash sub-nodes, the image data is
+transitively protected: any change to the image data invalidates the hash,
+and any change to the hash invalidates the configuration signature.</p>
+<p>This design means that image data is protected without being directly included
+in the configuration signature. The <code class="docutils literal notranslate"><span class="pre">data</span></code> property (and related properties
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code>, <code class="docutils literal notranslate"><span class="pre">data-position</span></code> and <code class="docutils literal notranslate"><span class="pre">data-offset</span></code>) of image nodes are
+explicitly excluded from the signed region, since image-data integrity is already
+guaranteed by the image hash.</p>
+<p>This two-level design has an important consequence: the same image can appear
+in multiple configurations, each with its own signature, without duplicating
+the image data or requiring it to be signed multiple times.</p>
+</section>
+<section id="configuration-signing-compared-to-image-signing">
+<h4><span class="section-number">7.2.3. </span>Configuration signing compared to image signing<a class="headerlink" href="#configuration-signing-compared-to-image-signing" title="Link to this heading">¶</a></h4>
+<p>Signing each image independently is vulnerable to a mix-and-match attack, where
+an attacker combines legitimately signed images into a configuration that was
+never intended. For example, an attacker could pair a signed kernel with a
+different signed devicetree to change the system’s behaviour, even though both
+images carry valid signatures.</p>
+<p>Configuration signing prevents this, because the signature binds a specific
+set of images together. A loader that verifies the configuration signature
+knows that this exact combination of images was approved by the signer.</p>
+</section>
+<section id="verification-procedure">
+<h4><span class="section-number">7.2.4. </span>Verification procedure<a class="headerlink" href="#verification-procedure" title="Link to this heading">¶</a></h4>
+<p>The bootloader verifies a configuration as follows:</p>
+<ol class="arabic simple">
+<li><p>Locate the configuration’s signature node and verify the signature against
+a trusted public key.</p></li>
+<li><p>The signature covers certain FDT nodes and a region of the string table
+(see <a class="reference internal" href="#hash-contents"><span class="std std-ref">Hash contents</span></a> below). Rebuild the list of nodes that should
+have been signed (the root node, the configuration node, each referenced
+image node and its hash sub-nodes) and verify that the hash of those nodes
+matches the signature.</p></li>
+<li><p>For each image referenced by the configuration, compute the hash of the
+image data and compare it against the <code class="docutils literal notranslate"><span class="pre">value</span></code> in the image’s hash
+sub-node. This step may be deferred until the image is actually loaded,
+which can be some time after the configuration is selected.</p></li>
+</ol>
+<p>If any step fails, the configuration must be rejected.</p>
+</section>
+</section>
+<section id="hash-contents">
+<span id="id1"></span><h3><span class="section-number">7.3. </span>Hash contents<a class="headerlink" href="#hash-contents" title="Link to this heading">¶</a></h3>
+<p>This section defines exactly which bytes are included when computing the hash
+for a signature. A FIT is a flattened devicetree (FDT), so the hash operates
+on the FDT binary structure as defined in the Devicetree Specification
+<a class="reference internal" href="#document-references#dtspec" id="id2"><span>[dtspec]</span></a>.</p>
+<p>The input to the hash is the concatenation of two regions: a set of nodes from
+the FDT structure block, followed by a region of the FDT strings block.</p>
+<section id="structure-block">
+<h4><span class="section-number">7.3.1. </span>Structure block<a class="headerlink" href="#structure-block" title="Link to this heading">¶</a></h4>
+<p>The signer and verifier each construct a <strong>node list</strong>: the set of FDT nodes
+whose content is included in the hash. For a configuration signature this list
+contains:</p>
+<ul class="simple">
+<li><p>the root (<code class="docutils literal notranslate"><span class="pre">/</span></code>) node,</p></li>
+<li><p>the configuration node (e.g. <code class="docutils literal notranslate"><span class="pre">/configurations/conf-1</span></code>),</p></li>
+<li><p>each image node referenced by the configuration
+(e.g. <code class="docutils literal notranslate"><span class="pre">/images/kernel</span></code>, <code class="docutils literal notranslate"><span class="pre">/images/fdt-1</span></code>),</p></li>
+<li><p>the hash sub-nodes of those image nodes
+(e.g. <code class="docutils literal notranslate"><span class="pre">/images/kernel/hash-1</span></code>, <code class="docutils literal notranslate"><span class="pre">/images/fdt-1/hash-1</span></code>), and</p></li>
+<li><p>any cipher sub-nodes of those image nodes (e.g. <code class="docutils literal notranslate"><span class="pre">/images/kernel/cipher-1</span></code>).</p></li>
+</ul>
+<p>The signer walks the FDT structure block sequentially and includes or excludes
+each token according to the following rules:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code></dt><dd><p>The token and the node’s unit name are included if the node or its parent
+is in the node list.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code></dt><dd><p>Included under the same condition as <code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_PROP</span></code></dt><dd><p>The token, the property length word, the string-table offset word, and the
+property data are all included if the containing node is in the node list
+<strong>and</strong> the property name is not one of the excluded properties: <code class="docutils literal notranslate"><span class="pre">data</span></code>,
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code>, <code class="docutils literal notranslate"><span class="pre">data-position</span></code> and <code class="docutils literal notranslate"><span class="pre">data-offset</span></code>. These are excluded
+because image-data integrity is covered by image hashes instead.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_NOP</span></code></dt><dd><p>Included if the containing node is in the node list.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_END</span></code></dt><dd><p>Always included.</p>
+</dd>
+</dl>
+<p>Note that the “or its parent” condition in the <code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code> and
+<code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code> rules means that sub-nodes of listed nodes contribute their
+structural tokens to the hash, even though they are not themselves in the node
+list. For example, the signature sub-nodes of the configuration node have their
+<code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code> and <code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code> tokens included, but their properties
+are excluded (since <code class="docutils literal notranslate"><span class="pre">FDT_PROP</span></code> requires the node itself to be in the list).</p>
+<p>All included bytes are fed into the hash in the order they appear in the
+structure block. Padding bytes that are part of the FDT token alignment are
+included as they appear.</p>
+</section>
+<section id="strings-block">
+<h4><span class="section-number">7.3.2. </span>Strings block<a class="headerlink" href="#strings-block" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">hashed-strings</span></code> property in the signature node records the start offset
+and size of the region of the FDT strings block that is hashed. The start is
+normally 0 (the beginning of the strings block). Only property names that
+are referenced by the signed nodes need to appear in this region; the signer
+must ensure that the region is large enough to cover them.</p>
+<p>After hashing the structure-block regions, the hash algorithm continues with
+the strings-block region to produce the final digest.</p>
+</section>
+<section id="id3">
+<h4><span class="section-number">7.3.3. </span>Image hashing<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p>For image hash nodes (<code class="docutils literal notranslate"><span class="pre">/images/image-name/hash-1</span></code>), the hash is computed
+over the image’s <code class="docutils literal notranslate"><span class="pre">data</span></code> property value only (i.e. the raw image content,
+not any FDT metadata). The algorithm is given by the hash node’s <code class="docutils literal notranslate"><span class="pre">algo</span></code>
+property and the resulting digest is stored in its <code class="docutils literal notranslate"><span class="pre">value</span></code> property.</p>
+</section>
+<section id="worked-example">
+<h4><span class="section-number">7.3.4. </span>Worked example<a class="headerlink" href="#worked-example" title="Link to this heading">¶</a></h4>
+<p>This section walks through a concrete FIT to show exactly which bytes are
+included in a configuration signature hash.</p>
+<section id="source">
+<h5><span class="section-number">7.3.4.1. </span>Source<a class="headerlink" href="#source" title="Link to this heading">¶</a></h5>
+<p>Consider the following minimal FIT source:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/ {
+    description = &quot;Example FIT&quot;;
+    #address-cells = &lt;1&gt;;
+
+    images {
+        kernel {
+            data = /incbin/(&quot;vmlinuz&quot;);
+            type = &quot;kernel&quot;;
+            arch = &quot;arm64&quot;;
+            os = &quot;linux&quot;;
+            compression = &quot;none&quot;;
+            load = &lt;0x40000000&gt;;
+            entry = &lt;0x40000000&gt;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+            };
+        };
+        fdt-1 {
+            data = /incbin/(&quot;board.dtb&quot;);
+            type = &quot;flat_dt&quot;;
+            arch = &quot;arm64&quot;;
+            compression = &quot;none&quot;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+            };
+        };
+    };
+    configurations {
+        default = &quot;conf-1&quot;;
+        conf-1 {
+            description = &quot;Boot Linux&quot;;
+            compatible = &quot;vendor,board&quot;;
+            kernel = &quot;kernel&quot;;
+            fdt = &quot;fdt-1&quot;;
+            signature-1 {
+                algo = &quot;sha256,rsa2048&quot;;
+                key-name-hint = &quot;dev&quot;;
+                sign-images = &quot;kernel&quot;, &quot;fdt&quot;;
+            };
+        };
+    };
+};
+</pre></div>
+</div>
+</section>
+<section id="after-signing">
+<h5><span class="section-number">7.3.4.2. </span>After signing<a class="headerlink" href="#after-signing" title="Link to this heading">¶</a></h5>
+<p>During signing, the signer adds a <code class="docutils literal notranslate"><span class="pre">value</span></code> property to each hash node
+containing the image digest, and adds <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">hashed-nodes</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hashed-strings</span></code> and other properties to the signature node. The
+resulting FIT looks like this:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/ {
+    description = &quot;Example FIT&quot;;
+    timestamp = &lt;0x67d96bac&gt;;
+    #address-cells = &lt;1&gt;;
+
+    images {
+        kernel {
+            data = &lt;...kernel data...&gt;;
+            type = &quot;kernel&quot;;
+            arch = &quot;arm64&quot;;
+            os = &quot;linux&quot;;
+            compression = &quot;none&quot;;
+            load = &lt;0x40000000&gt;;
+            entry = &lt;0x40000000&gt;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+                value = &lt;...32-byte SHA-256 digest of kernel data...&gt;;
+            };
+        };
+        fdt-1 {
+            data = &lt;...devicetree data...&gt;;
+            type = &quot;flat_dt&quot;;
+            arch = &quot;arm64&quot;;
+            compression = &quot;none&quot;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+                value = &lt;...32-byte SHA-256 digest of devicetree data...&gt;;
+            };
+        };
+    };
+    configurations {
+        default = &quot;conf-1&quot;;
+        conf-1 {
+            description = &quot;Boot Linux&quot;;
+            compatible = &quot;vendor,board&quot;;
+            kernel = &quot;kernel&quot;;
+            fdt = &quot;fdt-1&quot;;
+            signature-1 {
+                algo = &quot;sha256,rsa2048&quot;;
+                key-name-hint = &quot;dev&quot;;
+                sign-images = &quot;kernel&quot;, &quot;fdt&quot;;
+                value = &lt;...256-byte RSA-2048 signature...&gt;;
+                hashed-nodes = &quot;/&quot;, &quot;/configurations/conf-1&quot;,
+                    &quot;/images/kernel&quot;, &quot;/images/kernel/hash-1&quot;,
+                    &quot;/images/fdt-1&quot;, &quot;/images/fdt-1/hash-1&quot;;
+                hashed-strings = &lt;0x00000000 0x000000d4&gt;;
+                timestamp = &lt;0x67d96bac&gt;;
+                signer-name = &quot;mkimage&quot;;
+                signer-version = &quot;2025.04-rc3&quot;;
+            };
+        };
+    };
+};
+</pre></div>
+</div>
+</section>
+<section id="node-list">
+<h5><span class="section-number">7.3.4.3. </span>Node list<a class="headerlink" href="#node-list" title="Link to this heading">¶</a></h5>
+<p>For the configuration signature <code class="docutils literal notranslate"><span class="pre">/configurations/conf-1/signature-1</span></code>, the
+node list is:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/configurations/conf-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/kernel</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/kernel/hash-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/fdt-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/fdt-1/hash-1</span></code></p></li>
+</ul>
+</section>
+<section id="what-is-hashed">
+<h5><span class="section-number">7.3.4.4. </span>What is hashed<a class="headerlink" href="#what-is-hashed" title="Link to this heading">¶</a></h5>
+<p>The following shows the signed FIT with <strong>bold</strong> indicating the parts that are
+included in the configuration signature hash. Lines in normal weight are not
+hashed. Note that node braces (<code class="docutils literal notranslate"><span class="pre">{</span></code> and <code class="docutils literal notranslate"><span class="pre">}</span></code>) represent <code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code>
+and <code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code> tokens respectively; these are included whenever the node
+or its parent is in the node list.</p>
+<pre class="literal-block"><strong>/ {</strong>
+    <strong>description = &quot;Example FIT&quot;;</strong>
+    <strong>timestamp = &lt;0x67d96bac&gt;;</strong>
+    <strong>#address-cells = &lt;1&gt;;</strong>
+
+    <strong>images {</strong>
+        <strong>kernel {</strong>
+            data = &lt;...kernel data...&gt;;
+            <strong>type = &quot;kernel&quot;;</strong>
+            <strong>arch = &quot;arm64&quot;;</strong>
+            <strong>os = &quot;linux&quot;;</strong>
+            <strong>compression = &quot;none&quot;;</strong>
+            <strong>load = &lt;0x40000000&gt;;</strong>
+            <strong>entry = &lt;0x40000000&gt;;</strong>
+            <strong>hash-1 {</strong>
+                <strong>algo = &quot;sha256&quot;;</strong>
+                <strong>value = &lt;...32-byte SHA-256 digest...&gt;;</strong>
+            <strong>};</strong>
+        <strong>};</strong>
+        <strong>fdt-1 {</strong>
+            data = &lt;...devicetree data...&gt;;
+            <strong>type = &quot;flat_dt&quot;;</strong>
+            <strong>arch = &quot;arm64&quot;;</strong>
+            <strong>compression = &quot;none&quot;;</strong>
+            <strong>hash-1 {</strong>
+                <strong>algo = &quot;sha256&quot;;</strong>
+                <strong>value = &lt;...32-byte SHA-256 digest...&gt;;</strong>
+            <strong>};</strong>
+        <strong>};</strong>
+    <strong>};</strong>
+    <strong>configurations {</strong>
+        default = &quot;conf-1&quot;;
+        <strong>conf-1 {</strong>
+            <strong>description = &quot;Boot Linux&quot;;</strong>
+            <strong>compatible = &quot;vendor,board&quot;;</strong>
+            <strong>kernel = &quot;kernel&quot;;</strong>
+            <strong>fdt = &quot;fdt-1&quot;;</strong>
+            <strong>signature-1 {</strong>
+                algo = &quot;sha256,rsa2048&quot;;
+                key-name-hint = &quot;dev&quot;;
+                sign-images = &quot;kernel&quot;, &quot;fdt&quot;;
+                value = &lt;...256-byte RSA-2048 signature...&gt;;
+                hashed-nodes = &quot;/&quot;, &quot;/configurations/conf-1&quot;, ...;
+                hashed-strings = &lt;0x00000000 0x000000d4&gt;;
+                timestamp = &lt;0x67d96bac&gt;;
+                signer-name = &quot;mkimage&quot;;
+                signer-version = &quot;2025.04-rc3&quot;;
+            <strong>};</strong>
+        <strong>};</strong>
+    <strong>};</strong>
+<strong>};</strong>
+
+Strings block:
+<strong>description\0</strong>
+<strong>timestamp\0</strong>
+<strong>#address-cells\0</strong>
+<strong>type\0</strong>
+<strong>arch\0</strong>
+<strong>os\0</strong>
+<strong>compression\0</strong>
+<strong>load\0</strong>
+<strong>entry\0</strong>
+<strong>algo\0</strong>
+<strong>value\0</strong>
+<strong>compatible\0</strong>
+<strong>kernel\0</strong>
+<strong>fdt\0</strong>
+default\0
+padding\0</pre>
+<p>Key points to note:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">data</span></code> properties of both image nodes are excluded since image-data
+integrity is verified separately through the hash nodes.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">default</span></code> property of the <code class="docutils literal notranslate"><span class="pre">configurations</span></code> node is not hashed because
+that node is not in the node list (only its parent <code class="docutils literal notranslate"><span class="pre">/</span></code> is). This is safe
+because the bootloader selects a configuration by its own logic, not by
+trusting the default.</p></li>
+<li><p>All properties of <code class="docutils literal notranslate"><span class="pre">signature-1</span></code> are excluded because that node is not in the
+node list. Its braces are included because its parent <code class="docutils literal notranslate"><span class="pre">conf-1</span></code> is. This is
+safe because the signature itself is verified against a trusted public key,
+not by hashing.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">images</span></code> and <code class="docutils literal notranslate"><span class="pre">configurations</span></code> nodes have no properties of their own,
+but their braces are included because their parent <code class="docutils literal notranslate"><span class="pre">/</span></code> is in the node list.
+This serves as a structural sanity check, ensuring that an attacker cannot
+inject unexpected nodes into the tree without detection.</p></li>
+<li><p>The strings-block region contains the property name strings referenced by the
+hashed nodes. Although the string-table offset in each <code class="docutils literal notranslate"><span class="pre">FDT_PROP</span></code> token is
+hashed, the string at that offset must also be protected; otherwise an
+attacker could rename a property (e.g. changing <code class="docutils literal notranslate"><span class="pre">algo</span></code> to something
+unrecognised) to trick the bootloader into skipping verification. The hashed
+region should therefore always start at offset 0.</p></li>
+</ul>
+<p>The complete byte sequence (structure-block regions plus strings-block region)
+is hashed with SHA-256. The resulting digest is then signed with the RSA-2048
+private key to produce the signature <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+</section>
+</section>
+</section>
 </section>
 <span id="document-references"></span><section id="references">
-<h2><span class="section-number">7. </span>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<h2><span class="section-number">8. </span>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div role="list" class="citation-list">
 <div class="citation" id="dtspec" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>dtspec<span class="fn-bracket">]</span></span>
@@ -1372,10 +1740,11 @@ listed at <a class="reference external" href="https://elinux.org/Boot_Loaders#U-
 <li class="toctree-l1"><a class="reference internal" href="#document-license">1. Copyright</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#document-acknowledgements">2. Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#document-revhistory">3. Revision History</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#document-chapter1-introduction">4. Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#document-chapter2-source-file-format">5. Flattened Image Tree (FIT) Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#document-chapter3-usage">6. Flattened Image Tree (FIT) Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#document-references">7. References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter4-introduction">4. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter5-source-file-format">5. Flattened Image Tree (FIT) Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter6-usage">6. Flattened Image Tree (FIT) Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter7-security">7. Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-references">8. References</a></li>
 </ul>
 
 <div class="relations">
