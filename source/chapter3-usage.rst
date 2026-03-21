@@ -252,4 +252,103 @@ For more information on FIT security, see
 The mechanism is also widely covered in conference talks, some of which are
 listed at `elinux.org <https://elinux.org/Boot_Loaders#U-Boot>`_.
 
+.. _certificate_chain_validation:
+
+Certificate chain validation
+----------------------------
+
+FIT supports certificate chain validation as an alternative to direct public
+key verification.
+This enables a chain-of-trust model similar to Authenticode with UEFI Secure
+Boot.
+
+When the signature's ``format`` property is ``pkcs7``, the ``value`` property
+contains a PKCS#7/CMS SignedData structure (as used by Authenticode).
+The certificate chain is embedded within the SignedData.
+
+Validation proceeds as follows:
+
+#. Parse the PKCS#7 SignedData structure from the ``value`` property
+#. Extract the signing certificate and any intermediate certificates
+#. Verify the signature using the signing certificate's public key
+#. Walk the certificate chain, verifying each certificate's signature against
+   its issuer's public key
+#. Verify the root certificate is trusted by checking its hash against the
+   bootloader's trust store
+#. Verify each certificate's validity period (NotBefore/NotAfter) against
+   the current time, if a reliable time source is available
+#. Verify each certificate includes the Code Signing Extended Key Usage (EKU)
+   extension (OID ``1.3.6.1.5.5.7.3.3``)
+#. Check the signature's ``generation`` property against the bootloader's
+   minimum acceptable generation (see :ref:`certificate_revocation`)
+
+If any step fails, the signature must be rejected.
+
+This format enables compatibility with existing Authenticode tooling and
+workflows.
+
+Trust anchors
+~~~~~~~~~~~~~
+
+The bootloader stores trusted root CA certificate hashes in the same secure
+storage used for direct public keys (e.g., UEFI secure variables or U-Boot's
+control FDT). A root certificate is trusted if its SHA-256 hash matches one in
+the trust store.
+
+Extended Key Usage
+~~~~~~~~~~~~~~~~~~
+
+Certificates used for FIT signing must include the Code Signing EKU extension
+(OID ``1.3.6.1.5.5.7.3.3``, id-kp-codeSigning).
+This is the same OID used by Authenticode and UEFI Secure Boot.
+It prevents certificates issued for other purposes (e.g., TLS, email) from
+being misused to sign firmware images.
+
+Intermediate CA certificates in the chain should include the
+``anyExtendedKeyUsage`` OID or the Code Signing OID.
+
+.. _certificate_revocation:
+
+Certificate revocation
+----------------------
+
+FIT uses generation-based revocation for simplicity.
+
+The signature node includes:
+
+- ``compatible``: identifies the signing authority (e.g.,
+  ``"vendor,product-signing"``)
+- ``generation``: integer generation number
+
+The bootloader maintains a minimum acceptable generation per ``compatible``
+value in secure storage.
+This allows different signing authorities to manage revocation independently;
+one vendor can revoke old signatures without affecting another vendor's
+signatures.
+
+During validation, the bootloader:
+
+#. Looks up the minimum generation for the signature's ``compatible`` value
+#. Rejects the signature if its ``generation`` is less than the stored minimum
+
+To revoke, the system administrator increments the minimum generation for a
+specific ``compatible`` value in the bootloader's secure storage;
+all signatures with that ``compatible`` and lower generation numbers become
+invalid.
+
+This approach has several advantages:
+
+- Simple to implement (integer comparison per signing authority)
+- No need to track individual revoked certificate serial numbers
+- No network access required (unlike OCSP)
+- Deterministic and fast
+- Multiple signing authorities can coexist
+
+To revoke and re-issue:
+
+#. Issue new signatures with a higher generation number
+#. Update the FIT with new signatures
+#. Increment the bootloader's minimum generation for that ``compatible`` value
+#. All older signatures from that authority are now rejected
+
 .. sectionauthor:: Simon Glass <sjg@chromium.org>
