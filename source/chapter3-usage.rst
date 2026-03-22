@@ -252,4 +252,61 @@ For more information on FIT security, see
 The mechanism is also widely covered in conference talks, some of which are
 listed at `elinux.org <https://elinux.org/Boot_Loaders#U-Boot>`_.
 
+.. _measured_boot:
+
+Measured boot
+-------------
+
+FIT supports measured boot through integration with a Trusted Platform Module
+(TPM).
+When enabled, the bootloader extends a PCR with measurements of each image
+before loading it.
+This creates a cryptographic record of what was booted,
+enabling attestation and TPM-sealed secrets.
+
+Measurement algorithm
+~~~~~~~~~~~~~~~~~~~~~
+
+Images are measured in the following order:
+
+#. kernel or firmware
+#. ramdisk (if present)
+#. loadables (each image, in the order specified)
+#. fdt (each blob and overlay, in the order specified)
+#. cmdline (if present in the configuration)
+
+For each item, the measurement is performed as::
+
+    PCR = hash(PCR || hash(data))
+
+Where:
+
+- ``PCR`` is the current PCR value (initially all zeros if the PCR was reset)
+- ``hash`` is the TPM bank's hash algorithm (e.g., SHA-256)
+- ``data`` is the raw image data, after any decompression
+
+Only the image data is measured, not metadata such as load addresses,
+compression type, or image descriptions.
+For cmdline, the UTF-8 encoded string value is measured directly.
+
+The signing tool can pre-calculate expected PCR values using this algorithm.
+These values may be stored in PCR-prediction nodes within the configuration.
+
+TPM policy binding
+~~~~~~~~~~~~~~~~~~
+
+Expected PCR values enable TPM policy binding.
+Secrets can be sealed to a TPM policy that requires specific PCR values.
+The secrets can only be unsealed when the measured boot produces the expected
+PCR state.
+
+This is useful for:
+
+- Encrypting disk encryption keys that are only released to authorised images
+- Protecting credentials that should only be available to verified boot chains
+- Remote attestation, where a third party verifies the boot state
+
+For interoperability, PCR 11 is recommended for FIT image measurements,
+following the convention established by Unified Kernel Images (UKI).
+
 .. sectionauthor:: Simon Glass <sjg@chromium.org>
