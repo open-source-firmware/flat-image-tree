@@ -192,6 +192,81 @@ before SPL), then TPL will only load images with a phase of "spl". This allows
 all images to be provided in a single FIT, with each phase pulling out what is
 needed as the boot proceeds.
 
+Variant images
+--------------
+
+Some platforms require multiple versions of the same firmware component, where
+only one version is loaded at runtime based on platform-specific criteria. A
+common example is security-state-dependent firmware: a device may ship with
+firmware stubs for different security levels (e.g. high-security, field-
+securable, general-purpose), but only one is appropriate for the detected
+hardware state.
+
+These images typically share the same load address, since they serve the same
+purpose and the hardware expects the firmware at a fixed location. This creates
+an apparent memory overlap in the FIT, but it is intentional because the images
+are mutually exclusive at runtime.
+
+To express this relationship, images can declare a ``variant`` property (see
+:ref:`prop_variant`). Images sharing the same variant value form a mutually
+exclusive group: at most one image from the group will be loaded during any
+given boot.
+
+Example::
+
+    images {
+        tifsstub-hs {
+            description = "TIFSSTUB for HS devices";
+            type = "firmware";
+            arch = "arm32";
+            compression = "none";
+            load = <0x9dc00000>;
+            entry = <0x9dc00000>;
+            variant = "tifsstub";
+        };
+        tifsstub-fs {
+            description = "TIFSSTUB for FS devices";
+            type = "firmware";
+            arch = "arm32";
+            compression = "none";
+            load = <0x9dc00000>;
+            entry = <0x9dc00000>;
+            variant = "tifsstub";
+        };
+        tifsstub-gp {
+            description = "TIFSSTUB for GP devices";
+            type = "firmware";
+            arch = "arm32";
+            compression = "none";
+            load = <0x9dc00000>;
+            entry = <0x9dc00000>;
+            variant = "tifsstub";
+        };
+    };
+
+    configurations {
+        conf-1 {
+            firmware = "atf";
+            loadables = "tee", "tifsstub-hs", "tifsstub-fs", "tifsstub-gp";
+            fdt = "fdt-1";
+        };
+    };
+
+The boot firmware is responsible for selecting the appropriate image from each
+variant group. This selection is platform-specific; for example, TI K3 platforms
+select based on the device's security state.
+
+Memory-overlap detection
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Tools that validate FIT images (such as ``mkimage``) may check for memory
+overlaps between images in a configuration. When images declare the same
+``variant`` value, overlap-detection tools should not report conflicts between
+them, since they are mutually exclusive by design.
+
+Genuine overlaps (images without a shared variant that would occupy the same
+memory simultaneously) remain errors and should be reported.
+
 .. _multi_step:
 
 Multi-step loading
