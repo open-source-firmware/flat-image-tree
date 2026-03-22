@@ -114,6 +114,12 @@ The root node of the FIT should have the following layout::
           o conf-1 {...}
           o conf-2 {...}
           ...
+        |
+        o generation
+          |
+          o product-1 {...}
+          o product-2 {...}
+          ...
 
 Optional property
 ~~~~~~~~~~~~~~~~~
@@ -147,6 +153,13 @@ Mandatory nodes
 :index:`configurations`
     Contains a set of available configuration nodes and
     defines a default configuration.
+
+Optional nodes
+~~~~~~~~~~~~~~
+
+:index:`generation`
+    Contains generation metadata for software components included in the FIT.
+    Used for revocation and security version tracking.
 
 
 '/images' node
@@ -516,6 +529,36 @@ padding
     The padding algorithm, it may be pkcs-1.5 or pss,
     if no value is provided we assume pkcs-1.5
 
+For RSA signing the following properties are added by the signer and are
+mandatory:
+
+rsa,num-bits
+    Number of bits used by the RSA key (e.g. 2048)
+
+rsa,modulus
+    Modulus (N) as a big-endian multi-word integer
+
+rsa,exponent
+    Public exponent (E) as a 64 bit unsigned integer
+
+rsa,r-squared
+    (2^num-bits)^2 as a big-endian multi-word integer
+
+rsa,n0-inverse
+    -1 / modulus[0] mod 2^32
+
+For ECDSA signing the following properties are added by the signer and are
+mandatory:
+
+ecdsa,curve
+    Name of ECDSA curve. Value values are "prime256v1" and "brainpool256"
+
+ecdsa,x-point
+    Public key X coordinate as a big-endian multi-word integer
+
+ecdsa,y-point
+    Public key Y coordinate as a big-endian multi-word integer
+
 
 '/configurations' node
 ----------------------
@@ -692,6 +735,189 @@ comment
 padding
     The padding algorithm, it may be pkcs-1.5 or pss,
     if no value is provided we assume pkcs-1.5
+
+
+'/generation' node
+------------------
+
+The optional 'generation' node contains metadata for software components
+included in the FIT, used for security-version tracking and revocation. This
+allows firmware and other boot components to enforce minimum security versions
+and reject FITs containing components with known vulnerabilities.
+
+Note that this information applies for the entire FIT, i.e. it should not be
+used if product version has been revoked.
+
+The 'generation' node has the following structure::
+
+    o generation
+        |- compatible = "fit,generation-v1"
+        |
+        o product-1 {...}
+        o product-2 {...}
+        ...
+        |
+        o signature-1 {...}
+        o signature-2 {...}
+        ...
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+compatible
+    Must be "fit,generation-v1" to identify the metadata-format version.
+
+Mandatory nodes
+~~~~~~~~~~~~~~~
+
+At least one product sub-node is required when the generation node is present.
+
+Optional nodes
+~~~~~~~~~~~~~~
+
+Signature sub-nodes
+    Each signature sub-node represents a separate signature calculated for the
+    generation metadata according to specified algorithm. This ensures the
+    integrity and authenticity of the generation information.
+
+Product nodes
+-------------
+
+Each product node represents a software component included in the FIT and has
+the following structure::
+
+    o product-name
+        |- product = "product identifier"
+        |- vendor = "vendor identifier"
+        |- generation = <generation_number>
+        |- version = "version string"
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+product
+    :index:`Product identifier` string. This identifies the specific software
+    component (e.g., "u-boot", "grub", "linux", "arm-trusted-firmware").
+    The product identifier should be consistent across versions for the same
+    software component.
+
+vendor
+    :index:`Vendor identifier` string identifying the organization or vendor
+    responsible for the product (e.g. "Free Software Foundation", "arm").
+
+generation
+    :index:`Generation number` as a 32-bit unsigned integer. This is a
+    monotonically increasing security version number used for revocation.
+    When security vulnerabilities are discovered, the generation number
+    is incremented to allow bootloaders to reject older, vulnerable versions.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+version
+    Human-readable version string for the product (e.g., "2024.07", "6.1.0").
+
+url
+    URL string providing additional information about the vendor or product.
+
+build-id
+    Build-specific identifier string for tracking specific builds.
+
+Examples
+~~~~~~~~
+
+Single product example::
+
+    generation {
+        compatible = "fit,generation-v1";
+
+        linux {
+            product = "linux";
+            generation = <8>;
+            version = "6.14.0";
+        };
+
+        signature-1 {
+            algo = "sha256,rsa2048";
+            key-name-hint = "generation-key";
+        };
+    };
+
+Multi-product example::
+
+    generation {
+        compatible = "fit,generation-v1";
+
+        u-boot {
+            product = "u-boot";
+            vendor = "denx";
+            generation = <12>;
+            version = "2024.07";
+            build-id = "2024.07-g1a2b3c4d";
+        };
+
+        atf {
+            product = "arm-trusted-firmware";
+            vendor = "arm";
+            generation = <4>;
+            version = "2.10";
+            url = "https://github.com/ARM-software/arm-trusted-firmware";
+        };
+
+        optee {
+            product = "optee";
+            vendor = "linaro";
+            generation = <2>;
+            version = "4.3.0";
+            url = "https://github.com/OP-TEE/optee_os";
+        };
+
+        signature-1 {
+            algo = "sha256,rsa2048";
+            key-name-hint = "generation-key";
+        };
+    };
+
+Usage
+~~~~~
+
+Boot components can use generation metadata to:
+
+1. Parse the generation node to extract product and generation information
+2. Compare against stored minimum generation requirements
+3. Reject FIT images where any product's generation falls below the minimum
+4. Allow boot only when all products meet generation requirements
+
+This mechanism provides defense against rollback attacks and ensures that
+known-vulnerable software versions cannot be loaded, similar to the Secure Boot
+Advanced Targeting (SBAT) mechanism used with UEFI.
+
+Generation-signature nodes
+--------------------------
+
+The generation nodes supports the same signature mechanisms as other FIT nodes.
+At least one must be present. Signature sub-nodes use the same format and
+properties as described in the `Configuration-signature nodes`_ section. The
+signature covers all product nodes within the generation node, ensuring the
+integrity of the generation metadata.
+
+Example generation signature::
+
+    o signature-1
+        |- algo = "sha256,rsa2048"
+        |- key-name-hint = "generation-key"
+        |- value = [signature value]
+        |- hashed-nodes = "/generation", "/generation/u-boot",
+              "/generation/atf", "/generation/optee"
+
+The signature ensures that:
+
+1. Generation numbers cannot be downgraded by an attacker
+2. Product information cannot be modified without detection
+3. The generation metadata comes from a trusted source
+
+Boot components should verify at least one of these signatures before using the
+metadata for revocation decisions.
 
 
 .. sectionauthor:: Marian Balakowicz <m8@semihalf.com>
