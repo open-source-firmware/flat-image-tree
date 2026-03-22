@@ -134,6 +134,39 @@ found, searching stops, using the best match found in the stage.
 
 Other suffixes may be added in future.
 
+Boot menu
+~~~~~~~~~
+
+In some cases it may desirable to show a menu of boot options and wait for the
+user to select one. In this case the :ref:`os_info` provides information which
+can be presented to the user to aid this choice. The :ref:`logos_prop` property
+provides logos which can be shown in the case of a graphical menu.
+
+The OS Information can also be useful for a fully automated boot, such as to
+select a particular version of the OS.
+
+The bootloader must support at least logos in BMP format, if it supports a
+graphical display.
+
+Logos should be selected based on the following criteria:
+
+    #. The logo format must be supported by the bootloader
+
+    #. SVG is preferred (if supported), followed by PNG (also if supported)
+       and then BMP
+
+    #. Larger logos are preferred, so long as they fit into the screen space
+       available to the bootloader
+
+    #. Color is preferred to grayscale, unless the bootloader knows that
+       the display is not capable of showing color
+
+    #. Logos with an alpha channel are preferred to those that lack one.
+
+    #. Logos with a dark background are preferred when the background is
+       dark. Logos with a light background are preferred when the background
+       is light.
+
 
 Load the images from the selected configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

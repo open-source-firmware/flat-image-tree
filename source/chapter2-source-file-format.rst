@@ -167,6 +167,8 @@ the '/images' node should have the following layout::
         |
         o hash-1 {...}
         o hash-2 {...}
+        o logo-info {...}
+        o os-info {...}
         ...
 
 Mandatory properties
@@ -198,6 +200,7 @@ description
     kernel                Kernel Image
     kernel_noload         Kernel Image (no loading done)
     kwbimage              Kirkwood Boot Image
+    logo                  Logo or other graphical image
     lpc32xximage          LPC32XX Boot Image
     mtk_image             MediaTek BootROM loadable Image
     multi                 Multi-File Image
@@ -393,6 +396,15 @@ signature-1
     Each signature sub-node represents a separate signature
     calculated for node's data according to specified algorithm.
 
+logo-info
+    Contains information about the logo image, to help describe characteristics
+    such as image dimensions.
+
+os-info
+    Contains information about the OS image, to help identify it. This
+    can be useful for displaying a menu for the user. The information is
+    generally only useful for image nodes which contain an OS.
+
 .. index:: Hash nodes
 
 Hash nodes
@@ -517,6 +529,237 @@ padding
     if no value is provided we assume pkcs-1.5
 
 
+.. _logos:
+
+Logo Information node
+---------------------
+
+This node is mandatory for images of type 'logo'.
+
+Graphical logos can be used in boot menus to provide a visual indication of
+what is being booted. Logos are stored within the FIT as images, referred to
+by the :ref:`logos_prop` property in the configuration node.
+
+For the image, compression may be used, but if the file format itself supports
+compression this is not recommended.
+
+The 'logo-info' node has the following structure::
+
+    o logo-info
+       |- format = "image/bmp";
+       |- background = "dark";
+
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+:index:`format`
+    IANA media type [mediatypes]_ of the graphical image. This must be provided
+    for images of type :index:`logo`. See :ref:`logos`.
+
+    The following formats are defined. Support for logos is optional. If logos
+    are supported, BMP must be supported. Other formats are optional.
+
+    ==============  =========  =====================================
+    Media type      Support    Meaning
+    ==============  =========  =====================================
+    image/bmp       Mandatory  Windows bitmap; see [windowsbmp]_
+    image/png       Optional   Portable Network Graphics; see [png]_
+    ==============  =========  =====================================
+
+    Image properties such as width, height, depth, and colour type are encoded
+    within the image file itself and need not be duplicated here.
+
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+background
+    String indicating the type of background the image targets. This helps the
+    boot menu select an appropriate logo variant.
+
+    Valid values are:
+
+    ===============  ===================================================
+    Background type  Meaning
+    ===============  ===================================================
+    light            The image looks best on a white or light background
+    dark             The image looks best on a black or dark background
+    ===============  ===================================================
+
+.. _os_info:
+
+OS Information node
+-------------------
+
+The 'os-info' node provides information about an image, specifically targeting
+images which constitute an operating system. The properties are based on a
+subset of the freedesktop.org os-release specification [osrelease]_, limited
+to fields useful for display in a boot menu.
+
+The 'os-info' node has the following structure::
+
+    o os-info
+        |- name = "OS name"
+        |- version = "OS version"
+        |- pretty-name = "OS pretty name"
+        |- id = "OS identifier"
+        |- version-id = "OS version identifier"
+        |- home-url = "OS homepage URL"
+        |- vendor-name = "OS vendor name"
+
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+If an 'os-info' node is included, these properties are mandatory:
+
+name
+    A string identifying the operating system, without a version component,
+    and suitable for presentation to the user.
+
+    Examples::
+
+        name = "Fedora Linux";
+
+        name = "Ubuntu";
+
+version
+    A string identifying the operating system version, excluding any OS name
+    information, possibly including a release code name, and suitable for
+    presentation to the user.
+
+    Examples::
+
+        version = "32 (Workstation Edition)";
+
+        version = "20.04.1 LTS (Focal Fossa)";
+
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+id
+    A lower-case string identifying the operating system, excluding version
+    information and without spaces or other characters outside of 0-9, a-z,
+    ".", "_" and "-".
+
+    Examples::
+
+        id = "fedora";
+
+        id = "debian";
+
+id-like
+    A list of operating system identifiers in the same syntax as id. This should
+    list identifiers of operating systems that are closely related to the local
+    operating system in regards to packaging and programming interfaces.
+
+    Examples::
+
+        id-like = "rhel", "centos", "fedora";
+
+        id-like = "debian";
+
+image-id
+    A lower-case string identifying a specific image of the operating system.
+
+    Examples::
+
+        image-id = "vendorx-cashier-system";
+
+        image-id = "netbook-image";
+
+image-version
+    A lower-case string identifying the OS image version.
+
+    Examples::
+
+        image-version = "33";
+
+        image-version = "47.1rc1";
+
+pretty-name
+    A pretty operating system name in a format suitable for presentation to
+    the user. May or may not contain a release code name or OS version of
+    some kind.
+
+    Examples::
+
+        pretty-name = "Fedora Linux 32 (Workstation Edition)";
+
+        pretty-name = "Ubuntu 20.04.1 LTS";
+
+home-url
+    Link to the homepage for the operating system. This may be displayed as
+    a QR code or stored for informational purposes.
+
+    Example::
+
+        home-url = "https://fedoraproject.org/";
+
+os-variant
+    A string identifying a specific variant or edition of the operating
+    system suitable for presentation to the user.
+
+    Examples::
+
+        os-variant = "Workstation Edition";
+
+        os-variant = "Server Edition";
+
+variant-id
+    A lower-case string identifying a specific variant or edition of the
+    operating system.
+
+    Examples::
+
+        variant-id = "workstation";
+
+        variant-id = "server";
+
+vendor-name
+    The name of the operating system vendor.
+
+    Examples::
+
+        vendor-name = "Fedora Project";
+
+        vendor-name = "Canonical Ltd.";
+
+vendor-url
+    Link to the vendor homepage. This may be displayed as a QR code or stored
+    for informational purposes.
+
+    Examples::
+
+        vendor-url = "https://fedoraproject.org/";
+
+        vendor-url = "https://canonical.com/";
+
+version-codename
+    A lower-case string identifying the operating system release code name,
+    excluding any OS name information or release version, and suitable for
+    processing by scripts or usage in generated filenames.
+
+    Examples::
+
+        version-codename = "focal";
+
+        version-codename = "jammy";
+
+version-id
+    A lower-case string identifying the operating system release, excluding
+    any OS name information or release code name, and suitable for processing
+    by scripts or usage in generated filenames.
+
+    Examples::
+
+        version-id = "32";
+
+        version-id = "20.04";
+
+
 '/configurations' node
 ----------------------
 
@@ -569,6 +812,7 @@ Each configuration has the following structure::
         |- loadables = "loadables sub-node unit-name" [, ...];
         |- script = "script sub-node unit-name";
         |- compatible = "vendor,board-style device tree compatible string";
+        |- logos = "log sub-node unit-name" [, ...];
         o signature-1 {...}
 
 Mandatory properties
@@ -636,6 +880,16 @@ load-only
     image, i.e. kernel or firmware. The configuration's images may be loaded
     into memory for use by the executable image, which comes from another
     configuration or FIT. See see :ref:`multi_step`.
+
+.. _logos_prop:
+
+logos
+    Unit names of the corresponding image blobs containing a logo for this
+    operating system. Logos are listed in order of preference.
+
+    Multiple logos can be provided to ensure the widest possible bootloader
+    support. If any logos are provide, at least one must be in BMP format.
+    See :ref:`logos`.
 
 The FDT blob is required to properly boot FDT-based kernel, so the minimal
 configuration for 2.6 FDT kernel is (kernel, fdt) pair.
