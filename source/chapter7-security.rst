@@ -25,13 +25,18 @@ For more information on FIT security, see
 The mechanism is also widely covered in conference talks, some of which are
 listed at `elinux.org <https://elinux.org/Boot_Loaders#U-Boot>`_.
 
-Architecture
-------------
+.. _fit-conf-signing:
 
-FIT security uses a two-level scheme: image hashing and configuration signing.
+Per-configuration signing
+-------------------------
+
+Architecture
+~~~~~~~~~~~~
+
+This FIT security scheme consists of two levels: image hashing and configuration signing.
 
 Image hashing
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 Each image node contains one or more hash sub-nodes. Each hash sub-node holds
 the algorithm name (e.g. ``sha256``) and the resulting digest of the image
@@ -43,7 +48,7 @@ the image data can also replace the hash. Authentication comes from the
 configuration signature, described next.
 
 Configuration signing
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 Each configuration node may contain one or more signature sub-nodes. A
 configuration signature covers:
@@ -69,7 +74,7 @@ in multiple configurations, each with its own signature, without duplicating
 the image data or requiring it to be signed multiple times.
 
 Configuration signing compared to image signing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Signing each image independently is vulnerable to a mix-and-match attack, where
 an attacker combines legitimately signed images into a configuration that was
@@ -82,7 +87,7 @@ set of images together. A loader that verifies the configuration signature
 knows that this exact combination of images was approved by the signer.
 
 Verification procedure
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 The bootloader verifies a configuration as follows:
 
@@ -111,7 +116,7 @@ If any step fails, the configuration must be rejected.
 .. _hash_contents:
 
 Hash contents
--------------
+~~~~~~~~~~~~~
 
 This section defines exactly which bytes are included when computing the hash
 for a signature. A FIT is a flattened devicetree (FDT), so the hash operates
@@ -122,7 +127,7 @@ The input to the hash is the concatenation of two regions: a set of nodes from
 the FDT structure block, followed by a region of the FDT strings block.
 
 Structure block
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 The signer and verifier each construct a **node list**: the set of FDT nodes
 whose content is included in the hash. For a configuration signature this list
@@ -173,7 +178,7 @@ structure block. Padding bytes that are part of the FDT token alignment are
 included as they appear.
 
 Strings block
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 The ``hashed-strings`` property in the signature node records the start offset
 and size of the region of the FDT strings block that is hashed. The start is
@@ -185,7 +190,7 @@ After hashing the structure-block regions, the hash algorithm continues with
 the strings-block region to produce the final digest.
 
 Image hashing
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 For image hash nodes (``/images/image-name/hash-1``), the hash is computed
 over the image's ``data`` property value only (i.e. the raw image content,
@@ -193,13 +198,13 @@ not any FDT metadata). The algorithm is given by the hash node's ``algo``
 property and the resulting digest is stored in its ``value`` property.
 
 Worked example
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^
 
 This section walks through a concrete FIT to show exactly which bytes are
 included in a configuration signature hash.
 
 Source
-^^^^^^
+""""""
 
 Consider the following minimal FIT source::
 
@@ -247,7 +252,7 @@ Consider the following minimal FIT source::
     };
 
 After signing
-^^^^^^^^^^^^^
+"""""""""""""
 
 During signing, the signer adds a ``value`` property to each hash node
 containing the image digest, and adds ``value``, ``hashed-nodes``,
@@ -309,7 +314,7 @@ resulting FIT looks like this::
     };
 
 Node list
-^^^^^^^^^
+"""""""""
 
 For the configuration signature ``/configurations/conf-1/signature-1``, the
 node list is:
@@ -322,7 +327,7 @@ node list is:
 - ``/images/fdt-1/hash-1``
 
 What is hashed
-^^^^^^^^^^^^^^
+""""""""""""""
 
 The following shows the signed FIT with **bold** indicating the parts that are
 included in the configuration signature hash. Lines in normal weight are not
