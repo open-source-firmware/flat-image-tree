@@ -255,7 +255,28 @@ Conditionally mandatory properties
 data
     Path to the external file which contains this node's binary data. Within
     the FIT this is the contents of the file. This is mandatory unless
-    :index:`external data` is used.
+    :index:`external data` is used or ``image-data`` is provided.
+
+.. _prop_image_data:
+
+image-data
+    Unit name of another image node under ``/images`` whose binary data
+    this node shares. This is a directive for the FIT producer
+    (e.g. mkimage); when present, the producer arranges for both nodes
+    to reference the same data (e.g. identical ``data-offset`` and
+    ``data-size`` in external-data mode). In an authored FIT the node
+    does not include ``data``, ``data-offset``, ``data-position`` or
+    ``data-size`` - these are filled in by the producer. In a resolved
+    FIT the property is retained alongside the data properties, as a
+    record of the sharing relationship for tools that further process
+    the FIT.
+
+    The target node must not itself have an ``image-data`` property;
+    chains of references are not permitted.
+
+    No other properties are inherited from the source node; all metadata
+    must be set explicitly. See `Shared image data`_ for details and an
+    example.
 
 data-size
     Size of the data in bytes. This is mandatory if :index:`external data` is
@@ -627,6 +648,87 @@ kernel command line (see :ref:`verity-usage`).
 
 Both the filesystem payload data and the dm-verity Merkle-tree hash data are
 expected to reside inside the same sub-image.
+
+.. _shared-image-data:
+
+Shared image data
+-----------------
+
+When multiple configurations need to load the same binary at different
+addresses, the ``image-data`` property allows an image node to share another
+node's binary data rather than duplicating it. The referencing node carries
+its own ``load``, ``entry`` and other metadata, but obtains the binary
+payload from the source node.
+
+Example: two configurations load the same kernel binary at different
+addresses without duplicating the data::
+
+    images {
+        kernel-1 {
+            description = "Linux kernel";
+            data = /incbin/("Image");
+            type = "kernel";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0x40200000>;
+            entry = <0x40200000>;
+            hash-1 {
+                algo = "sha256";
+            };
+        };
+        kernel-board-b {
+            description = "Linux kernel at alternate address";
+            image-data = "kernel-1";
+            type = "kernel";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0x80200000>;
+            entry = <0x80200000>;
+            hash-1 {
+                algo = "sha256";
+            };
+        };
+    };
+    configurations {
+        default = "conf-board-a";
+        conf-board-a {
+            kernel = "kernel-1";
+            fdt = "fdt-board-a";
+        };
+        conf-board-b {
+            kernel = "kernel-board-b";
+            fdt = "fdt-board-b";
+        };
+    };
+
+Both ``kernel-1`` and ``kernel-board-b`` are full image nodes. The FIT
+producer (e.g. mkimage) resolves the ``image-data`` reference so that
+both nodes point to the same binary payload. In external-data mode both
+nodes reference the same data region, avoiding duplication. In inline
+mode the producer copies the data into both nodes. Each node has its own
+hash, which covers the same bytes. Because the referencing node is a
+normal image node it is included in the configuration signature with no
+special handling.
+
+The ``image-data`` property is retained in the resolved FIT alongside
+the produced ``data``, ``data-offset`` or ``data-size`` properties. This
+lets a producer that later re-processes the FIT (e.g. to convert between
+inline and external-data mode) recognise the sharing relationship without
+having to compare byte content. If ``image-data`` and the data
+properties disagree the FIT is malformed and the producer must reject
+it.
+
+Chained references are not permitted: the target of ``image-data`` must
+not itself carry an ``image-data`` property.
+
+No properties are inherited from the source node; all metadata must be
+set explicitly. Only the binary payload is shared.
+
+FIT consumers (e.g. bootloaders) shall ignore the ``image-data``
+property. The ``data``, ``data-offset`` and ``data-size`` properties are
+authoritative.
 
 '/configurations' node
 ----------------------
