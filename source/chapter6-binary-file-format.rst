@@ -147,11 +147,75 @@ This allows metadata entries to be added, modified, or removed at any time,
 including after whole FIT signing,
 without invalidating a whole-FIT signature.
 
-The region starts with a 4-byte magic ``0x4649544D`` (ASCII ``"FITM"``)
-followed by a 4-byte big-endian length field
-giving the total number of bytes of metadata entries that follow the header.
-An empty metadata region has a length of zero,
+The metadata trailer uses a type-length-value (TLV) encoding
+with its own header:
+
+.. table:: struct fit_metadata
+
+   ======  ====  ======  =============================================
+   Offset  Size  Field   Description
+   ======  ====  ======  =============================================
+   0x00    4     magic   Metadata trailer magic (big-endian)
+   0x04    4     length  Total length of TLV data in bytes,
+                         excluding this 8-byte header (big-endian)
+   ======  ====  ======  =============================================
+
+The ``magic`` field identifies the start of a metadata trailer.
+Its value is ``0x4649544D`` (ASCII ``"FITM"``).
+
+The ``length`` field gives the total length of the TLV entries
+that follow the header.
+It does not include the 8-byte header itself.
+An empty metadata trailer has a length of zero,
 making its total on-disk size 8 bytes (magic + zero length).
+
+The header is followed by zero or more TLV entries, each encoded as:
+
+.. table:: TLV entry format
+
+   ======  ====  ======  =============================================
+   Offset  Size  Field   Description
+   ======  ====  ======  =============================================
+   0x00    2     tag     Entry type (big-endian)
+   0x02    2     length  Length of value in bytes (big-endian)
+   0x04    N     value   Entry data (not padded)
+   ======  ====  ======  =============================================
+
+Entries are packed:
+the total consumed space of each entry is ``4 + length`` bytes.
+Because entries are not padded, an entry with an odd-length value
+causes the next entry's 16-bit ``tag`` field to start at an unaligned offset.
+Parsers shall handle unaligned accesses when reading TLV entries.
+The sum of all entry sizes shall equal the ``length`` field in the header.
+Parsers shall reject a metadata trailer
+where the entries do not fill the region exactly.
+
+Implementations encountering an unknown ``tag`` shall skip past the entry
+using its ``length`` field.
+This allows older parsers to process FIT images
+that contain entry types defined by future versions of this specification.
+
+When a parser encounters multiple entries for a tag,
+the last entry takes precedence,
+unless the tag's documentation explicitly prescribes a different behavior.
+
+Location
+~~~~~~~~
+
+To locate the metadata trailer, implementations shall:
+
+#. Parse the FDT and FIT headers to obtain ``totalsize`` and ``ext_data_size``.
+#. Verify that the file or medium contains at least 8 bytes
+   at offset ``totalsize + ext_data_size``
+   (the metadata trailer is always present).
+#. Read the 8-byte metadata header at that offset.
+   Verify the magic matches ``0x4649544D``.
+   If the magic does not match, the FIT shall be rejected;
+   the metadata trailer is mandatory even when it contains no TLV entries.
+#. Verify that ``fit_metadata::length`` additional bytes
+   are available in the file or medium.
+#. Parse the TLV entries from the ``fit_metadata::length`` bytes
+   following the header.
 
 The complete size of a FIT file is
 ``fdt_header::totalsize + fit_header::ext_data_size + 8 + fit_metadata::length``.
@@ -164,6 +228,18 @@ The complete size of a FIT file is
    must carry their own authentication mechanism,
    such as an embedded signature that a verifier can check
    independently of the whole-FIT hash.
+
+.. _fit-metadata-types:
+
+The following metadata entry types are defined:
+
+.. table:: FIT metadata entry types
+
+   ==========  ========================  ==========================================
+   Tag         Name                      Description
+   ==========  ========================  ==========================================
+   ``0x0000``  (no-op)                   Value bytes are ignored.
+   ==========  ========================  ==========================================
 
 .. index:: External data
 
@@ -210,10 +286,10 @@ which shifts the start of the FDT data accordingly.
     |                |                     |
     v                v                     v
     |<---- 0x28 ---->|<- 0x28 + hdr_size ->|
-    |<-------------------- totalsize ---------------->|<--- ext_data_size -->|<-- 8  -->|
+    |<-------------------- totalsize ---------------->|<--- ext_data_size -->|<-- 8+ -->|
     +----------------+---------------------+----------+-----+----------------+----------+
     |  fdt_header    |      fit_header     | FDT data |(pad)| external image | metadata |
-    |                | .magic@0            | (memrsv, |     |      data      |          |
+    |                | .magic@0            | (memrsv, |     |      data      |  (TLV)   |
     | .boot_cpuid@1c | .hdr_size@4         | struct,  |     |                |          |
     | = 0x46495400   | .ext_data_size@8    | strings) |     |                |          |
     |                | ... etc.            |          |     |                |          |
