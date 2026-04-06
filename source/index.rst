@@ -14,8 +14,9 @@
    revhistory
    chapter4-introduction
    chapter5-source-file-format
-   chapter6-usage
+   chapter6-binary-file-format
    chapter7-security
+   chapter8-usage
    references
 
 ..
