@@ -434,4 +434,45 @@ The complete byte sequence (structure-block regions plus strings-block region)
 is hashed with SHA-256. The resulting digest is then signed with the RSA-2048
 private key to produce the signature ``value``.
 
+.. _fit-whole-signing:
+
+Whole-FIT signing
+-----------------
+
+When signing or verifying a FIT as a whole, the hash is computed over the byte range
+``[0, fdt_header::totalsize + fit_header::ext_data_size)``.
+The metadata trailer (see :ref:`fit-metadata`) intentionally lies outside this range
+and is not covered by the hash.
+
+When computing the whole-FIT hash
+(e.g. for signing or integrity verification),
+the procedure is:
+
+#. Finalize the FIT header fields (``hdr_size``, ``ext_data_size``).
+#. Verify that the upper 16 bits of ``ext_data_size`` are zero
+   (only the lower 48 bits are significant).
+   Verify that the storage medium or file contains at least
+   ``fdt_header::totalsize + fit_header::ext_data_size`` bytes.
+#. Hash the byte range
+   ``[0, fdt_header::totalsize + fit_header::ext_data_size)``.
+
+The hash algorithm is determined by the signing scheme in use.
+
+Verification recomputes the hash over the same range
+and checks it against the value produced by the signing scheme.
+
+.. note::
+
+   Whether a valid signature is required is a bootloader policy decision
+   and shall not depend on the presence or absence of the FIT magic
+   or FIT header.
+   A bootloader that only verifies signatures when the FIT magic is present
+   is vulnerable to a format downgrade attack
+   where an attacker strips the magic to bypass whole-FIT verification.
+   Note that ``boot_cpuid_phys`` is within the signed range,
+   so stripping it invalidates the signature, but only if the
+   bootloader checks for a signature in the first place.
+   The defence must be at the policy level.
+
 .. sectionauthor:: Simon Glass <sjg@chromium.org>
+.. sectionauthor:: Whole-FIT additions, 26/4/6 Ahmad Fatoum <a.fatoum@pengutronix.de>
