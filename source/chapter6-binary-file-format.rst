@@ -239,7 +239,39 @@ The following metadata entry types are defined:
    Tag         Name                      Description
    ==========  ========================  ==========================================
    ``0x0000``  (no-op)                   Value bytes are ignored.
+   ``0x0001``  install-uuid              Installation UUID (16 bytes, :RFC:`4122`).
    ==========  ========================  ==========================================
+
+.. _fit-metadata-install-uuid:
+
+install-uuid
+""""""""""""
+
+The ``install-uuid`` entry is a 16-byte UUID (:RFC:`4122`)
+that uniquely identifies a particular installation of this FIT image
+on persistent storage.
+The ``length`` field of this entry shall be 16.
+
+Installation tooling should generate a fresh UUID
+each time the image is written to storage.
+UUIDv4 (random) is recommended for systems without a reliable time source;
+UUIDv1 (time-based) may be used when an RTC or NTP clock is available.
+
+An all-zero value (16 bytes of ``0x00``) serves as a build-time placeholder
+and implementations should treat it as if the TLV element is absent.
+Installation tooling shall replace it with a newly generated UUID
+before or during installation.
+
+.. note::
+
+   The ``install-uuid`` resides in the metadata trailer
+   and is not covered by any whole-FIT signature.
+   An attacker with write access to the boot medium
+   can replace the UUID without invalidating the signature.
+   Systems that use the UUID for update-critical decisions
+   (e.g. selecting an update target partition)
+   should cross-check it with a different, authenticated, mechanism.
+
 
 .. index:: External data
 
