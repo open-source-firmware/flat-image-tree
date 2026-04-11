@@ -1,0 +1,35 @@
+name: Tag on merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Extract version from label
+      id: version
+      env:
+        LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+      run: |
+        # Find the label matching release-*, e.g. release-v1.0
+        LABEL=$(echo "$LABELS_JSON" \
+          | jq -r '.[] | select(startswith("release-"))' | head -1)
+        TAG="${LABEL#release-}"
+        echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Create tag
+      if: steps.version.outputs.tag != ''
+      env:
+        TAG: ${{ steps.version.outputs.tag }}
+        SHA: ${{ github.sha }}
+      run: |
+        git tag "$TAG" "$SHA"
+        git push origin "$TAG"
