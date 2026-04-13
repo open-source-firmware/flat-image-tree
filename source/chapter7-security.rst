@@ -138,6 +138,21 @@ contains:
 - the ``dm-verity`` sub-node of any ``filesystem``-type image node that carries one
   (e.g. ``/images/rootfs-1/dm-verity``).
 
+An image node is "referenced by the configuration" if it is named by
+any string property of the configuration node, except for the following
+properties which are excluded:
+
+- ``description`` - textual description of the configuration,
+- ``compatible`` - board compatible string(s) used for configuration
+  matching, and
+- ``default`` - reserved name; not used on a configuration node itself.
+
+All other string properties are treated as image references and their
+named image nodes are added to the node list. For each such property,
+if no image node with the named unit name exists under ``/images``, the
+property is skipped (a missing reference is not an error during node-list
+construction).
+
 The signer walks the FDT structure block sequentially and includes or excludes
 each token according to the following rules:
 
