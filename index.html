@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v0.8-33-g4f1cd31 documentation</title>
+    <title>Flattened Image Tree Specification v0.8-34-ga5a1c4b documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <script src="_static/documentation_options.js?v=074e9765"></script>
+    <script src="_static/documentation_options.js?v=4f3c2007"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="icon" href="_static/fit-favicon.png"/>
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v0.8-33-g4f1cd31<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v0.8-34-ga5a1c4b<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><section id="copyright">
 <h2><span class="section-number">1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h2>
@@ -1773,6 +1773,20 @@ contains:</p>
 <li><p>the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> sub-node of any <code class="docutils literal notranslate"><span class="pre">filesystem</span></code>-type image node that carries one
 (e.g. <code class="docutils literal notranslate"><span class="pre">/images/rootfs-1/dm-verity</span></code>).</p></li>
 </ul>
+<p>An image node is “referenced by the configuration” if it is named by
+any string property of the configuration node, except for the following
+properties which are excluded:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">description</span></code> - textual description of the configuration,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compatible</span></code> - board compatible string(s) used for configuration
+matching, and</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> - reserved name; not used on a configuration node itself.</p></li>
+</ul>
+<p>All other string properties are treated as image references and their
+named image nodes are added to the node list. For each such property,
+if no image node with the named unit name exists under <code class="docutils literal notranslate"><span class="pre">/images</span></code>, the
+property is skipped (a missing reference is not an error during node-list
+construction).</p>
 <p>The signer walks the FDT structure block sequentially and includes or excludes
 each token according to the following rules:</p>
 <dl class="simple">
