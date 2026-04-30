@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v0.8-32-gc210313 documentation</title>
+    <title>Flattened Image Tree Specification v0.8-33-ga75afed documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <script src="_static/documentation_options.js?v=37b6acb8"></script>
+    <script src="_static/documentation_options.js?v=f25078e7"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="icon" href="_static/fit-favicon.png"/>
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v0.8-32-gc210313<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v0.8-33-ga75afed<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><section id="copyright">
 <h2><span class="section-number">1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h2>
@@ -520,10 +520,28 @@ should also be set to “none”.</p>
 </section>
 <section id="conditionally-mandatory-properties">
 <h4><span class="section-number">5.3.2. </span>Conditionally mandatory properties<a class="headerlink" href="#conditionally-mandatory-properties" title="Link to this heading">¶</a></h4>
-<dl>
+<dl class="simple">
 <dt>data</dt><dd><p>Path to the external file which contains this node’s binary data. Within
 the FIT this is the contents of the file. This is mandatory unless
-<span class="target" id="index-18"></span>external data is used.</p>
+<span class="target" id="index-18"></span>external data is used or <code class="docutils literal notranslate"><span class="pre">image-data</span></code> is provided.</p>
+</dd>
+</dl>
+<dl id="prop-image-data">
+<dt>image-data</dt><dd><p>Unit name of another image node under <code class="docutils literal notranslate"><span class="pre">/images</span></code> whose binary data
+this node shares. This is a directive for the FIT producer
+(e.g. mkimage); when present, the producer arranges for both nodes
+to reference the same data (e.g. identical <code class="docutils literal notranslate"><span class="pre">data-offset</span></code> and
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code> in external-data mode). In an authored FIT the node
+does not include <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">data-offset</span></code>, <code class="docutils literal notranslate"><span class="pre">data-position</span></code> or
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code> - these are filled in by the producer. In a resolved
+FIT the property is retained alongside the data properties, as a
+record of the sharing relationship for tools that further process
+the FIT.</p>
+<p>The target node must not itself have an <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property;
+chains of references are not permitted.</p>
+<p>No other properties are inherited from the source node; all metadata
+must be set explicitly. See <a class="reference internal" href="#id5">Shared image data</a> for details and an
+example.</p>
 </dd>
 <dt>data-size</dt><dd><p>Size of the data in bytes. This is mandatory if <span class="target" id="index-19"></span>external data is
 used.</p>
@@ -1029,8 +1047,81 @@ kernel command line (see <a class="reference internal" href="#document-chapter6-
 expected to reside inside the same sub-image.</p>
 </section>
 </section>
+<section id="shared-image-data">
+<span id="id5"></span><h3><span class="section-number">5.7. </span>Shared image data<a class="headerlink" href="#shared-image-data" title="Link to this heading">¶</a></h3>
+<p>When multiple configurations need to load the same binary at different
+addresses, the <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property allows an image node to share another
+node’s binary data rather than duplicating it. The referencing node carries
+its own <code class="docutils literal notranslate"><span class="pre">load</span></code>, <code class="docutils literal notranslate"><span class="pre">entry</span></code> and other metadata, but obtains the binary
+payload from the source node.</p>
+<p>Example: two configurations load the same kernel binary at different
+addresses without duplicating the data:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>images {
+    kernel-1 {
+        description = &quot;Linux kernel&quot;;
+        data = /incbin/(&quot;Image&quot;);
+        type = &quot;kernel&quot;;
+        arch = &quot;arm64&quot;;
+        os = &quot;linux&quot;;
+        compression = &quot;none&quot;;
+        load = &lt;0x40200000&gt;;
+        entry = &lt;0x40200000&gt;;
+        hash-1 {
+            algo = &quot;sha256&quot;;
+        };
+    };
+    kernel-board-b {
+        description = &quot;Linux kernel at alternate address&quot;;
+        image-data = &quot;kernel-1&quot;;
+        type = &quot;kernel&quot;;
+        arch = &quot;arm64&quot;;
+        os = &quot;linux&quot;;
+        compression = &quot;none&quot;;
+        load = &lt;0x80200000&gt;;
+        entry = &lt;0x80200000&gt;;
+        hash-1 {
+            algo = &quot;sha256&quot;;
+        };
+    };
+};
+configurations {
+    default = &quot;conf-board-a&quot;;
+    conf-board-a {
+        kernel = &quot;kernel-1&quot;;
+        fdt = &quot;fdt-board-a&quot;;
+    };
+    conf-board-b {
+        kernel = &quot;kernel-board-b&quot;;
+        fdt = &quot;fdt-board-b&quot;;
+    };
+};
+</pre></div>
+</div>
+<p>Both <code class="docutils literal notranslate"><span class="pre">kernel-1</span></code> and <code class="docutils literal notranslate"><span class="pre">kernel-board-b</span></code> are full image nodes. The FIT
+producer (e.g. mkimage) resolves the <code class="docutils literal notranslate"><span class="pre">image-data</span></code> reference so that
+both nodes point to the same binary payload. In external-data mode both
+nodes reference the same data region, avoiding duplication. In inline
+mode the producer copies the data into both nodes. Each node has its own
+hash, which covers the same bytes. Because the referencing node is a
+normal image node it is included in the configuration signature with no
+special handling.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property is retained in the resolved FIT alongside
+the produced <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">data-offset</span></code> or <code class="docutils literal notranslate"><span class="pre">data-size</span></code> properties. This
+lets a producer that later re-processes the FIT (e.g. to convert between
+inline and external-data mode) recognise the sharing relationship without
+having to compare byte content. If <code class="docutils literal notranslate"><span class="pre">image-data</span></code> and the data
+properties disagree the FIT is malformed and the producer must reject
+it.</p>
+<p>Chained references are not permitted: the target of <code class="docutils literal notranslate"><span class="pre">image-data</span></code> must
+not itself carry an <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property.</p>
+<p>No properties are inherited from the source node; all metadata must be
+set explicitly. Only the binary payload is shared.</p>
+<p>FIT consumers (e.g. bootloaders) shall ignore the <code class="docutils literal notranslate"><span class="pre">image-data</span></code>
+property. The <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">data-offset</span></code> and <code class="docutils literal notranslate"><span class="pre">data-size</span></code> properties are
+authoritative.</p>
+</section>
 <section id="configurations-node">
-<h3><span class="section-number">5.7. </span>‘/configurations’ node<a class="headerlink" href="#configurations-node" title="Link to this heading">¶</a></h3>
+<h3><span class="section-number">5.8. </span>‘/configurations’ node<a class="headerlink" href="#configurations-node" title="Link to this heading">¶</a></h3>
 <p>The ‘configurations’ node creates convenient, labeled
 <span class="target" id="index-33"></span>boot configurations,
 which combine together <span class="target" id="index-34"></span>kernel images with their
@@ -1044,22 +1135,22 @@ which combine together <span class="target" id="index-34"></span>kernel images w
     ...
 </pre></div>
 </div>
-<section id="id5">
-<h4><span class="section-number">5.7.1. </span>Optional property<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<section id="id6">
+<h4><span class="section-number">5.8.1. </span>Optional property<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
 <dl class="simple">
 <dt>default</dt><dd><p>Selects one of the configuration sub-nodes as a default configuration.</p>
 </dd>
 </dl>
 </section>
-<section id="id6">
-<h4><span class="section-number">5.7.2. </span>Mandatory nodes<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<section id="id7">
+<h4><span class="section-number">5.8.2. </span>Mandatory nodes<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
 <dl class="simple">
 <dt>configuration-sub-node-unit-name</dt><dd><p>At least one configuration sub-node is required.</p>
 </dd>
 </dl>
 </section>
-<section id="id7">
-<h4><span class="section-number">5.7.3. </span>Optional nodes<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<section id="id8">
+<h4><span class="section-number">5.8.3. </span>Optional nodes<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
 <dl class="simple">
 <dt>signature-1</dt><dd><p>Each signature sub-node represents a separate signature
 calculated for the configuration according to specified algorithm.</p>
@@ -1068,7 +1159,7 @@ calculated for the configuration according to specified algorithm.</p>
 </section>
 </section>
 <section id="configuration-nodes">
-<h3><span class="section-number">5.8. </span>Configuration nodes<a class="headerlink" href="#configuration-nodes" title="Link to this heading">¶</a></h3>
+<h3><span class="section-number">5.9. </span>Configuration nodes<a class="headerlink" href="#configuration-nodes" title="Link to this heading">¶</a></h3>
 <p>Each configuration has the following structure:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o config-1
     |- description = &quot;configuration description&quot;;
@@ -1082,15 +1173,15 @@ calculated for the configuration according to specified algorithm.</p>
     o signature-1 {...}
 </pre></div>
 </div>
-<section id="id8">
-<h4><span class="section-number">5.8.1. </span>Mandatory properties<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<section id="id9">
+<h4><span class="section-number">5.9.1. </span>Mandatory properties<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
 <dl class="simple">
 <dt>description</dt><dd><p>Textual configuration description.</p>
 </dd>
 </dl>
 </section>
-<section id="id9">
-<h4><span class="section-number">5.8.2. </span>Conditionally mandatory property<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
+<section id="id10">
+<h4><span class="section-number">5.9.2. </span>Conditionally mandatory property<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
 <dl class="simple">
 <dt>kernel or firmware</dt><dd><p>Unit name of the corresponding <span class="target" id="index-36"></span>kernel or <span class="target" id="index-37"></span>firmware
 (u-boot, op-tee, etc) image. If both “kernel” and “firmware” are specified,
@@ -1099,8 +1190,8 @@ properties are optional.</p>
 </dd>
 </dl>
 </section>
-<section id="id10">
-<h4><span class="section-number">5.8.3. </span>Optional properties<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<section id="id11">
+<h4><span class="section-number">5.9.3. </span>Optional properties<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
 <dl>
 <dt>cmdline</dt><dd><p>Command line passed to the next boot stage, e.g. the operating system
 kernel. The value is an UTF-8 encoded string.</p>
@@ -1149,7 +1240,7 @@ not</em> be specified in a configuration node.</p>
 </section>
 </section>
 <section id="configuration-signature-nodes">
-<h3><span class="section-number">5.9. </span>Configuration-signature nodes<a class="headerlink" href="#configuration-signature-nodes" title="Link to this heading">¶</a></h3>
+<h3><span class="section-number">5.10. </span>Configuration-signature nodes<a class="headerlink" href="#configuration-signature-nodes" title="Link to this heading">¶</a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o signature-1
     |- algo = &quot;algorithm name&quot;
     |- key-name-hint = &quot;key name&quot;
@@ -1158,8 +1249,8 @@ not</em> be specified in a configuration node.</p>
     |- hashed-strings = &lt;0 len&gt;
 </pre></div>
 </div>
-<section id="id11">
-<h4><span class="section-number">5.9.1. </span>Mandatory properties<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<section id="id12">
+<h4><span class="section-number">5.10.1. </span>Mandatory properties<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
 <dl class="simple">
 <dt>algo</dt><dd><p>See <a class="reference internal" href="#fit-algorithm">FIT Algorithm</a>.</p>
 </dd>
