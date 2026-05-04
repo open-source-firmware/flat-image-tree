@@ -444,4 +444,195 @@ The complete byte sequence (structure-block regions plus strings-block region)
 is hashed with SHA-256. The resulting digest is then signed with the RSA-2048
 private key to produce the signature ``value``.
 
+
+Whole-FIT signing
+-----------------
+
+Per-configuration signing covers the integrity of one configuration and
+the images it references. A FIT may additionally carry a *whole-FIT
+signature* over the entire FIT image, including the FDT and any
+external image data. Whole-FIT signing is intended to complement
+per-configuration signing, not to replace it.
+
+A whole-FIT signature is stored in the binary trailer (see
+:ref:`chapter-binary-trailer`) as a ``signature-N`` property. The
+trailer is a constrained FDT blob placed inside the main FDT but
+excluded from the signed range, so its contents (including the
+signatures themselves) can be modified post-signing.
+
+Why whole-FIT signing
+~~~~~~~~~~~~~~~~~~~~~
+
+Per-configuration signing requires the bootloader to parse the FIT's
+FDT before authentication: it must locate the configuration node, the
+referenced image nodes, and the signature node, then construct the
+node list and hash the relevant FDT structure bytes. The pre-auth
+parser is therefore a full FDT parser (e.g. libfdt), which is large
+and has historically been a source of bugs when fed adversarial
+input.
+
+Whole-FIT signing allows a bootloader to authenticate the FIT before
+parsing any FDT structure. The verifier reads a small number of
+fixed-offset fields, hashes a contiguous byte range, and checks the
+signature. Only after the signature verifies does the bootloader
+parse the FDT — and at that point it is operating on trusted bytes.
+
+Bootloaders that need a smaller pre-authentication attack surface
+should use whole-FIT signing. Bootloaders that already trust the FDT
+parser they use may continue to use per-configuration signing alone.
+A FIT may carry both, so a single image can serve both kinds of
+bootloader.
+
+What is signed
+~~~~~~~~~~~~~~
+
+A whole-FIT signature covers two byte ranges, in this order:
+
+#. ``[0, 0x28)`` — the main FDT header (40 bytes). The trailer's fixed
+   ``totalsize`` keeps every header field stable, so the entire header
+   is signed without exclusions. This authenticates the FDT's
+   internal layout (``totalsize``, ``off_dt_struct``, ``off_dt_strings``,
+   ``off_mem_rsvmap``) as well as the external data extent
+   (``boot_cpuid_phys``).
+#. ``[0x28 + trailer_totalsize, totalsize + boot_cpuid_phys)`` —
+   the main FDT's memreserve, structure and strings blocks, followed
+   by all external image data.
+
+The trailer itself, ``[0x28, 0x28 + trailer_totalsize)``, is excluded
+so that its mutable contents (UUIDs, signatures, counters) can be
+modified post-signing without invalidating the signature.
+
+See :ref:`chapter-binary-trailer` for the byte-level details and
+verification procedure.
+
+Relationship to per-configuration signing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Whole-FIT signing protects the FIT as a whole; per-configuration
+signing protects each configuration individually. They are
+complementary:
+
+- A whole-FIT signature alone authenticates the FIT bytes but does
+  not bind specific images to specific configurations. If the
+  bootloader supports configuration selection by external means
+  (e.g. board compatibility), per-configuration signing is still
+  needed to prevent mix-and-match attacks within an authenticated
+  FIT.
+- Per-configuration signing alone provides the mix-and-match
+  protection but requires a full FDT parser to be exposed to
+  unauthenticated input.
+- A FIT carrying both provides the strongest guarantees: the FDT is
+  authenticated before it is parsed (whole-FIT) and individual
+  configurations are bound to their image sets (per-configuration).
+
+The ``compatible`` property used for configuration matching is
+included in the configuration node and therefore covered by
+per-configuration signing, but not by whole-FIT signing in any
+distinguishing way (whole-FIT signing covers all FDT bytes
+indiscriminately). This means a bootloader relying solely on
+whole-FIT signing could still be tricked by attacker-modified
+``compatible`` strings into selecting a different configuration than
+intended. Combining the two schemes closes this gap.
+
+Multiple signatures
+~~~~~~~~~~~~~~~~~~~
+
+The trailer can carry multiple ``signature-N`` properties for key
+rotation, multi-party signing or algorithm migration. All
+signatures cover the same byte ranges; they differ only in
+algorithm and key. Bootloader policy determines whether a single
+valid signature is sufficient or whether all must verify.
+
+Threat model
+~~~~~~~~~~~~
+
+This subsection summarises what whole-FIT signing protects against
+and what it does not, and how it compares to per-configuration
+signing.
+
+What whole-FIT signing protects against
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- **Tampering with FDT content.** Any modification to the main
+  FDT's structure, strings or memreserve blocks changes bytes in
+  the signed range, invalidating the signature.
+- **Tampering with external image data.** The signed range extends
+  to ``totalsize + boot_cpuid_phys``, covering all external image
+  data.
+- **FDT-pointer redirection.** ``totalsize``, ``off_dt_struct``,
+  ``off_dt_strings`` and ``off_mem_rsvmap`` are all in the signed
+  FDT header. An attacker cannot redirect an FDT consumer to parse
+  attacker-controlled bytes by manipulating these fields.
+- **Truncation and extension.** ``totalsize`` and
+  ``boot_cpuid_phys`` are signed, so an attacker cannot shrink the
+  apparent extent of the FIT to excise content from the hash, nor
+  extend it to smuggle data into a verified region.
+- **Bit rot in regions not covered by per-configuration signing.**
+  Per-configuration signing is selective and does not hash, for
+  example, configuration nodes other than the one being signed,
+  unreferenced image nodes, or the FDT's strings block tail.
+  Whole-FIT signing covers all of these as raw bytes.
+- **Adversarial input to a full FDT parser.** A bootloader can
+  verify the whole-FIT signature using only a small fixed-offset
+  reader, before invoking libfdt or any equivalent. This shrinks
+  the pre-authentication attack surface to the verifier itself
+  plus the constrained-FDT trailer parser.
+
+What whole-FIT signing does *not* protect against
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- **Mix-and-match attacks within an authenticated FIT.** Whole-FIT
+  signing certifies the FDT bytes as a whole, but it does not bind
+  specific images to specific configurations. A bootloader that
+  verifies only the whole-FIT signature and then chooses a
+  configuration based on, for example, ``compatible`` matching can
+  still be tricked into selecting an attacker-favoured
+  configuration if the FIT genuinely contains multiple
+  configurations and the attacker controls the matching input.
+  Per-configuration signing is required to prevent this.
+- **Modification of the trailer.** The trailer (UUIDs, signatures,
+  counters) is intentionally excluded from the signed range. An
+  attacker with write access to the boot medium can modify trailer
+  contents freely. Trailer values used for security-relevant
+  decisions (e.g. install UUIDs influencing update targeting) shall
+  be cross-checked against an authenticated source.
+- **Downgrade attacks against the signing scheme itself.** If the
+  bootloader policy is "verify a whole-FIT signature if one is
+  present, otherwise allow the FIT to boot", an attacker can strip
+  the trailer's signatures (or the trailer entirely) to bypass
+  whole-FIT verification. The defence is at policy level: a
+  bootloader requiring whole-FIT signing must not fall back to
+  unsigned operation. ``boot_cpuid_phys`` and the FDT magic are
+  both signed, so a downgrade attack must work at the policy
+  layer, not the format layer.
+- **Rollback and replay.** Neither whole-FIT signing nor
+  per-configuration signing prevents an attacker from booting a
+  previously valid (but now superseded) FIT. Anti-rollback
+  requires an authenticated version counter, typically held in
+  hardware (e.g. fuses) and checked by the bootloader against a
+  signed version field in the FIT.
+- **Compromise of the signing key.** Whole-FIT signing inherits
+  the security of the signature algorithm and key management. Key
+  rotation is supported via multiple ``signature-N`` properties,
+  but an attacker who obtains a valid private key can produce
+  authentic-looking FITs.
+
+Comparison with per-configuration signing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+================================  =============  ===========
+Threat                            Per-config     Whole-FIT
+================================  =============  ===========
+FDT content tampering             Selective      Yes
+External image data tampering     Via hash node  Yes
+Mix-and-match within FIT          Yes            No
+FDT-pointer redirection           Indirect       Yes
+File truncation / extension       No             Yes
+Pre-auth parser attack surface    libfdt         Trivial
+================================  =============  ===========
+
+The two schemes are complementary. A FIT carrying both gets the
+mix-and-match resistance of per-configuration signing and the
+small pre-authentication attack surface of whole-FIT signing.
+
 .. sectionauthor:: Simon Glass <sjg@chromium.org>

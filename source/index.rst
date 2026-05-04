@@ -16,6 +16,7 @@
    chapter5-source-file-format
    chapter6-usage
    chapter7-security
+   chapter8-binary-trailer
    references
 
 ..
