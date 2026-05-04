@@ -368,14 +368,37 @@ arch
 entry
     Entry point address, address size is determined by
     '#address-cells' property of the root node.
-    Mandatory for types: "firmware", and "kernel".
+
+    When omitted, the entry point is assumed to be equal to the
+    effective load address - execution starts at the first
+    instruction of the loaded image. Producers requiring a specific
+    entry point shall set the ``entry`` property explicitly. Image
+    formats that need richer entry semantics are better served by a
+    container such as ELF.
 
 .. _prop_load:
 
 load
     Load address, address size is determined by '#address-cells'
     property of the root node.
-    Mandatory for types: "firmware", and "kernel".
+
+    When omitted, the bootloader chooses an effective load address
+    appropriate for the image type and target platform (e.g. a free,
+    suitably-aligned region of RAM). If the bootloader cannot
+    determine a suitable load address, it shall refuse to boot the
+    image.
+
+    The bootloader is allowed, but not required, to use the image
+    data address (the location of the image's data bytes - whether
+    inline via ``data``, in an attached store via ``data-offset`` or
+    at a fixed address via ``data-position``) as the load address.
+    Producers requiring a specific address shall set the ``load``
+    property explicitly. Image producers shall not rely on a
+    particular fallback address being chosen by the bootloader;
+    doing so creates a hidden coupling between the FIT layout and
+    runtime behaviour, which breaks for inline FITs (where data
+    alignment is constrained by the FDT structure) and for external
+    FITs whose placement may vary.
 
 :index:`compatible`
     Compatible method for loading image.
