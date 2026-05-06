@@ -28,10 +28,15 @@ jobs:
         pip3 install --user Sphinx
         pip3 install --user codespell
 
+    - name: fetch tags
+      # actions/checkout creates lightweight tags locally even when the
+      # source tag is annotated, which causes 'git describe --exact-match'
+      # to miss it. Refetching pulls the proper annotated tag.
+      run: git fetch --tags --force
+
     - name: build pdf
       run: |
         make latexpdf
-        git fetch --tags --force # Needed to make git-describe work
         mv build/latex/fit-specification.pdf build/latex/fit-specification-$(git describe).pdf
     - name: build html
       run: make html
