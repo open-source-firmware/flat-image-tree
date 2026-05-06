@@ -202,6 +202,14 @@ class FdtValidator():
         for prop_name in node.props.keys():
             if prop_name == 'linux,phandle':    # Ignore this (use 'phandle' instead)
                 continue
+            stripped = prop_name.strip()
+            if stripped != prop_name:
+                msg = (f"Property name '{prop_name}' has surrounding "
+                       f"whitespace; check the tool that produced this FIT")
+                if stripped and stripped in schema_props:
+                    msg += f" (did you mean '{stripped}'?)"
+                self.fail(node.path, msg)
+                continue
             element, _ = self.get_element(schema, prop_name, node, PropDesc)
             if not element or not isinstance(element, PropDesc):
                 if prop_name == 'phandle':

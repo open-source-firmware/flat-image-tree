@@ -12,6 +12,9 @@ import sys
 import tempfile
 import unittest
 
+# pylint: disable=E0401
+import libfdt
+
 if __name__ == "__main__":
     # Allow 'from validate import xxx to work'
     our_path = os.path.dirname(os.path.realpath(__file__))
@@ -159,6 +162,38 @@ class UnitTests(unittest.TestCase):
             ["/images: Unexpected property 'extra-prop', valid list is ()",
              "/: Unexpected subnode 'wibble', valid list is (images, configurations)"],
              result)
+
+    def test_whitespace_in_prop_name(self):
+        """Test that trailing/leading whitespace in property names is reported
+
+        Some FIT producers emit property names with stray whitespace (for
+        example by splitting a DTS-like ``name  = "value"`` line on ``=``
+        without strip()-ing the LHS). A binary FIT carries those names
+        verbatim, so the validator should flag the malformed name rather than
+        report a generic 'Unexpected property' error.
+        """
+        fdt = libfdt.Fdt.create_empty_tree(1024)
+        fdt.setprop_u32(0, '#address-cells', 1)
+        fdt.setprop_u32(0, 'timestamp', 123456)
+        fdt.setprop_str(0, 'description', 'desc')
+        fdt.setprop_u32(0, 'description ', 0)  # trailing space, matches schema
+        fdt.setprop_str(0, 'oddprop ', 'x')    # trailing space, no schema match
+        with tempfile.NamedTemporaryFile(suffix='.fit', delete=False) as fit:
+            fit.write(bytes(fdt.as_bytearray()))
+            fit.close()
+            tools.prepare_output_dir(None)
+            errors = self.val.start(fit.name)
+            tools.finalise_output_dir()
+            os.unlink(fit.name)
+        self.assertIn(
+            "/: Property name 'description ' has surrounding whitespace; "
+            "check the tool that produced this FIT (did you mean "
+            "'description'?)",
+            errors)
+        self.assertIn(
+            "/: Property name 'oddprop ' has surrounding whitespace; "
+            "check the tool that produced this FIT",
+            errors)
 
 
 if __name__ == '__main__':
