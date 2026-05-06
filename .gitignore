@@ -1,2 +1,4 @@
 # Build output
 build/
+
+__pycache__
