@@ -499,10 +499,17 @@ key-name-hint
     <name>.crt.
 
 sign-images
-    An unsorted list of images to sign, each being a property of the conf
-    node that contains them. The default is "kernel,fdt" which means that these
-    two images will be looked up in the config and signed if present. This is
-    used by mkimage to determine which images to sign.
+    *Deprecated.* An unsorted list of property names on the parent
+    configuration node identifying the images to sign. New FITs shall
+    omit this property. The signer and verifier instead derive the
+    set of referenced images automatically from the configuration's
+    string properties as described in :ref:`hash_contents`. This
+    auto-discovery covers every image referenced by the configuration
+    without requiring producers to keep the list in sync.
+
+    Tools should ignore ``sign-images`` if present and apply the
+    auto-discovery rule unconditionally. A future revision of this
+    specification may remove the property entirely.
 
 The following properties are added as part of signing, and are mandatory:
 
@@ -866,7 +873,7 @@ Configuration-signature nodes
     o signature-1
         |- algo = "algorithm name"
         |- key-name-hint = "key name"
-        |- sign-images = "path1", "path2";
+        |- sign-images = "path1", "path2";  /* deprecated */
         |- value = [hash or checksum value]
         |- hashed-strings = <0 len>
 
