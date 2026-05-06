@@ -32,11 +32,11 @@ author = u'Marian Balakowicz <m8@semihalf.com>'
 # The short X.Y version
 try:
     version = str(subprocess.check_output(
-        ["git", "describe", "--exact-match"]), 'utf-8').strip()
+        ["git", "describe", "--tags", "--exact-match"]), 'utf-8').strip()
 except:
     try:
         version = str(subprocess.check_output(
-            ["git", "describe", "--dirty"]), 'utf-8').strip()
+            ["git", "describe", "--tags", "--dirty"]), 'utf-8').strip()
     except:
         version = "unknown-rev"
 # The full version, including alpha/beta/rc tags
