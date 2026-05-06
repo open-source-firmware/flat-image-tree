@@ -184,6 +184,7 @@ description
     ====================  ==================
     invalid               Invalid Image
     aisimage              Davinci AIS image
+    amlimage              Amlogic Boot Image
     atmelimage            ATMEL ROM-Boot Image
     copro                 Coprocessor Image
     fdt_legacy            legacy Image with Flat Device Tree
@@ -211,11 +212,13 @@ description
     rksd                  Rockchip SD Boot Image
     rkspi                 Rockchip SPI Boot Image
     script                Script
+    sfspl                 StarFive SPL Image
     socfpgaimage          Altera SoCFPGA CV/AV preloader
     socfpgaimage_v1       Altera SoCFPGA A10 preloader
     spkgimage             Renesas SPKG Image
     standalone            Standalone Program
     stm32image            STMicroelectronics STM32 Image
+    stm32imagev2          STMicroelectronics STM32 Image V2.0
     sunxi_egon            Allwinner eGON Boot Image
     sunxi_toc0            Allwinner TOC0 Boot Image
     tee                   Trusted Execution Environment Image
@@ -303,6 +306,7 @@ os
     arm-trusted-firmware  ARM Trusted Firmware
     dell                  Dell
     efi                   EFI Firmware
+    elf                   ELF Image
     esix                  Esix
     freebsd               FreeBSD
     integrity             INTEGRITY
