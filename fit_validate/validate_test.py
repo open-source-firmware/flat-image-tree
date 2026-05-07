@@ -141,7 +141,8 @@ class UnitTests(unittest.TestCase):
             dts.close()
             self.returncode = 0
             if use_command_line:
-                call_args = ['python', '-m', 'fit_validate.validate', dts.name]
+                call_args = [sys.executable, '-m', 'fit_validate.validate',
+                             dts.name]
                 if extra_options:
                     call_args += extra_options
                 try:
@@ -198,7 +199,7 @@ class UnitTests(unittest.TestCase):
                 "/configurations/config-1: Required property 'firmware' missing",
                 ], result)
 
-    def test_comannd_line(self):
+    def test_command_line(self):
         """Test that the command-line interface works correctly"""
         self.assertEqual([], self.run_test(HEADER, True, ['-u']))
 
