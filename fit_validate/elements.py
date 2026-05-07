@@ -225,8 +225,9 @@ class PropStringList(PropDesc):
         str_pattern: Regex to use to validate the string
     """
     def __init__(self, name, required=False, str_pattern='',
-                             conditional_props=None):
-        super().__init__(name, 'stringlist', required, conditional_props)
+                             conditional_props=None, required_when=None):
+        super().__init__(name, 'stringlist', required, conditional_props,
+                         required_when)
         self.str_pattern = str_pattern
 
     def validate_prop(self, val, prop):

@@ -251,6 +251,73 @@ class UnitTests(unittest.TestCase):
             "missing",
             ], result)
 
+    def test_phase_value_invalid(self):
+        """The phase property must be 'spl' or 'u-boot'"""
+        bad = HEADER.replace(
+            'type = "kernel";',
+            'type = "kernel";\n            phase = "tpl";', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1: 'phase' value 'tpl' is not one of the allowed "
+            "values (spl, u-boot)",
+            ], result)
+
+    def test_phase_value_ok(self):
+        """A correctly-spelled phase value should validate"""
+        ok = HEADER.replace(
+            'type = "kernel";',
+            'type = "kernel";\n            phase = "spl";', 1)
+        self.assertEqual([], self.run_test(ok))
+
+    def test_data_position_satisfies_data_requirement(self):
+        """An image with data-position should not require data-offset"""
+        ok = HEADER.replace(
+            'data = "abc";',
+            'data-position = <0x80000000>;\n            data-size = <0x100>;',
+            1)
+        self.assertEqual([], self.run_test(ok))
+
+    def test_fpga_requires_compatible(self):
+        """type=fpga requires the compatible property"""
+        bad = HEADER.replace('type = "kernel";', 'type = "fpga";', 1)
+        bad = bad.replace('os = "linux";\n            ', '', 1)
+        bad = bad.replace('load = <0x10000000>;\n            ', '', 1)
+        bad = bad.replace('entry = <0x10000000>;\n            ', '', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1: Required property 'compatible' missing",
+            ], result)
+
+    def test_config_load_only(self):
+        """A config with load-only and no firmware should validate"""
+        ok = HEADER.replace(
+            'firmware = "image-1";',
+            'load-only;', 1)
+        # firmware is required for UPL configs, so the missing-firmware
+        # complaint still fires; only check that load-only itself is
+        # accepted as a known property.
+        result = self.run_test(ok)
+        for line in result:
+            self.assertNotIn('load-only', line)
+
+    def test_config_cmdline(self):
+        """A config with cmdline should validate"""
+        ok = HEADER.replace(
+            'firmware = "image-1";',
+            'firmware = "image-1";\n            cmdline = "console=ttyS0";', 1)
+        self.assertEqual([], self.run_test(ok))
+
+    def test_config_fpga_ref(self):
+        """A config's fpga property must reference an existing image"""
+        bad = HEADER.replace(
+            'firmware = "image-1";',
+            'firmware = "image-1";\n            fpga = "missing-fpga";', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/configurations/config-1: 'fpga' references missing node "
+            "'/images/missing-fpga'",
+            ], result)
+
     def test_kernel_requires_os(self):
         """type=kernel images must have an os property"""
         bad = HEADER.replace('os = "linux";\n            ', '', 1)

@@ -57,6 +57,9 @@ ARCH_REQUIRED_TYPES = ['standalone', 'kernel', 'firmware', 'ramdisk', 'fdt']
 # Image types for which 'entry' and 'load' are mandatory (chapter 5).
 LOAD_REQUIRED_TYPES = ['firmware', 'kernel']
 
+# Allowed values for the U-Boot 'phase' property (chapter 5).
+PHASE_VALUES = ['spl', 'u-boot']
+
 # Hash algorithms accepted on a hash-N node (chapter 5, Hash nodes).
 HASH_ALGO = r'crc16-ccitt|crc32|md5|sha1|sha256|sha384|sha512'
 
@@ -134,11 +137,13 @@ def get_schema(upl=False):
                    required_when={'type': ARCH_REQUIRED_TYPES}),
         PropString('compression', values=COMPRESSION_TYPES),
         PropInt('data-offset', True, conditional_props={
-            'data': False, 'image-data': False}),
+            'data': False, 'image-data': False, 'data-position': False}),
         PropInt('data-size', True, conditional_props={
             'data': False, 'image-data': False}),
         PropDesc('data', True, conditional_props={
-            'data-offset': False, 'data-size': False, 'image-data': False}),
+            'data-offset': False, 'data-size': False, 'image-data': False,
+            'data-position': False}),
+        PropInt('data-position'),
         PropImageRef('image-data', no_chain=True),
         PropString('os', values=OS_NAMES,
                    required_when={'type': ['kernel']}),
@@ -149,6 +154,12 @@ def get_schema(upl=False):
         PropInt('entry-start', False),
         PropInt('entry', required_when={'type': LOAD_REQUIRED_TYPES}),
         PropInt('reloc-start', False),
+        # 'compatible' on an image carries the loading-method string for
+        # fpga images (and images without a load address). Spec lists only
+        # the fpga methods explicitly, so leave the value set open.
+        PropStringList('compatible',
+                       required_when={'type': ['fpga']}),
+        PropString('phase', values=PHASE_VALUES),
         _hash_node(),
         _image_signature_node(),
     ])
@@ -156,8 +167,12 @@ def get_schema(upl=False):
     node_config = NodeConfig(r'config-\d+' if upl else r'conf-\d+', elements=[
         PropString('description', True),
         PropImageRef('fdt'),
+        PropImageRef('fpga'),
+        PropImageRef('script'),
         PropImageRefList('loadables'),
         PropStringList('compatible'),
+        PropString('cmdline'),
+        PropBool('load-only'),
         PropBool('require-fit'),
         _config_signature_node(),
     ])
