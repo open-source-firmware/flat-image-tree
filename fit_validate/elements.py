@@ -66,13 +66,40 @@ class SchemaElement():
                 key: name of controlling property
                 value: True if the property must be present, False if it must be
                     absent
+        required_when: Dynamic requirement based on sibling values. Dict:
+                key: name of sibling property to inspect
+                value: list of values that make this element required
+            If the sibling exists and its value is in the listed values the
+            element becomes required. Otherwise the static ``required`` flag
+            applies.
     """
-    def __init__(self, name, prop_type, required=False, conditional_props=None):
+    def __init__(self, name, prop_type, required=False, conditional_props=None,
+                 required_when=None):
         self.name = name
         self.prop_type = prop_type
         self.required = required
         self.conditional_props = conditional_props
+        self.required_when = required_when
         self.parent = None
+
+    def is_required(self, node):
+        """Return True if this element is required for the given node
+
+        Args:
+            node (fdt.Node): Node being validated, used to look up sibling
+                property values for required_when
+
+        Returns:
+            bool: True if the element must be present in this node
+        """
+        if self.required:
+            return True
+        if self.required_when and node is not None:
+            for sibling_name, allowed_values in self.required_when.items():
+                sibling = node.props.get(sibling_name)
+                if sibling is not None and sibling.value in allowed_values:
+                    return True
+        return False
 
     def validate(self, val, prop_or_node):
         """Validate the schema element against the given property.
@@ -116,14 +143,26 @@ class PropString(PropDesc):
 
     Args:
         str_pattern: Regex to use to validate the string
+        values: Optional list of allowed string values. When set the value
+            must appear in the list; ``str_pattern`` is ignored.
     """
     def __init__(self, name, required=False, str_pattern='',
-                             conditional_props=None):
-        super().__init__(name, 'string', required, conditional_props)
+                             conditional_props=None, required_when=None,
+                             values=None):
+        super().__init__(name, 'string', required, conditional_props,
+                         required_when)
         self.str_pattern = str_pattern
+        self.values = values
 
     def validate_prop(self, val, prop):
-        """Check the string with a regex"""
+        """Check the string against a list of allowed values or a regex"""
+        if self.values is not None:
+            if prop.value not in self.values:
+                val.fail(
+                    get_node_path(prop),
+                    f"'{prop.name}' value '{prop.value}' is not one of "
+                    f"the allowed values ({', '.join(self.values)})")
+            return
         if not self.str_pattern:
             return
         pattern = '^' + self.str_pattern + '$'
@@ -136,8 +175,10 @@ class PropString(PropDesc):
 
 class PropInt(PropDesc):
     """Single-cell (32-bit) integer"""
-    def __init__(self, name, required=False, conditional_props=None):
-        super().__init__(name, 'int', required, conditional_props)
+    def __init__(self, name, required=False, conditional_props=None,
+                 required_when=None):
+        super().__init__(name, 'int', required, conditional_props,
+                         required_when)
 
     def validate_prop(self, val, prop):
         """Check the timestamp"""

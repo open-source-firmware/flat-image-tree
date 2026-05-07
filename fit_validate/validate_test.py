@@ -41,6 +41,8 @@ HEADER = '''/dts-v1/;
             data = "abc";
             os = "linux";
             project = "linux";
+            load = <0x10000000>;
+            entry = <0x10000000>;
         };
     };
 
@@ -68,6 +70,8 @@ SIGNED = '''/dts-v1/;
             data = "abc";
             os = "linux";
             project = "linux";
+            load = <0x10000000>;
+            entry = <0x10000000>;
             hash-1 {
                 algo = "sha256";
                 value = [00 11 22 33];
@@ -247,6 +251,48 @@ class UnitTests(unittest.TestCase):
             "missing",
             ], result)
 
+    def test_kernel_requires_os(self):
+        """type=kernel images must have an os property"""
+        bad = HEADER.replace('os = "linux";\n            ', '', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1: Required property 'os' missing",
+            ], result)
+
+    def test_non_kernel_does_not_require_os(self):
+        """A non-kernel image without os should validate"""
+        ok = HEADER.replace('type = "kernel";', 'type = "ramdisk";', 1)
+        ok = ok.replace('os = "linux";\n            ', '', 1)
+        ok = ok.replace('load = <0x10000000>;\n            ', '', 1)
+        ok = ok.replace('entry = <0x10000000>;\n            ', '', 1)
+        self.assertEqual([], self.run_test(ok))
+
+    def test_invalid_arch(self):
+        """An arch outside the allowed set should be reported"""
+        bad = HEADER.replace('arch = "arm64";', 'arch = "z80";', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1: 'arch' value 'z80' is not one of the allowed "
+            "values (invalid, alpha, arc, arm64, arm,",
+            ], result)
+
+    def test_invalid_compression(self):
+        """A compression outside the allowed set should be reported"""
+        bad = HEADER.replace(
+            'type = "kernel";',
+            'type = "kernel";\n            compression = "snappy";', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1: 'compression' value 'snappy' is not one of "
+            "the allowed values (none, bzip2, gzip, lz4, lzma, lzo, zstd)",
+            ], result)
+
+    def test_root_description_optional(self):
+        """The spec says root description is optional"""
+        ok = HEADER.replace(
+            'description = "This is my description";\n    ', '', 1)
+        self.assertEqual([], self.run_test(ok))
+
     def test_default_references_missing_config(self):
         """`default` must name an existing configuration"""
         bad = HEADER.replace(
@@ -289,8 +335,7 @@ class UnitTests(unittest.TestCase):
             '''image-2 {
             description = "Chain target";
             arch = "arm64";
-            type = "kernel";
-            os = "linux";
+            type = "ramdisk";
             project = "linux";
             image-data = "image-1";
         };

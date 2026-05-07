@@ -19,6 +19,44 @@ from fit_validate.elements import PropImageRefList, PropInt, PropString
 from fit_validate.elements import PropStringList, PropTimestamp
 
 
+# Allowed values for image 'type' (chapter 5).
+IMAGE_TYPES = [
+    'invalid', 'aisimage', 'atmelimage', 'copro', 'fdt_legacy', 'filesystem',
+    'firmware', 'firmware_ivt', 'flat_dt', 'flat-binary', 'fpga', 'gpimage',
+    'imx8image', 'imx8mimage', 'imximage', 'kernel', 'kernel_noload',
+    'kwbimage', 'lpc32xximage', 'mtk_image', 'multi', 'mxsimage',
+    'omapimage', 'pblimage', 'pmmc', 'ramdisk', 'rkimage', 'rksd',
+    'rkspi', 'script', 'socfpgaimage', 'socfpgaimage_v1', 'spkgimage',
+    'standalone', 'stm32image', 'sunxi_egon', 'sunxi_toc0', 'tee',
+    'tfa-bl31', 'ublimage', 'vybridimage', 'x86_setup', 'zynqimage',
+    'zynqmpbif', 'zynqmpimage',
+]
+
+# Allowed values for 'compression' on an image (chapter 5).
+COMPRESSION_TYPES = ['none', 'bzip2', 'gzip', 'lz4', 'lzma', 'lzo', 'zstd']
+
+# Allowed values for 'os' on an image (chapter 5).
+OS_NAMES = [
+    'invalid', '4_4bsd', 'arm-trusted-firmware', 'dell', 'efi', 'esix',
+    'freebsd', 'integrity', 'irix', 'linux', 'ncr', 'netbsd', 'openbsd',
+    'openrtos', 'opensbi', 'ose', 'plan9', 'psos', 'qnx', 'rtems', 'sco',
+    'solaris', 'svr4', 'tee', 'u-boot', 'vxworks',
+]
+
+# Allowed values for 'arch' on an image (chapter 5).
+ARCH_NAMES = [
+    'invalid', 'alpha', 'arc', 'arm64', 'arm', 'avr32', 'blackfin', 'ia64',
+    'm68k', 'microblaze', 'mips64', 'mips', 'nds32', 'nios2', 'or1k',
+    'powerpc', 'ppc', 'riscv', 's390', 'sandbox', 'sh', 'sparc64', 'sparc',
+    'x86_64', 'x86', 'xtensa',
+]
+
+# Image types for which 'arch' is mandatory (chapter 5).
+ARCH_REQUIRED_TYPES = ['standalone', 'kernel', 'firmware', 'ramdisk', 'fdt']
+
+# Image types for which 'entry' and 'load' are mandatory (chapter 5).
+LOAD_REQUIRED_TYPES = ['firmware', 'kernel']
+
 # Hash algorithms accepted on a hash-N node (chapter 5, Hash nodes).
 HASH_ALGO = r'crc16-ccitt|crc32|md5|sha1|sha256|sha384|sha512'
 
@@ -91,9 +129,10 @@ def get_schema(upl=False):
     node_image = NodeImage(r'image-\d+' if upl else r'[a-z-]+-\d+', elements=[
         PropString('description', True),
         PropTimestamp('timestamp'),
-        PropString('arch', True),
-        PropString('type', True),
-        PropString('compression'),
+        PropString('type', True, values=IMAGE_TYPES),
+        PropString('arch', values=ARCH_NAMES,
+                   required_when={'type': ARCH_REQUIRED_TYPES}),
+        PropString('compression', values=COMPRESSION_TYPES),
         PropInt('data-offset', True, conditional_props={
             'data': False, 'image-data': False}),
         PropInt('data-size', True, conditional_props={
@@ -101,13 +140,14 @@ def get_schema(upl=False):
         PropDesc('data', True, conditional_props={
             'data-offset': False, 'data-size': False, 'image-data': False}),
         PropImageRef('image-data', no_chain=True),
-        PropString('os', True),
-        PropInt('load'),
+        PropString('os', values=OS_NAMES,
+                   required_when={'type': ['kernel']}),
+        PropInt('load', required_when={'type': LOAD_REQUIRED_TYPES}),
         PropStringList('capabilities'),
         PropString('producer'),
         PropInt('uncomp-size'),
         PropInt('entry-start', False),
-        PropInt('entry', False),
+        PropInt('entry', required_when={'type': LOAD_REQUIRED_TYPES}),
         PropInt('reloc-start', False),
         _hash_node(),
         _image_signature_node(),
@@ -124,7 +164,7 @@ def get_schema(upl=False):
 
     schema = NodeDesc('/', True, [
         PropTimestamp('timestamp', True),
-        PropString('description', True),
+        PropString('description'),
         PropAddressCells(True),
         NodeDesc('images', True, [
             node_image,

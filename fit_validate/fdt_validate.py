@@ -241,7 +241,8 @@ class FdtValidator():
             if (not isinstance(element, PropDesc) or
                     not self.element_present(element, node)):
                 continue
-            if element.required and element.name not in node.props.keys():
+            if (element.is_required(node)
+                    and element.name not in node.props.keys()):
                 self.fail(
                     node.path,
                     f"Required property '{element.name}' missing")
@@ -249,7 +250,8 @@ class FdtValidator():
         # Check that any required subnodes are present
         subnode_names = [n.name for n in node.subnodes]
         for element in schema.elements:
-            if (not isinstance(element, NodeDesc) or not element.required
+            if (not isinstance(element, NodeDesc)
+                    or not element.is_required(node)
                     or not self.element_present(element, node)):
                 continue
             if element.name not in subnode_names:
