@@ -203,6 +203,57 @@ class UnitTests(unittest.TestCase):
         """Test that the command-line interface works correctly"""
         self.assertEqual([], self.run_test(HEADER, True, ['-u']))
 
+    def test_upl_extension_selects_upl_schema(self):
+        """A .upl file is validated against the UPL schema automatically
+
+        The fixture uses HEADER, which exercises UPL-only properties such as
+        ``project``. Run it through the command-line interface using a .upl
+        suffix and without the -u flag - validation should still succeed.
+        """
+        with tempfile.NamedTemporaryFile(suffix='.upl', delete=False) as upl:
+            upl.close()
+        with tempfile.NamedTemporaryFile(suffix='.dts', delete=False) as dts:
+            dts.write(HEADER.encode('utf-8'))
+            dts.close()
+            tools.prepare_output_dir(None)
+            from dtoc import fdt_util
+            dtb = fdt_util.EnsureCompiled(dts.name)
+            with open(dtb, 'rb') as src, open(upl.name, 'wb') as dst:
+                dst.write(src.read())
+            tools.finalise_output_dir()
+            os.unlink(dts.name)
+        try:
+            output = subprocess.check_output(
+                [sys.executable, '-m', 'fit_validate.validate', upl.name],
+                stderr=subprocess.STDOUT)
+            self.assertEqual(b'', output)
+        finally:
+            os.unlink(upl.name)
+
+    def test_require_fit_rejected_on_plain_fit(self):
+        """require-fit is a UPL extension, not part of the FIT spec"""
+        # Convert HEADER from UPL into plain FIT by swapping the UPL-only
+        # properties for their FIT counterparts and adding require-fit.
+        plain = HEADER.replace('project = "linux";', '')
+        plain = plain.replace('firmware = "image-1";',
+                              'kernel = "image-1";\n            '
+                              'require-fit;')
+        plain = plain.replace('config-1', 'conf-1')
+        # When run without -u and on a non-.upl file, require-fit is unknown.
+        with tempfile.NamedTemporaryFile(suffix='.dts', delete=False) as dts:
+            dts.write(plain.encode('utf-8'))
+            dts.close()
+            try:
+                output = subprocess.check_output(
+                    [sys.executable, '-m', 'fit_validate.validate', dts.name],
+                    stderr=subprocess.STDOUT)
+                self.fail('expected non-zero exit')
+            except subprocess.CalledProcessError as exc:
+                output = exc.output
+            finally:
+                os.unlink(dts.name)
+        self.assertIn(b"Unexpected property 'require-fit'", output)
+
     def test_extra(self):
         """Test complaining about extra nodes and properties"""
         result = self.run_test(HEADER + EXTRA)

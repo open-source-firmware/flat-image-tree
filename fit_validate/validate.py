@@ -48,7 +48,9 @@ def parse_args(argv):
              'useful for debugging')
     parser.add_argument(
         '-u', '--upl', action='store_true',
-        help='Use the Universal Payload (UPL) schema instead of FIT')
+        help='Force the Universal Payload (UPL) schema for every file. '
+             'When unset, files with a .upl extension are validated as UPL '
+             'and the rest as plain FIT.')
     parser.add_argument('files', type=str, nargs='*', help='Files to validate')
     # parser.add_argument('-U', '--show-environment', action='store_true',
           # default=False, help='Show environment changes in summary')
@@ -83,14 +85,15 @@ def run_fit_validate(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
     tools.prepare_output_dir(None)
-    validator = fdt_validate.FdtValidator(schema.get_schema(args.upl),
-                                          args.raise_on_error)
+    fit_schema = schema.get_schema(False)
+    upl_schema = schema.get_schema(True)
     found_errors = False
     try:
         for fname in args.files:
+            use_upl = args.upl or fname.lower().endswith('.upl')
+            validator = fdt_validate.FdtValidator(
+                upl_schema if use_upl else fit_schema, args.raise_on_error)
             errors = validator.start(fname)
-            if errors:
-                found_errors = True
             if errors:
                 show_errors(fname, errors)
                 found_errors = True

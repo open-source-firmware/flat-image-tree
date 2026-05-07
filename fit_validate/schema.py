@@ -173,7 +173,6 @@ def get_schema(upl=False):
         PropStringList('compatible'),
         PropString('cmdline'),
         PropBool('load-only'),
-        PropBool('require-fit'),
         _config_signature_node(),
     ])
 
@@ -190,10 +189,12 @@ def get_schema(upl=False):
         ]),
     ])
 
-    # Tweak the base schema as needed for UPL/vanilla variants
+    # Tweak the base schema as needed for UPL/vanilla variants. require-fit
+    # is a UPL extension and is not part of the FIT specification.
     if upl:
         node_image.add_element(PropString('project', True))
         node_config.add_element(PropImageRef('firmware', True))
+        node_config.add_element(PropBool('require-fit'))
     else:
         node_config.add_element(PropImageRef('kernel', True))
         node_config.add_element(PropImageRef('ramdisk'))
