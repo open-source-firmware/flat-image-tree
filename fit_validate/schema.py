@@ -11,9 +11,73 @@ In this way it is possible to describe the schema in a fairly natural,
 hierarchical way.
 """
 
-from fit_validate.elements import NodeDesc, NodeConfig, NodeImage
-from fit_validate.elements import PropAddressCells, PropBool, PropDesc, PropInt
-from fit_validate.elements import PropString, PropStringList, PropTimestamp
+from fit_validate.elements import NodeConfig, NodeDesc, NodeHash, NodeImage
+from fit_validate.elements import NodeSignature
+from fit_validate.elements import PropAddressCells, PropBool, PropBytes
+from fit_validate.elements import PropDesc, PropInt, PropString, PropStringList
+from fit_validate.elements import PropTimestamp
+
+
+# Hash algorithms accepted on a hash-N node (chapter 5, Hash nodes).
+HASH_ALGO = r'crc16-ccitt|crc32|md5|sha1|sha256|sha384|sha512'
+
+# Signature algorithms are a composite '<hash>,<signing>' string (chapter 5,
+# Image-signature nodes). The spec lists explicit combinations but explains
+# that any hash may be paired with any signing algorithm, so allow any
+# rsaNNNN or ecdsaNNNN paired with one of the supported hashes.
+SIGNATURE_ALGO = r'(sha1|sha256|sha384|sha512),(rsa\d+|ecdsa\d+)'
+
+# Padding modes for signature nodes.
+SIGNATURE_PADDING = r'pkcs-1\.5|pss'
+
+
+def _hash_node():
+    """Build a hash-N node schema element"""
+    return NodeHash(elements=[
+        PropString('algo', True, str_pattern=HASH_ALGO),
+        PropBytes('value', True),
+    ])
+
+
+def _image_signature_node():
+    """Build a signature-N schema element for use under an image node
+
+    Per the spec, in a fully-signed image these properties are mandatory:
+    algo, key-name-hint, value, hashed-nodes, hashed-strings.
+    """
+    return NodeSignature(elements=[
+        PropString('algo', True, str_pattern=SIGNATURE_ALGO),
+        PropString('key-name-hint', True),
+        PropBytes('value', True),
+        PropStringList('hashed-nodes', True),
+        PropBytes('hashed-strings', True),
+        PropStringList('sign-images'),
+        PropTimestamp('timestamp'),
+        PropString('signer-name'),
+        PropString('signer-version'),
+        PropString('comment'),
+        PropString('padding', str_pattern=SIGNATURE_PADDING),
+    ])
+
+
+def _config_signature_node():
+    """Build a signature-N schema element for use under a config node
+
+    Per the spec, in a fully-signed config only algo, key-name-hint and
+    value are mandatory; sign-images and hashed-strings are optional.
+    """
+    return NodeSignature(elements=[
+        PropString('algo', True, str_pattern=SIGNATURE_ALGO),
+        PropString('key-name-hint', True),
+        PropBytes('value', True),
+        PropStringList('sign-images'),
+        PropBytes('hashed-strings'),
+        PropTimestamp('timestamp'),
+        PropString('signer-name'),
+        PropString('signer-version'),
+        PropString('comment'),
+        PropString('padding', str_pattern=SIGNATURE_PADDING),
+    ])
 
 
 def get_schema(upl=False):
@@ -42,6 +106,8 @@ def get_schema(upl=False):
         PropInt('entry-start', False),
         PropInt('entry', False),
         PropInt('reloc-start', False),
+        _hash_node(),
+        _image_signature_node(),
     ])
 
     node_config = NodeConfig(r'config-\d+' if upl else r'conf-\d+', elements=[
@@ -50,6 +116,7 @@ def get_schema(upl=False):
         PropStringList('loadables'),
         PropStringList('compatible'),
         PropBool('require-fit'),
+        _config_signature_node(),
     ])
 
     schema = NodeDesc('/', True, [

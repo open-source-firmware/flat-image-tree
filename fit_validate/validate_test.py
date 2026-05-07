@@ -53,6 +53,49 @@ HEADER = '''/dts-v1/;
 };
 '''
 
+# A header with hash and signature subnodes, signed with sha256+rsa2048.
+SIGNED = '''/dts-v1/;
+
+/ {
+    timestamp = <123456>;
+    description = "Signed image";
+    #address-cells = <1>;
+    images {
+        image-1 {
+            description = "Image description";
+            arch = "arm64";
+            type = "kernel";
+            data = "abc";
+            os = "linux";
+            project = "linux";
+            hash-1 {
+                algo = "sha256";
+                value = [00 11 22 33];
+            };
+            signature-1 {
+                algo = "sha256,rsa2048";
+                key-name-hint = "dev";
+                value = [aa bb cc dd];
+                hashed-nodes = "/", "/images/image-1";
+                hashed-strings = <0 0x100>;
+            };
+        };
+    };
+
+    configurations {
+        config-1 {
+            description = "Configuration description";
+            firmware = "image-1";
+            signature-1 {
+                algo = "sha256,rsa2048";
+                key-name-hint = "dev";
+                value = [aa bb cc dd];
+            };
+        };
+    };
+};
+'''
+
 EXTRA = '''
 / {
     wibble {
@@ -162,6 +205,47 @@ class UnitTests(unittest.TestCase):
             ["/images: Unexpected property 'extra-prop', valid list is ()",
              "/: Unexpected subnode 'wibble', valid list is (images, configurations)"],
              result)
+
+    def test_signed_ok(self):
+        """A FIT with valid hash and signature subnodes should validate"""
+        self.assertEqual([], self.run_test(SIGNED))
+
+    def test_hash_missing_algo(self):
+        """A hash node missing algo should be reported"""
+        bad = SIGNED.replace('                algo = "sha256";\n', '', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1/hash-1: Required property 'algo' missing",
+            ], result)
+
+    def test_hash_unknown_algo(self):
+        """An unsupported hash algorithm should be reported"""
+        bad = SIGNED.replace('algo = "sha256";', 'algo = "blake3";', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1/hash-1: 'algo' value 'blake3' does not match "
+            "pattern '^crc16-ccitt|crc32|md5|sha1|sha256|sha384|sha512$'",
+            ], result)
+
+    def test_signature_unknown_algo(self):
+        """An unsupported signature algorithm should be reported"""
+        bad = SIGNED.replace('"sha256,rsa2048"', '"sha256,dilithium3"', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1/signature-1: 'algo' value 'sha256,dilithium3' "
+            "does not match pattern "
+            "'^(sha1|sha256|sha384|sha512),(rsa\\d+|ecdsa\\d+)$'",
+            ], result)
+
+    def test_image_signature_missing_required(self):
+        """An image signature missing hashed-nodes should be reported"""
+        bad = SIGNED.replace(
+            'hashed-nodes = "/", "/images/image-1";\n            ', '', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/images/image-1/signature-1: Required property 'hashed-nodes' "
+            "missing",
+            ], result)
 
     def test_whitespace_in_prop_name(self):
         """Test that trailing/leading whitespace in property names is reported

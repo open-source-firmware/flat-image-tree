@@ -29,6 +29,7 @@ Unit tests can be run like this:
 """
 
 import os
+import re
 
 # pylint: disable=E0401
 from dtoc import fdt, fdt_util
@@ -146,6 +147,15 @@ class FdtValidator():
                 True if the node should have schema, False if it can be ignored
                     (because it is internal to the device-tree format)
         """
+        # When more than one NodeAny sibling defines a name pattern, pick
+        # the one whose pattern matches. With a single NodeAny we keep the
+        # historic behaviour of accepting any name and letting validate_node
+        # report the pattern mismatch.
+        patterned_anys = [e for e in schema.elements
+                          if (isinstance(e, NodeAny) and e.name_pattern
+                              and self.element_present(e, node))]
+        filter_by_pattern = len(patterned_anys) > 1
+
         for element in schema.elements:
             if not self.element_present(element, node):
                 continue
@@ -153,6 +163,10 @@ class FdtValidator():
                 return element, True
             if ((expected is None or expected == NodeDesc) and
                         isinstance(element, NodeAny)):
+                if filter_by_pattern and element.name_pattern:
+                    if re.match('^' + element.name_pattern + '$', name):
+                        return element, True
+                    continue
                 return element, True
             if ((expected is None or expected == PropDesc) and
                         isinstance(element, PropAny)):

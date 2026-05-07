@@ -100,6 +100,17 @@ class PropDesc(SchemaElement):
         """
 
 
+class PropBytes(PropDesc):
+    """A property carrying an opaque byte sequence
+
+    Used for hash and signature values, where the bytes are produced by an
+    external tool and the validator only checks for presence (length is
+    determined by the algorithm).
+    """
+    def __init__(self, name, required=False, conditional_props=None):
+        super().__init__(name, 'bytes', required, conditional_props)
+
+
 class PropString(PropDesc):
     """A string-property
 
@@ -371,3 +382,15 @@ class NodeConfig(NodeAny):
     """A FIT config node"""
     def __init__(self, name_pattern, elements):
         super().__init__(name_pattern=name_pattern, elements=elements)
+
+
+class NodeHash(NodeAny):
+    """A FIT hash node (hash-1, hash-2, ...)"""
+    def __init__(self, elements):
+        super().__init__(name_pattern=r'hash-\d+', elements=elements)
+
+
+class NodeSignature(NodeAny):
+    """A FIT signature node (signature-1, signature-2, ...)"""
+    def __init__(self, elements):
+        super().__init__(name_pattern=r'signature-\d+', elements=elements)
