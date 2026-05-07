@@ -1,0 +1,6 @@
+# C build artifacts
+*.o
+*.a
+
+# Sphinx output
+build/
