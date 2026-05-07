@@ -201,6 +201,69 @@ class PropStringList(PropDesc):
                     f"'{prop.name}' value '{item}' does not match pattern '{pattern}'")
 
 
+class PropNodeRef(PropString):
+    """A string property whose value names another node by unit name
+
+    The target node lives at ``<target_parent_path>/<value>``. Used for
+    image and configuration references, where one node points at another
+    by name rather than via a phandle.
+
+    Properties:
+        target_parent_path: Path of the parent under which the target lives
+            (e.g. '/images')
+        no_chain: True if the target node must not itself have a property of
+            this same name (used for image-data, where chains are forbidden)
+    """
+    def __init__(self, name, target_parent_path, required=False,
+                 conditional_props=None, no_chain=False):
+        super().__init__(name, required, conditional_props=conditional_props)
+        self.target_parent_path = target_parent_path
+        self.no_chain = no_chain
+
+    def validate_prop(self, val, prop):
+        super().validate_prop(val, prop)
+        if not isinstance(prop.value, str):
+            return
+        target_path = self.target_parent_path + '/' + prop.value
+        target = val.get_node(target_path)
+        if target is None:
+            val.fail(get_node_path(prop),
+                     f"'{prop.name}' references missing node '{target_path}'")
+            return
+        if self.no_chain and self.name in target.props:
+            val.fail(get_node_path(prop),
+                     f"'{prop.name}' target '{prop.value}' itself has a "
+                     f"'{self.name}' property; chains are not permitted")
+
+
+class PropImageRef(PropNodeRef):
+    """A property whose value names a node under /images"""
+    def __init__(self, name, required=False, conditional_props=None,
+                 no_chain=False):
+        super().__init__(name, '/images', required, conditional_props,
+                         no_chain)
+
+
+class PropConfigRef(PropNodeRef):
+    """A property whose value names a node under /configurations"""
+    def __init__(self, name, required=False, conditional_props=None):
+        super().__init__(name, '/configurations', required, conditional_props)
+
+
+class PropImageRefList(PropStringList):
+    """A stringlist where each entry names a node under /images"""
+    def validate_prop(self, val, prop):
+        super().validate_prop(val, prop)
+        if isinstance(prop.value, str):
+            items = [prop.value]
+        else:
+            items = prop.value or []
+        for item in items:
+            if val.get_node('/images/' + item) is None:
+                val.fail(get_node_path(prop),
+                         f"'{prop.name}' references missing image '{item}'")
+
+
 class PropPhandleTarget(PropDesc):
     """A phandle-target property schema element
 

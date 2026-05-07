@@ -247,6 +247,65 @@ class UnitTests(unittest.TestCase):
             "missing",
             ], result)
 
+    def test_default_references_missing_config(self):
+        """`default` must name an existing configuration"""
+        bad = HEADER.replace(
+            'configurations {',
+            'configurations {\n        default = "missing-conf";', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/configurations: 'default' references missing node "
+            "'/configurations/missing-conf'",
+            ], result)
+
+    def test_firmware_references_missing_image(self):
+        """A config's `firmware` must name an existing image"""
+        bad = HEADER.replace('firmware = "image-1"',
+                             'firmware = "ghost-image"', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/configurations/config-1: 'firmware' references missing node "
+            "'/images/ghost-image'",
+            ], result)
+
+    def test_loadables_references_missing_image(self):
+        """A config's `loadables` items must each name an existing image"""
+        bad = HEADER.replace(
+            'firmware = "image-1";',
+            'firmware = "image-1";\n            '
+            'loadables = "image-1", "missing-1", "missing-2";', 1)
+        result = self.run_test(bad)
+        self._check_all_in([
+            "/configurations/config-1: 'loadables' references missing image "
+            "'missing-1'",
+            "/configurations/config-1: 'loadables' references missing image "
+            "'missing-2'",
+            ], result)
+
+    def test_image_data_no_chain(self):
+        """image-data target must not itself have image-data"""
+        chained = HEADER.replace(
+            'image-1 {',
+            '''image-2 {
+            description = "Chain target";
+            arch = "arm64";
+            type = "kernel";
+            os = "linux";
+            project = "linux";
+            image-data = "image-1";
+        };
+
+        image-1 {''', 1).replace(
+            'data = "abc";',
+            'image-data = "image-2";', 1)
+        result = self.run_test(chained)
+        self._check_all_in([
+            "/images/image-2: 'image-data' target 'image-1' itself has a "
+            "'image-data' property; chains are not permitted",
+            "/images/image-1: 'image-data' target 'image-2' itself has a "
+            "'image-data' property; chains are not permitted",
+            ], result)
+
     def test_whitespace_in_prop_name(self):
         """Test that trailing/leading whitespace in property names is reported
 

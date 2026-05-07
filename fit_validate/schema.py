@@ -14,8 +14,9 @@ hierarchical way.
 from fit_validate.elements import NodeConfig, NodeDesc, NodeHash, NodeImage
 from fit_validate.elements import NodeSignature
 from fit_validate.elements import PropAddressCells, PropBool, PropBytes
-from fit_validate.elements import PropDesc, PropInt, PropString, PropStringList
-from fit_validate.elements import PropTimestamp
+from fit_validate.elements import PropConfigRef, PropDesc, PropImageRef
+from fit_validate.elements import PropImageRefList, PropInt, PropString
+from fit_validate.elements import PropStringList, PropTimestamp
 
 
 # Hash algorithms accepted on a hash-N node (chapter 5, Hash nodes).
@@ -51,7 +52,7 @@ def _image_signature_node():
         PropBytes('value', True),
         PropStringList('hashed-nodes', True),
         PropBytes('hashed-strings', True),
-        PropStringList('sign-images'),
+        PropImageRefList('sign-images'),
         PropTimestamp('timestamp'),
         PropString('signer-name'),
         PropString('signer-version'),
@@ -70,7 +71,7 @@ def _config_signature_node():
         PropString('algo', True, str_pattern=SIGNATURE_ALGO),
         PropString('key-name-hint', True),
         PropBytes('value', True),
-        PropStringList('sign-images'),
+        PropImageRefList('sign-images'),
         PropBytes('hashed-strings'),
         PropTimestamp('timestamp'),
         PropString('signer-name'),
@@ -93,11 +94,13 @@ def get_schema(upl=False):
         PropString('arch', True),
         PropString('type', True),
         PropString('compression'),
-        PropInt('data-offset', True, conditional_props={'data': False}),
-        PropInt('data-size', True, conditional_props={'data': False}),
-        PropDesc('data', True,
-                 conditional_props={'data-offset': False,
-                                    'data-size': False}),
+        PropInt('data-offset', True, conditional_props={
+            'data': False, 'image-data': False}),
+        PropInt('data-size', True, conditional_props={
+            'data': False, 'image-data': False}),
+        PropDesc('data', True, conditional_props={
+            'data-offset': False, 'data-size': False, 'image-data': False}),
+        PropImageRef('image-data', no_chain=True),
         PropString('os', True),
         PropInt('load'),
         PropStringList('capabilities'),
@@ -112,8 +115,8 @@ def get_schema(upl=False):
 
     node_config = NodeConfig(r'config-\d+' if upl else r'conf-\d+', elements=[
         PropString('description', True),
-        PropString('fdt'),  # Add
-        PropStringList('loadables'),
+        PropImageRef('fdt'),
+        PropImageRefList('loadables'),
         PropStringList('compatible'),
         PropBool('require-fit'),
         _config_signature_node(),
@@ -127,7 +130,7 @@ def get_schema(upl=False):
             node_image,
         ]),
         NodeDesc('configurations', True, [
-            PropString('default'),
+            PropConfigRef('default'),
             node_config,
         ]),
     ])
@@ -135,9 +138,9 @@ def get_schema(upl=False):
     # Tweak the base schema as needed for UPL/vanilla variants
     if upl:
         node_image.add_element(PropString('project', True))
-        node_config.add_element(PropString('firmware', True))
+        node_config.add_element(PropImageRef('firmware', True))
     else:
-        node_config.add_element(PropString('kernel', True))
-        node_config.add_element(PropString('ramdisk'))
+        node_config.add_element(PropImageRef('kernel', True))
+        node_config.add_element(PropImageRef('ramdisk'))
 
     return schema

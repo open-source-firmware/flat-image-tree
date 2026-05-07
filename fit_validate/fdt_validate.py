@@ -303,6 +303,19 @@ class FdtValidator():
         """Prepare to validate"""
         self._fdt = _fdt
 
+    def get_node(self, path):
+        """Look up a node by full path
+
+        Args:
+            path (str): Full devicetree path (e.g. '/images/image-1')
+
+        Returns:
+            fdt.Node, or None if no such node exists
+        """
+        if self._fdt is None:
+            return None
+        return self._fdt.GetNode(path)
+
 
     def start(self, fname):
         """Start validating a master configuration file
