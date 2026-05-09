@@ -492,11 +492,14 @@ A whole-FIT signature covers two byte ranges, in this order:
    ``totalsize`` keeps every header field stable, so the entire header
    is signed without exclusions. This authenticates the FDT's
    internal layout (``totalsize``, ``off_dt_struct``, ``off_dt_strings``,
-   ``off_mem_rsvmap``) as well as the external data extent
-   (``boot_cpuid_phys``).
-#. ``[0x28 + trailer_totalsize, totalsize + boot_cpuid_phys)`` —
+   ``off_mem_rsvmap``).
+#. ``[0x28 + trailer_totalsize, totalsize + external_data_size)`` —
    the main FDT's memreserve, structure and strings blocks, followed
-   by all external image data.
+   by all external image data, where ``external_data_size`` is the
+   value of the trailer's ``external-data-size`` property (zero if
+   absent). The property is implicitly authenticated by the
+   signature: any change to it shifts the upper bound of range 2 and
+   invalidates the hash.
 
 The trailer itself, ``[0x28, 0x28 + trailer_totalsize)``, is excluded
 so that its mutable contents (UUIDs, signatures, counters) can be
@@ -557,16 +560,18 @@ What whole-FIT signing protects against
   FDT's structure, strings or memreserve blocks changes bytes in
   the signed range, invalidating the signature.
 - **Tampering with external image data.** The signed range extends
-  to ``totalsize + boot_cpuid_phys``, covering all external image
-  data.
+  to ``totalsize + external_data_size``, covering all external
+  image data.
 - **FDT-pointer redirection.** ``totalsize``, ``off_dt_struct``,
   ``off_dt_strings`` and ``off_mem_rsvmap`` are all in the signed
   FDT header. An attacker cannot redirect an FDT consumer to parse
   attacker-controlled bytes by manipulating these fields.
-- **Truncation and extension.** ``totalsize`` and
-  ``boot_cpuid_phys`` are signed, so an attacker cannot shrink the
-  apparent extent of the FIT to excise content from the hash, nor
-  extend it to smuggle data into a verified region.
+- **Truncation and extension.** ``totalsize`` is in the signed
+  header and ``external-data-size`` is implicitly authenticated by
+  the signature (any change shifts the byte range and breaks the
+  hash), so an attacker cannot shrink the apparent extent of the
+  FIT to excise content, nor extend it to smuggle data into a
+  verified region.
 - **Bit rot in regions not covered by per-configuration signing.**
   Per-configuration signing is selective and does not hash, for
   example, configuration nodes other than the one being signed,
@@ -602,9 +607,9 @@ What whole-FIT signing does *not* protect against
   the trailer's signatures (or the trailer entirely) to bypass
   whole-FIT verification. The defence is at policy level: a
   bootloader requiring whole-FIT signing must not fall back to
-  unsigned operation. ``boot_cpuid_phys`` and the FDT magic are
-  both signed, so a downgrade attack must work at the policy
-  layer, not the format layer.
+  unsigned operation. The FDT magic and the rest of the header are
+  signed, so a downgrade attack must work at the policy layer, not
+  the format layer.
 - **Rollback and replay.** Neither whole-FIT signing nor
   per-configuration signing prevents an attacker from booting a
   previously valid (but now superseded) FIT. Anti-rollback

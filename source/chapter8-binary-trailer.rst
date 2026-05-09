@@ -76,15 +76,18 @@ The main FDT therefore looks like this:
            v     v             v                           v
            [hdr] [trailer FDT] [memrsv | struct | strings]
 
-External image data follows the main FDT, and ``boot_cpuid_phys``
-in the FDT header records its size:
+External image data follows the main FDT, and the trailer's
+``external-data-size`` property records its size:
 
 .. code-block::
 
-    offset 0                 totalsize    totalsize + boot_cpuid_phys
+    offset 0                 totalsize    totalsize + ext_size
            |                 |            |
            v                 v            v
            [main FDT, including trailer]  [external image data]
+
+where ``ext_size`` is the value of the trailer's
+``external-data-size`` property (zero if absent).
 
 Compatibility with existing FITs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,21 +123,30 @@ read from the trailer.
 External data size
 ~~~~~~~~~~~~~~~~~~
 
-The ``boot_cpuid_phys`` field of the main FDT header (offset
-``0x1c``, four bytes, big-endian) carries the size of the external
-data region in bytes — the number of bytes after the main FDT's
-``totalsize`` that contain externally stored image data. FIT does
-not otherwise use this field. A FIT with no external data sets it
-to zero.
+The number of bytes of external image data — the bytes after the
+main FDT's ``totalsize`` — is recorded in the trailer's root node
+as the ``external-data-size`` property (defined in
+`Trailer property catalogue`_). The value is a 64-bit big-endian
+integer, so the external data region is not constrained by any
+header-field width.
 
-This value is required for whole-FIT signing because it defines the
-extent of the authenticated content. Producers that emit a
-whole-FIT signature shall set ``boot_cpuid_phys`` accurately.
+Although the trailer is excluded from the whole-FIT signature,
+``external-data-size`` is *implicitly authenticated* by it: the
+signature is computed over a byte range whose upper bound depends
+on this value, so any tampering shifts the byte range and causes
+the signature check to fail. See `Whole-FIT signing`_ below for
+the exact range and verification procedure.
 
-Because the field is 32 bits, the external data region is limited
-to 4 GiB. A FIT with more than 4 GiB of external data cannot use
-whole-FIT signing under this scheme. In practice this is not a
-constraint, since FITs of that size are rare.
+A FIT with no external data either omits the property or sets it
+to zero. Producers that emit a whole-FIT signature shall set
+``external-data-size`` accurately.
+
+The ``boot_cpuid_phys`` field of the main FDT header is not used
+by FIT. Producers shall set it to zero; consumers shall ignore its
+value. Mandating a fixed value removes a producer-controlled byte
+range from the signed header, eliminating a covert channel and
+keeping the signed header's content fully determined by the FIT
+specification.
 
 
 Constrained FDT profile
@@ -284,6 +296,23 @@ treating them as an error.
 The ``vendor-`` prefix is reserved for vendor-defined properties
 that will never be standardised by this specification.
 
+external-data-size
+    The size in bytes of the external image data region — the bytes
+    after the main FDT's ``totalsize``. The value is a 64-bit
+    big-endian integer stored as 8 bytes, with the high 32 bits
+    first. A 64-bit value avoids the 4 GiB ceiling that a 32-bit
+    FDT header field would impose.
+
+    The all-zero value (or absence of the property) indicates no
+    external data. A producer that emits a whole-FIT signature shall
+    set this property to the actual external-data length.
+
+    The property is not signed directly, but is implicitly
+    authenticated by the whole-FIT signature: the signed byte range
+    extends to ``totalsize + external_data_size``, so any change to
+    the value shifts the range and invalidates the signature. See
+    `Whole-FIT signing`_ below.
+
 install-uuid
     A 16-byte RFC 4122 UUID identifying a particular installation
     of this FIT on persistent storage.
@@ -354,9 +383,11 @@ Signed byte ranges
 The signature covers two byte ranges, in this order:
 
 #. ``[0, 0x28)`` — the FDT header (40 bytes).
-#. ``[0x28 + trailer_totalsize, totalsize + boot_cpuid_phys)`` —
+#. ``[0x28 + trailer_totalsize, totalsize + external_data_size)`` —
    the main FDT's memreserve, structure and strings blocks,
-   followed by all external image data.
+   followed by all external image data, where
+   ``external_data_size`` is the value of the trailer's
+   ``external-data-size`` property (zero if absent).
 
 The hash is computed over the concatenation of these two ranges in
 order. The bytes between them, ``[0x28, 0x28 + trailer_totalsize)``,
@@ -368,16 +399,18 @@ Properties of the signed ranges
 
 - The full FDT header is signed (range 1), so an attacker cannot
   tamper with ``totalsize``, ``off_dt_struct``, ``off_dt_strings``,
-  ``off_mem_rsvmap``, ``boot_cpuid_phys`` or any other header
-  field. The FIT layout is fully authenticated.
+  ``off_mem_rsvmap`` or any other header field. The FIT layout is
+  fully authenticated.
 - The trailer's ``totalsize`` is in the trailer's FDT header, which
   is *inside* the excluded trailer region — but it cannot be
   tampered with for an attack: changing it would shift the start
   of range 2, causing the verifier to hash different bytes than
   the signer, and the signature would fail.
-- Range 2 is bounded above by ``totalsize + boot_cpuid_phys``,
-  both of which are signed. An attacker cannot shrink the range to
-  excise external data from the hash.
+- ``external-data-size`` lives in the (excluded) trailer body but
+  is similarly anchored: it determines the upper bound of range 2,
+  so any change shifts the hash input and invalidates the
+  signature. An attacker cannot shrink range 2 to excise external
+  data, nor extend it to include attacker-controlled bytes.
 
 Verification procedure
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -386,10 +419,12 @@ A verifier:
 
 #. Reads ``trailer_totalsize`` from the trailer's FDT header
    (offset ``0x2c``).
-#. Reads the main FDT's ``totalsize`` (offset ``0x4``) and
-   ``boot_cpuid_phys`` (offset ``0x1c``).
+#. Parses the trailer with the constrained-FDT parser to obtain
+   the value of ``external-data-size`` (zero if the property is
+   absent).
+#. Reads the main FDT's ``totalsize`` (offset ``0x4``).
 #. Hashes ``[0, 0x28)`` followed by
-   ``[0x28 + trailer_totalsize, totalsize + boot_cpuid_phys)``.
+   ``[0x28 + trailer_totalsize, totalsize + external_data_size)``.
 #. For each ``signature-N`` property in the trailer (starting at
    ``signature-1`` and stopping at the first missing number),
    verifies the hash against the signature using the algorithm and
