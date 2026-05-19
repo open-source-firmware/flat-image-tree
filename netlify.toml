@@ -1,3 +1,3 @@
 [build]
 	publish = "build/singlehtml"
-	command = "make singlehtml"
+	command = "git fetch --unshallow --tags 2>/dev/null || git fetch --tags --force; make singlehtml"
