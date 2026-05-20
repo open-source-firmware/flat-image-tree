@@ -2,8 +2,8 @@
 
 .. _chapter-source-file-format:
 
-Flattened Image Tree (FIT) Format
-=================================
+Flattened Image Tree (FIT) Source Format
+========================================
 
 Introduction
 ------------
@@ -68,29 +68,6 @@ To identify FIT sub-nodes representing images, hashes, configurations (which
 are defined in the following sections), the "unit name" of the given sub-node
 is used as its identifier as it assures uniqueness without additional
 checking required.
-
-.. index:: External data
-
-.. _ExternalData:
-
-External data
-~~~~~~~~~~~~~
-
-FIT is normally built initially with image data in the 'data' property of each
-image node. It is also possible for this data to reside outside the FIT itself.
-This allows the 'FDT' part of the FIT to be quite small, so that it can be
-loaded and scanned without loading a large amount of data. Then when an image is
-needed it can be loaded from an external source.
-
-External FITs use 'data-offset' or 'data-position' instead of 'data'.
-
-The :index:`mkimage` tool can convert a FIT to use external data using the `-E`
-argument, optionally using `-p` to specific a fixed position.
-
-It is often desirable to align each image to a block size or cache-line size
-(e.g. 512 bytes), so that there is no need to copy it to an
-:index:`aligned address` when reading the image data. The mkimage tool provides
-a `-B` argument to support this.
 
 Root-node properties
 --------------------
