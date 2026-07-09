@@ -91,6 +91,13 @@ string in the bootloader's compatible list, ``"foo,bar"``, matches a compatible
 string in the root of ``fdt1``. Although ``"bim,bam"`` in ``fdt2`` matches the
 second string, this isn't as good a match as ``fdt1``.
 
+If several configurations are equally good matches (they match at the same
+position in the bootloader's compatible stringlist), the one named by the
+``default`` property is selected. This disambiguates a FIT whose configurations
+share a compatible string, for example a base devicetree plus overlay
+combinations for a single model, without relying on the order of the
+configuration nodes.
+
 In U-Boot this algorithm is handled by ``fit_conf_find_compat()`` and enabled
 by the ``CONFIG_FIT_BEST_MATCH`` option.
 
