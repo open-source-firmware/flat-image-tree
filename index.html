@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v1.0-6-gc566886 documentation</title>
+    <title>Flattened Image Tree Specification v1.0-7-g8f6cc25 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <script src="_static/documentation_options.js?v=37ab5a9b"></script>
+    <script src="_static/documentation_options.js?v=83aa54f8"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="icon" href="_static/fit-favicon.png"/>
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v1.0-6-gc566886<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v1.0-7-g8f6cc25<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><section id="copyright">
 <h2><span class="section-number">1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h2>
@@ -1368,6 +1368,12 @@ config-2 {
 string in the bootloader’s compatible list, <code class="docutils literal notranslate"><span class="pre">&quot;foo,bar&quot;</span></code>, matches a compatible
 string in the root of <code class="docutils literal notranslate"><span class="pre">fdt1</span></code>. Although <code class="docutils literal notranslate"><span class="pre">&quot;bim,bam&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">fdt2</span></code> matches the
 second string, this isn’t as good a match as <code class="docutils literal notranslate"><span class="pre">fdt1</span></code>.</p>
+<p>If several configurations are equally good matches (they match at the same
+position in the bootloader’s compatible stringlist), the one named by the
+<code class="docutils literal notranslate"><span class="pre">default</span></code> property is selected. This disambiguates a FIT whose configurations
+share a compatible string, for example a base devicetree plus overlay
+combinations for a single model, without relying on the order of the
+configuration nodes.</p>
 <p>In U-Boot this algorithm is handled by <code class="docutils literal notranslate"><span class="pre">fit_conf_find_compat()</span></code> and enabled
 by the <code class="docutils literal notranslate"><span class="pre">CONFIG_FIT_BEST_MATCH</span></code> option.</p>
 <p>Sometime models have multiple PCB revisions or different minor variants, often
