@@ -255,7 +255,6 @@ Consider the following minimal FIT source::
                 signature-1 {
                     algo = "sha256,rsa2048";
                     key-name-hint = "dev";
-                    sign-images = "kernel", "fdt";
                 };
             };
         };
@@ -309,7 +308,6 @@ resulting FIT looks like this::
                 signature-1 {
                     algo = "sha256,rsa2048";
                     key-name-hint = "dev";
-                    sign-images = "kernel", "fdt";
                     value = <...256-byte RSA-2048 signature...>;
                     hashed-nodes = "/", "/configurations/conf-1",
                         "/images/kernel", "/images/kernel/hash-1",
@@ -387,7 +385,6 @@ or its parent is in the node list.
                **signature-1 {**
                    algo = "sha256,rsa2048";
                    key-name-hint = "dev";
-                   sign-images = "kernel", "fdt";
                    value = <...256-byte RSA-2048 signature...>;
                    hashed-nodes = "/", "/configurations/conf-1", ...;
                    hashed-strings = <0x00000000 0x000000d4>;
