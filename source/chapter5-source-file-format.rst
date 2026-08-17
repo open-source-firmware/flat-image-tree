@@ -168,6 +168,7 @@ the '/images' node should have the following layout::
         o hash-1 {...}
         o hash-2 {...}
         o dm-verity {...}
+        o cipher {...}
         ...
 
 Mandatory properties
@@ -294,6 +295,14 @@ data-position
     Machine address at which the data is to be found. This is a fixed address
     not relative to the loading of the FIT. This is mandatory if
     :index:`external data` is used with a fixed address.
+
+data-size-unciphered
+    Size in bytes of the image's unencrypted (plaintext) data. This is
+    mandatory when the image node has a ``cipher`` sub-node (see
+    `Cipher nodes`_): in that case ``data`` holds padded ciphertext that is
+    larger than the plaintext, and the consumer uses this value to recover
+    the original data after decryption. Unlike the ``data`` properties above,
+    this property is covered by the configuration signature.
 
 os
     :index:`OS` name, mandatory for types "kernel". Valid OS names are:
@@ -424,6 +433,10 @@ dm-verity
     Merkle-tree metadata so that the bootloader can construct kernel
     command-line parameters for integrity-verified boot.
     See `dm-verity nodes`_.
+
+cipher
+    Describes how this image's data is encrypted, so that a consumer holding
+    the right key can decrypt it. See `Cipher nodes`_.
 
 .. index:: Hash nodes
 
@@ -653,6 +666,101 @@ kernel command line (see :ref:`verity-usage`).
 Both the filesystem payload data and the dm-verity Merkle-tree hash data are
 expected to reside inside the same sub-image.
 
+.. index:: Cipher nodes
+
+.. _cipher-nodes:
+
+Cipher nodes
+------------
+
+An image node may contain a ``cipher`` sub-node describing how the image data
+is encrypted, allowing a consumer that holds the right key to decrypt it.
+Encryption provides *confidentiality* for the image payload only; it does not
+provide authentication. Integrity and authenticity continue to come from the
+image hash and the configuration signature (see :ref:`chapter-security`).
+
+::
+
+    o cipher
+        |- algo = "encryption algorithm name"
+        |- key-name-hint = "key name"
+        |- iv-name-hint = "IV name"
+        |- iv = [initialisation vector bytes]
+
+When the ``cipher`` sub-node is present, the image node's ``data`` (or its
+external-data equivalent) holds the *ciphertext* instead of the plaintext, and
+the image node carries a ``data-size-unciphered`` property giving the size of
+the original plaintext.
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+algo
+    :index:`Encryption algorithm <pair: encryption; algorithm>` name. The
+    ``algo`` value is the sole identifier of the encryption scheme: it fully
+    determines the cipher, key length, mode of operation, IV size and
+    padding. There is no separate property for the mode or any other
+    parameter. The algorithms currently defined by this specification, with
+    their key sizes, are:
+
+    ==================== ============ =========================================
+    Algorithm            Key (bytes)  Meaning
+    ==================== ============ =========================================
+    aes128               16           AES-128 in CBC mode
+    aes192               24           AES-192 in CBC mode
+    aes256               32           AES-256 in CBC mode
+    ==================== ============ =========================================
+
+    This list is not closed: future revisions of this specification may
+    define further algorithms, so a consumer must treat an unrecognised
+    ``algo`` as an error (and therefore reject the image) rather than
+    assuming the data is unencrypted.
+
+    The three algorithms above use the Cipher Block Chaining (CBC) mode of
+    operation with a 16-byte initialisation vector and PKCS#7 padding.
+    Because the padding rounds the ciphertext up to a whole number of
+    16-byte blocks, the plaintext size is recorded separately in
+    ``data-size-unciphered``. A scheme that needs a different mode, IV size
+    or padding (for example an AEAD mode such as AES-GCM) is added as a new
+    ``algo`` value rather than by introducing further properties.
+
+key-name-hint
+    Name of the key used to encrypt the image. This is only a hint that lets
+    the FIT producer and consumer locate the key material; it is not the key.
+    The key itself is **not** stored in the FIT. A FIT is not a confidential
+    container, so the decryption key must be provisioned out-of-band into a
+    trusted, secret store held by the consumer (for example a key built into
+    the bootloader). How that store is organised, and how the hint is mapped
+    to a key, is consumer-defined and outside the scope of this
+    specification.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+iv-name-hint
+    Name of the :index:`initialisation vector` (IV) to use. Like
+    ``key-name-hint`` this is only a hint used to locate the IV in the
+    consumer's trusted store. When ``iv-name-hint`` is present the ``iv``
+    property is normally omitted from the FIT, since the consumer obtains the
+    IV from its store.
+
+iv
+    The raw initialisation vector, as a byte array whose length matches the
+    cipher's block size (16 bytes for AES). The IV is not secret, so it may
+    be carried in the FIT. A producer given this property and no
+    ``iv-name-hint`` encrypts with exactly this IV. A producer given
+    neither property generates a fresh, random IV and stores it here.
+
+In a resolved FIT at least one of ``iv-name-hint`` or ``iv`` must be
+present, so that the consumer can obtain the IV needed to decrypt the
+data. An authored FIT may omit both, in which case the producer
+generates a random IV and records it in ``iv``.
+
+Because the ``cipher`` node is included in the configuration signature (see
+:ref:`hash_contents`), its ``algo``, ``key-name-hint``, ``iv-name-hint`` and
+``iv`` values are authenticated, even though the key itself is not part of
+the FIT.
+
 .. _shared-image-data:
 
 Shared image data
@@ -733,6 +841,82 @@ set explicitly. Only the binary payload is shared.
 FIT consumers (e.g. bootloaders) shall ignore the ``image-data``
 property. The ``data``, ``data-offset`` and ``data-size`` properties are
 authoritative.
+
+Sharing encrypted image data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When the source node is encrypted (carries a ``cipher`` sub-node, see
+`Cipher nodes`_), the bytes stored on disk (and therefore the bytes shared
+through ``image-data``) are the *ciphertext*. The sharing node must carry
+its own ``cipher`` sub-node, because no properties are inherited from the
+source. That ``cipher`` sub-node must describe the *same* ciphertext as the
+source: the same ``algo``, the same key (``key-name-hint``) and the same IV
+(the same ``iv-name-hint``, or the same explicit ``iv``). The
+``data-size-unciphered`` of the two nodes must also be equal, since the
+plaintext is identical.
+
+This is well-defined because AES-CBC is deterministic: a given plaintext,
+key and IV always produce the same ciphertext. Sharing that ciphertext
+between two nodes that use identical parameters is simply the same encrypted
+payload referenced twice; it is not two encryptions of different data under a
+reused IV, so it does not weaken the cipher.
+
+If the two nodes' cipher parameters would produce different ciphertext (for
+example a different ``algo``, key or IV, including the independent random IV
+that a producer generates when a node provides neither ``iv-name-hint`` nor
+``iv``), then the data cannot be shared and the FIT is malformed; the
+producer must reject it. To share encrypted data, both nodes must therefore
+reference the same IV explicitly, through the same ``iv-name-hint`` or the
+same ``iv``.
+
+For example, the encrypted form of the sharing example above keeps a matching
+``cipher`` sub-node on both nodes::
+
+    images {
+        kernel-1 {
+            description = "Linux kernel";
+            data = /incbin/("Image");
+            type = "kernel";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0x40200000>;
+            entry = <0x40200000>;
+            cipher {
+                algo = "aes256";
+                key-name-hint = "kernel-key";
+                iv-name-hint = "kernel-iv";
+            };
+            hash-1 {
+                algo = "sha256";
+            };
+        };
+        kernel-board-b {
+            description = "Linux kernel at alternate address";
+            image-data = "kernel-1";
+            type = "kernel";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0x80200000>;
+            entry = <0x80200000>;
+            cipher {
+                algo = "aes256";
+                key-name-hint = "kernel-key";
+                iv-name-hint = "kernel-iv";
+            };
+            hash-1 {
+                algo = "sha256";
+            };
+        };
+    };
+
+Both ``cipher`` sub-nodes use the same ``algo``, ``key-name-hint`` and
+``iv-name-hint``, so the single shared ciphertext decrypts to the same
+plaintext for either node. Sharing one IV explicitly, whether through the
+same ``iv-name-hint`` as here or through the same ``iv`` value, rather than
+relying on a producer-generated random IV, is what makes the shared
+ciphertext well-defined.
 
 '/configurations' node
 ----------------------
