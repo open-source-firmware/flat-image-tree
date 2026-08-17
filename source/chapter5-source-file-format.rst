@@ -747,11 +747,14 @@ iv-name-hint
 iv
     The raw initialisation vector, as a byte array whose length matches the
     cipher's block size (16 bytes for AES). The IV is not secret, so it may
-    be carried in the FIT. A producer that is not given an ``iv-name-hint``
-    generates a fresh, random IV and stores it here.
+    be carried in the FIT. A producer given this property and no
+    ``iv-name-hint`` encrypts with exactly this IV. A producer given
+    neither property generates a fresh, random IV and stores it here.
 
-At least one of ``iv-name-hint`` or ``iv`` must be present, so that the
-consumer can obtain the IV needed to decrypt the data.
+In a resolved FIT at least one of ``iv-name-hint`` or ``iv`` must be
+present, so that the consumer can obtain the IV needed to decrypt the
+data. An authored FIT may omit both, in which case the producer
+generates a random IV and records it in ``iv``.
 
 Because the ``cipher`` node is included in the configuration signature (see
 :ref:`hash_contents`), its ``algo``, ``key-name-hint``, ``iv-name-hint`` and
@@ -860,10 +863,11 @@ reused IV, so it does not weaken the cipher.
 
 If the two nodes' cipher parameters would produce different ciphertext (for
 example a different ``algo``, key or IV, including the independent random IV
-that a producer generates when ``iv-name-hint`` is absent), then the data
-cannot be shared and the FIT is malformed; the producer must reject it. To
-share encrypted data, both nodes must therefore reference the same IV
-explicitly, normally by using the same ``iv-name-hint``.
+that a producer generates when a node provides neither ``iv-name-hint`` nor
+``iv``), then the data cannot be shared and the FIT is malformed; the
+producer must reject it. To share encrypted data, both nodes must therefore
+reference the same IV explicitly, through the same ``iv-name-hint`` or the
+same ``iv``.
 
 For example, the encrypted form of the sharing example above keeps a matching
 ``cipher`` sub-node on both nodes::
@@ -909,9 +913,10 @@ For example, the encrypted form of the sharing example above keeps a matching
 
 Both ``cipher`` sub-nodes use the same ``algo``, ``key-name-hint`` and
 ``iv-name-hint``, so the single shared ciphertext decrypts to the same
-plaintext for either node. Relying on the same ``iv-name-hint`` rather than a
-producer-generated random IV is what makes the shared ciphertext
-well-defined.
+plaintext for either node. Sharing one IV explicitly, whether through the
+same ``iv-name-hint`` as here or through the same ``iv`` value, rather than
+relying on a producer-generated random IV, is what makes the shared
+ciphertext well-defined.
 
 '/configurations' node
 ----------------------
