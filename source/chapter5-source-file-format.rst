@@ -548,6 +548,13 @@ padding
     The padding algorithm, it may be pkcs-1.5 or pss,
     if no value is provided we assume pkcs-1.5
 
+tsa-token
+    An optional RFC 3161 [RFC3161]_ ``TimeStampToken``, DER-encoded, that
+    countersigns this node's ``value`` using a Timestamp Authority (TSA)
+    key independent of the image signing key. See :ref:`chapter-security`
+    for the verification procedure. A consumer that does not recognise
+    this property ignores it.
+
 
 .. index:: dm-verity nodes
 
@@ -909,6 +916,13 @@ comment
 padding
     The padding algorithm, it may be pkcs-1.5 or pss,
     if no value is provided we assume pkcs-1.5
+
+tsa-token
+    An optional RFC 3161 [RFC3161]_ ``TimeStampToken``, DER-encoded, that
+    countersigns this node's ``value`` using a Timestamp Authority (TSA)
+    key independent of the image signing key. See :ref:`chapter-security`
+    for the verification procedure. A consumer that does not recognise
+    this property ignores it.
 
 
 .. sectionauthor:: Marian Balakowicz <m8@semihalf.com>
