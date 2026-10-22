@@ -1,0 +1,74 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+#
+# Generate a diff PDF comparing the current branch against origin/main
+# Additions shown in bold, deletions struck through
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+BUILD_DIR="$ROOT_DIR/build/latex"
+OLD_TEX="/tmp/fit-spec-old.tex"
+
+cd "$ROOT_DIR"
+
+# Remember current branch
+CURRENT_BRANCH=$(git branch --show-current)
+if [ -z "$CURRENT_BRANCH" ]; then
+    echo "Error: Not on a branch (detached HEAD?)"
+    exit 1
+fi
+
+echo "Generating diff: origin/main -> $CURRENT_BRANCH"
+
+# Stash any uncommitted changes
+STASH_NEEDED=false
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo "Stashing uncommitted changes..."
+    git stash push -m "make-diff-pdf temporary stash"
+    STASH_NEEDED=true
+fi
+
+# Function to restore state on exit
+cleanup() {
+    echo "Returning to $CURRENT_BRANCH..."
+    git checkout "$CURRENT_BRANCH" 2>/dev/null || true
+    if [ "$STASH_NEEDED" = true ]; then
+        echo "Restoring stashed changes..."
+        git stash pop || true
+    fi
+}
+trap cleanup EXIT
+
+# Build origin/main
+echo "Building origin/main..."
+git checkout origin/main
+make latex > /dev/null 2>&1
+cp "$BUILD_DIR/fit-specification.tex" "$OLD_TEX"
+
+# Build current branch (cleanup trap will checkout)
+echo "Building $CURRENT_BRANCH branch..."
+git checkout "$CURRENT_BRANCH"
+if [ "$STASH_NEEDED" = true ]; then
+    git stash pop
+    STASH_NEEDED=false
+fi
+make latex > /dev/null 2>&1
+
+# Generate diff in build/latex directory (where Sphinx class files are)
+echo "Running latexdiff..."
+latexdiff --type=BOLD "$OLD_TEX" "$BUILD_DIR/fit-specification.tex" \
+    > "$BUILD_DIR/diff.tex" 2>/dev/null
+
+# Compile PDF (twice for cross-references)
+echo "Compiling PDF..."
+cd "$BUILD_DIR"
+pdflatex -interaction=nonstopmode diff.tex > /dev/null 2>&1
+pdflatex -interaction=nonstopmode diff.tex > /dev/null 2>&1
+
+# Move PDF to root and clean up
+mv diff.pdf "$ROOT_DIR/"
+rm -f diff.aux diff.log diff.out diff.toc diff.idx diff.ind diff.ilg diff.tex 2>/dev/null
+
+echo "Done: $ROOT_DIR/diff.pdf"
