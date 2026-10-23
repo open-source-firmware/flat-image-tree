@@ -815,6 +815,7 @@ Optional properties
 ~~~~~~~~~~~~~~~~~~~
 
 cmdline
+    (Only in conjunction with a "kernel" property):
     Command line passed to the next boot stage, e.g. the operating system
     kernel. The value is an UTF-8 encoded string.
 
@@ -836,6 +837,7 @@ loadables
     steps on this binary based on its component image node type.
 
 ramdisk
+    (Only in conjunction with a "kernel" property):
     Unit name of the corresponding ramdisk to be loaded at the given location.
 
 script
