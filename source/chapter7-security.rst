@@ -81,6 +81,30 @@ Configuration signing prevents this, because the signature binds a specific
 set of images together. A loader that verifies the configuration signature
 knows that this exact combination of images was approved by the signer.
 
+Encryption
+~~~~~~~~~~
+
+Hashing and signing protect *integrity* and *authenticity*: they let a
+consumer detect tampering and confirm that a configuration was approved by a
+trusted signer. They do not provide *confidentiality*: by default the image
+data in a FIT is readable by anyone who has the FIT.
+
+Where an image payload must be kept secret, the image node may carry a
+``cipher`` sub-node so that its data is stored encrypted. The cipher node
+records the algorithm and the hints needed to locate the key and
+initialisation vector, but never the key itself: a FIT is not a confidential
+container, so the key must be provisioned out-of-band into a trusted store
+held by the consumer. See :ref:`cipher-nodes` for the node format.
+
+Encryption is complementary to, and independent of, the integrity scheme:
+
+- The ``cipher`` node is part of the signed node list (see
+  :ref:`hash_contents`), so the algorithm and key/IV hints are authenticated.
+- The image is encrypted before it is hashed, so the image hash covers the
+  ciphertext exactly as it would cover the plaintext of an unencrypted image.
+  A consumer therefore verifies the hash against the stored (encrypted) data
+  and only then decrypts it.
+
 Verification procedure
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -134,7 +158,7 @@ contains:
   (e.g. ``/images/kernel``, ``/images/fdt-1``),
 - the hash sub-nodes of those image nodes
   (e.g. ``/images/kernel/hash-1``, ``/images/fdt-1/hash-1``),
-- any cipher sub-nodes of those image nodes (e.g. ``/images/kernel/cipher-1``), and
+- the cipher sub-node of any encrypted image node (e.g. ``/images/kernel/cipher``), and
 - the ``dm-verity`` sub-node of any ``filesystem``-type image node that carries one
   (e.g. ``/images/rootfs-1/dm-verity``).
 
