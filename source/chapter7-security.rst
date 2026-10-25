@@ -106,7 +106,56 @@ The bootloader verifies a configuration as follows:
    described in :ref:`verity-usage`, delegating integrity verification to the
    kernel's dm-verity target at mount time.
 
-If any step fails, the configuration must be rejected.
+If any step fails, the configuration must be rejected. Where the signing
+key has an associated validity window and a ``tsa-token`` is present, a
+verifier performs one additional check; see `Temporal proof via RFC 3161
+countersignature`_ below.
+
+.. _tsa-countersignature:
+
+Temporal proof via RFC 3161 countersignature
+---------------------------------------------
+
+Key revocation is normally binary: a verifier either trusts a signing key
+or it does not, and every image signed with a revoked key becomes
+unverifiable, including images produced before the key was revoked --
+whether the reason was compromise, leak, or the signer simply losing
+access to it.
+
+A signature node may carry a ``tsa-token`` property (see
+:ref:`chapter-source-file-format`): a DER-encoded RFC 3161 [RFC3161]_
+``TimeStampToken`` that countersigns ``value``. This token must be
+issued by a Timestamp Authority (TSA), a role distinct from the image
+signer: RFC 3161 section 2.3 requires the key behind it to belong to a
+certificate carrying the ``id-kp-timeStamping`` Extended Key Usage,
+marked critical, and used for no other purpose, so a TSA key can never
+also be a valid image-signing key. It lets a verifier that associates a
+validity window (a ``notBefore``/``notAfter`` pair) with a signing key
+accept images signed inside that window and reject images signed outside
+it, without weakening the revocation itself. A verifier that does not
+recognise ``tsa-token`` ignores it.
+
+When a signing key has an associated validity window and the signature
+node carries a ``tsa-token``, a verifier performs the following checks
+in addition to `Verification procedure`_:
+
+#. Parse ``tsa-token`` as a CMS [RFC5652]_ ``SignedData`` structure and verify that
+   ``TSTInfo.messageImprint`` matches ``value`` hashed with the algorithm
+   named in ``messageImprint.hashAlgorithm``.
+#. ``TSTInfo.policy`` (present in every token per RFC 3161 section
+   2.4.2) carries the TSA policy OID. A verifier holding more than one
+   TSA key in its key store should use this OID to select the right one,
+   then verify the token's CMS signature with it.
+#. Reject if ``TSTInfo.genTime`` falls outside the signing key's validity
+   window.
+
+An operator revokes a key -- whether it was compromised, leaked, or the
+signer simply lost access to it -- by setting the upper bound
+(``notAfter``) of its validity window to the time trust in the key
+ended: images stamped inside the window keep verifying; images produced
+with the key afterwards, whose ``genTime`` falls after ``notAfter``, do
+not. The lower bound (``notBefore``) similarly rejects a token backdated
+to before the key existed.
 
 .. _hash_contents:
 
