@@ -1,0 +1,105 @@
+name: PR preview
+
+# Runs in the context of the base repository, so it has a write token even
+# for pull requests from forks. It never checks out or runs code from the
+# pull request: it only copies the HTML built by the CI workflow.
+#
+# That HTML is not trusted. A pull request from a fork runs its own copy of
+# ci.yml, so it can upload any HTML or JavaScript as its preview, which is
+# then served under this project's Pages site and linked from a bot comment.
+# Neither this site nor the other Pages sites of the organisation has logins
+# or user data, so the risk is mainly content (e.g. phishing) appearing under
+# the project's name. Treat preview links on pull requests from unknown
+# contributors with the same care as their code.
+on:
+  workflow_run:
+    workflows: ["Github Action CI"]
+    types: [completed]
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      pages: read
+      pull-requests: write
+    # Shared with every other job that pushes to gh-pages. This also orders
+    # the job against pr-preview-cleanup.yml, so the state check below cannot
+    # race with a pull request being closed.
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: preview
+        path: preview
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    # The PR number comes from the artifact, so check that it names an open
+    # pull request whose head is the commit that was built
+    - name: check pull request
+      id: pr
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        PR=$(cat preview/pr-number)
+        if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+          echo "::error::Invalid pull-request number"
+          exit 1
+        fi
+        INFO=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" \
+          --jq '"\(.state) \(.head.sha)"')
+        read -r STATE SHA <<< "$INFO"
+        if [ "$STATE" != "open" ]; then
+          echo "::notice::PR $PR is $STATE, skipping"
+          echo "skip=true" >> "$GITHUB_OUTPUT"
+        elif [ "$SHA" != "$HEAD_SHA" ]; then
+          echo "::notice::PR $PR has moved on to $SHA, skipping"
+          echo "skip=true" >> "$GITHUB_OUTPUT"
+        fi
+        if ! SITE=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .html_url); then
+          echo "::error::GitHub Pages is not enabled for this repository"
+          exit 1
+        fi
+        echo "number=$PR" >> "$GITHUB_OUTPUT"
+        echo "url=${SITE%/}/pr-preview/pr-$PR/" >> "$GITHUB_OUTPUT"
+
+    - name: deploy
+      if: steps.pr.outputs.skip != 'true'
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./preview/site
+        destination_dir: pr-preview/pr-${{ steps.pr.outputs.number }}
+        commit_message: "Preview PR #${{ steps.pr.outputs.number }}"
+
+    - name: comment
+      if: steps.pr.outputs.skip != 'true'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PR: ${{ steps.pr.outputs.number }}
+        URL: ${{ steps.pr.outputs.url }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        MARKER="<!-- pr-preview -->"
+        BODY="$MARKER
+        Preview of ${HEAD_SHA:0:12}: $URL"
+        ID=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+          --jq ".[] | select(.user.login == \"github-actions[bot]\" and
+                             (.body | startswith(\"$MARKER\"))) | .id" |
+          head -1)
+        if [ -n "$ID" ]; then
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$ID" \
+            -f body="$BODY" > /dev/null
+        else
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            -f body="$BODY" > /dev/null
+        fi
