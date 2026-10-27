@@ -170,6 +170,11 @@ in use.
 The fixups required depend on the OS and its expectations. The result is a
 devicetree slightly modified from the FIT version.
 
+If the OS image contains OS requests (see :ref:`os-request-nodes`), the
+bootloader handles them at this point, adding the requested information to the
+``/chosen`` node. It should do this after any other fixup which sets the same
+properties, so that the OS receives at least what it asked for.
+
 Jump to the OS
 ~~~~~~~~~~~~~~
 
