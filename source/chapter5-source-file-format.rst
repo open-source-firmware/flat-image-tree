@@ -170,6 +170,7 @@ the '/images' node should have the following layout::
         o dm-verity {...}
         o logo {...}
         o os-info {...}
+        o aslr-rand {...}
         ...
 
 Mandatory properties
@@ -464,6 +465,13 @@ os-info
     Contains information about the OS image, to help identify it. This
     can be useful for displaying a menu for the user. The information is
     generally only useful for image nodes which contain an OS.
+
+OS requests
+    For images of type ``kernel`` or ``kernel_noload``,
+    each sub-node whose compatible string starts with ``vbe,``
+    asks the bootloader to provide information, such as random seeds,
+    to the OS when it boots.
+    See `OS-request nodes`_.
 
 .. index:: Hash nodes
 
@@ -1011,6 +1019,156 @@ version-id
 
         version-id = "20.04";
 
+
+.. index:: OS-request nodes
+
+.. _os-request-nodes:
+
+OS-request nodes
+----------------
+
+An OS can ask the bootloader for information it needs early in boot,
+such as random data to seed its random-number generator,
+by adding OS-request nodes to its image node.
+OS requests come from Verified Boot for Embedded [VBE]_,
+hence the ``vbe,`` prefix on their compatible strings and properties.
+
+::
+
+    o aslr-rand
+        |- compatible = "vbe,aslr-rand"
+        |- vbe,size = <8>
+        |- vbe,required
+
+The node name should be descriptive but is not otherwise specified.
+It must not start with ``hash`` or ``signature``,
+nor be ``cipher``, ``dm-verity``, ``logo`` or ``os-info``,
+since tools such as U-Boot use those names to identify other image sub-nodes.
+It must not have a unit address,
+since libfdt matches a name such as ``cipher@0`` as ``cipher``.
+The bootloader identifies each request by its compatible string,
+and ignores sub-nodes which do not have one starting with ``vbe,``.
+
+The bootloader passes what was requested to the OS in the ``/chosen`` node of
+the devicetree,
+using the standard property for each request,
+as described by the devicetree schema [dtschema]_
+and listed in :numref:`table_os_requests`.
+The OS then needs no knowledge of OS requests to use the result,
+and a bootloader which does not implement OS requests can still provide the
+same properties by other means.
+
+OS requests therefore only apply when the bootloader passes a devicetree to the
+OS.
+On a boot path which cannot deliver the ``/chosen`` properties,
+every request is unsatisfiable (see `Handling requests`_).
+When the bootloader starts the OS as a UEFI application [UEFI]_
+and provides the ``EFI_RNG_PROTOCOL``,
+the OS can obtain random data through that protocol instead,
+so the bootloader may ignore optional requests for random data.
+This does not apply to a request with ``vbe,required``.
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+compatible
+    The request, as a single string ``"vbe,<request>"``.
+    See :numref:`table_os_requests` for the defined requests.
+
+Conditionally mandatory properties
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+vbe,size
+    The number of bytes of data requested, as a 32-bit value.
+    :numref:`table_os_requests` says whether each request needs this property
+    and which sizes are valid.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+vbe,required
+    Boolean.
+    The OS cannot run correctly without this request.
+    See `Handling requests`_.
+
+Defined requests
+~~~~~~~~~~~~~~~~
+
+.. tabularcolumns:: | l l J |
+.. _table_os_requests:
+.. table:: OS requests
+
+   =================== ============== ==========================================
+   Compatible          vbe,size       Provided in /chosen
+   =================== ============== ==========================================
+   vbe,aslr-rand       Optional,      ``kaslr-seed``: 64 bits of random data,
+                       default 8;     which the OS uses to randomise its
+                       if present,    address-space layout
+                       must be 8
+   vbe,random-seed     Mandatory,     ``rng-seed``: at least ``vbe,size`` bytes
+                       at least 1     of random data, which the OS uses to seed
+                                      its random-number generator
+   =================== ============== ==========================================
+
+The bootloader must take the random data for both requests from a source
+which the platform considers cryptographically secure,
+providing fresh, unpredictable data,
+such as a hardware random-number generator or a properly seeded deterministic
+random-bit generator (DRBG).
+If it has no such source, the request is unsatisfiable.
+The OS may treat ``rng-seed`` as having full entropy.
+The bootloader must not use the same data for ``kaslr-seed`` and ``rng-seed``,
+e.g. it can read the random source separately for each.
+
+A ``kaslr-seed`` or ``rng-seed`` value already present in the devicetree
+passed with the OS is not fresh, so the bootloader replaces it,
+whatever its size.
+If the bootloader skips the request (see `Handling requests`_),
+it should still remove that value.
+For ``vbe,random-seed``, ``vbe,size`` is a minimum:
+the bootloader may provide a longer seed,
+and must not provide a shorter one than it would without the request.
+
+Handling requests
+~~~~~~~~~~~~~~~~~
+
+A bootloader which does not implement OS requests ignores the request nodes
+and boots the OS as usual,
+so ``vbe,required`` only has an effect with a bootloader which implements them.
+
+Such a bootloader may be unable to handle a request because:
+
+- it does not implement that particular request (it is *unsupported*),
+- it implements the request but cannot provide it, e.g. there is no suitable
+  random source, the size is larger than it can provide, or no devicetree is
+  passed to the OS (it is *unsatisfiable*), or
+- the request does not follow this specification, e.g. a mandatory
+  ``vbe,size`` is missing, is not a 32-bit value, or has a value which is
+  not valid for the request
+  (it is *malformed*).
+
+If such a request has ``vbe,required``, the bootloader must not boot the OS.
+Otherwise it skips the request, should report it, and boots the OS anyway.
+
+An image must hold at most one request with each compatible string,
+treating ``vbe,random-rand`` as ``vbe,random-seed``.
+If it holds more than one, the request is malformed,
+and it is required if any of them has ``vbe,required``.
+
+Compatibility
+~~~~~~~~~~~~~
+
+This section revises the earlier OS-request definitions referenced from
+[VBE]_.
+Those return the data in a ``data`` property of a copy of each request node
+under ``/chosen``, rather than in the standard properties,
+and default ``vbe,aslr-rand`` to 4 bytes.
+Mainline U-Boot, from v2023.01 to at least v2027.01-rc1,
+accepts only ``vbe,random-rand`` in place of ``vbe,random-seed``,
+so where it processes OS requests,
+a required ``vbe,random-seed`` stops the boot and an optional one is skipped.
+A bootloader may accept ``vbe,random-rand`` as another name for
+``vbe,random-seed``.
 
 '/configurations' node
 ----------------------
