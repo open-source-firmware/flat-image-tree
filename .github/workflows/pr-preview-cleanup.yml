@@ -1,0 +1,33 @@
+name: PR preview cleanup
+
+# Only the gh-pages branch is checked out, so pull_request_target is safe
+on:
+  pull_request_target:
+    types: [closed]
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Shared with every other job that pushes to gh-pages
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+
+    - name: remove preview
+      env:
+        PR: ${{ github.event.number }}
+      run: |
+        DIR="pr-preview/pr-$PR"
+        [ -d "$DIR" ] || exit 0
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git rm -rq "$DIR"
+        git commit -qm "Remove preview for PR #$PR"
+        git push

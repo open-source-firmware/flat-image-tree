@@ -50,12 +50,31 @@ jobs:
         path: |
           build/latex/fit-specification-*.pdf
 
-    - name: deploy
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v4
+    # pr-preview.yml publishes this, since a fork's token cannot write
+    - name: stage preview
+      if: github.event_name == 'pull_request'
+      env:
+        PR_NUMBER: ${{ github.event.number }}
+      run: |
+        mkdir preview
+        cp -r build/singlehtml preview/site
+        echo "$PR_NUMBER" > preview/pr-number
+
+    - name: upload preview
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build/singlehtml
+        name: preview
+        path: preview/
+        retention-days: 1
+
+    - name: upload site
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: site
+        path: build/singlehtml/
+        retention-days: 1
 
     - name: release
       uses: softprops/action-gh-release@v2
@@ -64,3 +83,28 @@ jobs:
         files: build/latex/fit-specification-*.pdf
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Shared with every other job that pushes to gh-pages
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: site
+        path: site
+
+    # Keep the pull-request previews under pr-preview/
+    - name: deploy
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
+        keep_files: true
