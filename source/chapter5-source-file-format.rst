@@ -168,6 +168,7 @@ the '/images' node should have the following layout::
         o hash-1 {...}
         o hash-2 {...}
         o dm-verity {...}
+        o aslr-rand {...}
         ...
 
 Mandatory properties
@@ -425,6 +426,11 @@ dm-verity
     command-line parameters for integrity-verified boot.
     See `dm-verity nodes`_.
 
+OS requests
+    For images of type ``kernel``, each sub-node whose compatible string
+    starts with ``vbe,`` asks the bootloader to provide something to the OS
+    when it boots. See `OS-request nodes`_.
+
 .. index:: Hash nodes
 
 Hash nodes
@@ -659,6 +665,93 @@ kernel command line (see :ref:`verity-usage`).
 
 Both the filesystem payload data and the dm-verity Merkle-tree hash data are
 expected to reside inside the same sub-image.
+
+.. _os-request-nodes:
+
+OS-request nodes
+----------------
+
+An OS can ask the bootloader for information it needs early in boot,
+such as random data to seed its random-number generator,
+by adding OS-request nodes to its image node.
+OS requests come from Verified Boot for Embedded [VBE]_,
+hence the ``vbe,`` prefix on their compatible strings and properties.
+
+::
+
+    o aslr-rand
+        |- compatible = "vbe,aslr-rand"
+        |- vbe,size = <8>
+        |- vbe,required
+
+Whoever builds the FIT chooses the node name.
+The bootloader identifies each request by its compatible string,
+and ignores sub-nodes which do not have one starting with ``vbe,``.
+
+The bootloader passes what was requested to the OS in the ``/chosen`` node of
+the devicetree,
+using the standard properties described by the devicetree schema [dtschema]_
+where one exists.
+The OS then needs no knowledge of OS requests to use the result,
+and a bootloader which does not support them can still provide the same
+properties by other means.
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+compatible
+    The request, as ``"vbe,<request>"``.
+    See :numref:`table_os_requests` for the defined requests.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+vbe,size
+    The number of bytes of data requested, as a 32-bit value.
+    Each request says whether it needs this property and what sizes it
+    accepts.
+    The bootloader may refuse a size larger than it can provide.
+
+vbe,required
+    Boolean.
+    The OS cannot run correctly without this request.
+    If the bootloader does not support the request or cannot satisfy it,
+    it must not boot the OS.
+    Without this property, the bootloader skips a request it does not
+    support and boots the OS anyway.
+
+.. tabularcolumns:: | l l J |
+.. _table_os_requests:
+.. table:: OS requests
+
+   =================== ============== ==========================================
+   Compatible          vbe,size       Provided in /chosen
+   =================== ============== ==========================================
+   vbe,aslr-rand       Optional,      ``kaslr-seed``: 64 bits of random data,
+                       must be 8      which the OS uses to randomise its
+                                      address-space layout
+   vbe,random-seed     Mandatory      ``rng-seed``: ``vbe,size`` bytes of
+                                      random data, which the OS uses to seed
+                                      its random-number generator
+   =================== ============== ==========================================
+
+The bootloader should take the random data from a hardware random-number
+generator.
+If the bootloader would otherwise write its own value to one of these
+properties, the data for the request replaces it.
+
+Reporting errors
+~~~~~~~~~~~~~~~~
+
+The bootloader may copy each request node to a sub-node of ``/chosen`` with the
+same name.
+If it cannot satisfy the request, it may then add these properties to the copy:
+
+vbe,error
+    A string describing the problem, for display or logging.
+
+vbe,errnum
+    A negative error number, whose meaning is specific to the bootloader.
 
 .. _shared-image-data:
 
