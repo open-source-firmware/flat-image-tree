@@ -799,7 +799,10 @@ Mandatory properties
 ~~~~~~~~~~~~~~~~~~~~
 
 description
-    Textual configuration description.
+    Textual configuration description. This is intended for people, e.g. for
+    display in a boot menu. Software must not parse it or rely on its format.
+    Information that a bootloader uses to select a configuration belongs in
+    ``compatible``.
 
 Conditionally mandatory property
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
