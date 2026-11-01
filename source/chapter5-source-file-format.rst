@@ -926,6 +926,12 @@ no configuration has a match node with a scheme that the bootloader
 implements, it selects a configuration as described in :ref:`chapter-usage`.
 Tools which create a FIT should pass match nodes through unchanged.
 
+Match nodes are included in a configuration signature (see
+:ref:`hash_contents`). The bootloader selects a configuration before checking
+its signature, so a match node which has been changed causes the selected
+configuration to fail verification, rather than allowing an unintended
+configuration to boot.
+
 Examples
 ~~~~~~~~
 

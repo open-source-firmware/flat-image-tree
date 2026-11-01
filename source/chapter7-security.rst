@@ -130,6 +130,8 @@ contains:
 
 - the root (``/``) node,
 - the configuration node (e.g. ``/configurations/conf-1``),
+- any match sub-nodes of the configuration node
+  (e.g. ``/configurations/conf-1/match-1``, see :ref:`match-nodes`),
 - each image node referenced by the configuration
   (e.g. ``/images/kernel``, ``/images/fdt-1``),
 - the hash sub-nodes of those image nodes
