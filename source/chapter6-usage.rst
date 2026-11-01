@@ -141,6 +141,12 @@ found, searching stops, using the best match found in the stage.
 
 Other suffixes may be added in future.
 
+Some bootloaders select a configuration using information which does not fit
+into a compatible string, such as a board ID and SoC revision. These may use
+match nodes in the configuration instead; see :ref:`match-nodes`. The
+bootloader must not parse the configuration's ``description`` for this
+purpose.
+
 
 Load the images from the selected configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
