@@ -793,6 +793,7 @@ Each configuration has the following structure::
         |- loadables = "loadables sub-node unit-name" [, ...];
         |- script = "script sub-node unit-name";
         |- compatible = "vendor,board-style device tree compatible string";
+        o match-1 {...}
         o signature-1 {...}
 
 Mandatory properties
@@ -802,7 +803,7 @@ description
     Textual configuration description. This is intended for people, e.g. for
     display in a boot menu. Software must not parse it or rely on its format.
     Information that a bootloader uses to select a configuration belongs in
-    ``compatible``.
+    ``compatible`` or in `match nodes`_.
 
 Conditionally mandatory property
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -870,6 +871,100 @@ configuration for 2.6 FDT kernel is (kernel, fdt) pair.
 Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
 'struct bd_info' must be passed instead of FDT blob, thus fdt property *must
 not* be specified in a configuration node.
+
+.. _match-nodes:
+
+Match nodes
+-----------
+
+Bootloaders differ in the information they use to select a configuration. One
+may read a board ID and SoC revision from fuses, another a board name and SKU
+ID from an EEPROM or GPIOs. Where this does not fit into a compatible string,
+it is not practical for this specification to define a property for each of
+these.
+
+Instead, a configuration node may hold one or more match sub-nodes, each
+describing the configuration in terms of one matching scheme::
+
+    o match-1
+        |- compatible = "vendor,scheme";
+        |- <name> = <value defined by the scheme>;
+        ...
+
+Match nodes are named ``match``, optionally followed by a hyphen and a number,
+e.g. ``match-1``, ``match-2``.
+
+Mandatory properties
+~~~~~~~~~~~~~~~~~~~~
+
+compatible
+    Name of the matching scheme, in the form ``"<vendor>,<scheme>"``. The
+    prefix is one listed in the devicetree vendor prefixes [vendor-prefixes]_,
+    typically that of the vendor of the bootloader or platform which uses the
+    scheme.
+
+Optional properties
+~~~~~~~~~~~~~~~~~~~
+
+The other properties are defined by the scheme. Since the scheme is named by
+``compatible``, these need no vendor prefix.
+
+Matching schemes
+~~~~~~~~~~~~~~~~
+
+The vendor which owns the prefix defines and documents each of its schemes.
+This covers:
+
+- the properties used, along with their types and meaning
+- how the bootloader compares them with the information it reads from the
+  hardware, e.g. exact equality, a mask or a minimum revision
+- how the scheme combines with the configuration's ``compatible`` property,
+  e.g. whether it is used instead of, or as well as, compatible matching
+
+A bootloader must ignore match nodes whose scheme it does not implement. If
+no configuration has a match node with a scheme that the bootloader
+implements, it selects a configuration as described in :ref:`chapter-usage`.
+Tools which create a FIT should pass match nodes through unchanged.
+
+Examples
+~~~~~~~~
+
+One bootloader may select a configuration using four integers read from the
+hardware::
+
+    conf-1 {
+        description = "Blazer";
+        compatible = "google,blazer";
+        kernel = "kernel";
+        fdt = "fdt-1";
+
+        match-1 {
+            compatible = "google,board-id";
+            board-id = <0x070406>;
+            board-rev = <0x010000>;
+            soc-id = <0x0005>;
+            soc-rev = <0x010000>;
+        };
+    };
+
+while another uses a board name with a revision and SKU ID::
+
+    conf-1 {
+        description = "Acme Roadrunner, rev 3";
+        compatible = "acme,roadrunner";
+        kernel = "kernel";
+        fdt = "fdt-1";
+
+        match-1 {
+            compatible = "acme,board-sku";
+            board-name = "roadrunner";
+            board-rev = <3>;
+            sku-id = <0x12>;
+        };
+    };
+
+A configuration which can be booted by both bootloaders could hold both match
+nodes, as ``match-1`` and ``match-2``.
 
 
 Configuration-signature nodes
