@@ -51,7 +51,8 @@ configuration signature covers:
 - the configuration node itself (including its references to images),
 - each image node referenced by the configuration,
 - the hash sub-nodes of those images,
-- the ``dm-verity`` sub-nodes of those images (where present), and
+- the ``dm-verity`` sub-nodes of those images (where present),
+- the OS-request sub-nodes of those images (where present), and
 - the root (``/``) node of the FIT.
 
 Because the signature covers the hash sub-nodes, the image data is
@@ -91,7 +92,8 @@ The bootloader verifies a configuration as follows:
 #. The signature covers certain FDT nodes and a region of the string table
    (see :ref:`hash_contents` below). Rebuild the list of nodes that should
    have been signed (the root node, the configuration node, each referenced
-   image node, its hash sub-nodes, and any ``dm-verity`` sub-node) and verify
+   image node, its hash sub-nodes, any ``dm-verity`` sub-node and any
+   OS-request sub-nodes) and verify
    that the hash of those nodes
    matches the signature.
 #. For each image referenced by the configuration, compute the hash of the
@@ -134,9 +136,12 @@ contains:
   (e.g. ``/images/kernel``, ``/images/fdt-1``),
 - the hash sub-nodes of those image nodes
   (e.g. ``/images/kernel/hash-1``, ``/images/fdt-1/hash-1``),
-- any cipher sub-nodes of those image nodes (e.g. ``/images/kernel/cipher-1``), and
+- any cipher sub-nodes of those image nodes (e.g. ``/images/kernel/cipher-1``),
 - the ``dm-verity`` sub-node of any ``filesystem``-type image node that carries one
-  (e.g. ``/images/rootfs-1/dm-verity``).
+  (e.g. ``/images/rootfs-1/dm-verity``), and
+- any OS-request sub-nodes of those image nodes, i.e. those with a compatible
+  string starting with ``vbe,``, whatever the image type
+  (e.g. ``/images/kernel/aslr-rand``, see :ref:`os-request-nodes`).
 
 An image node is "referenced by the configuration" if it is named by
 any string property of the configuration node, except for the following
