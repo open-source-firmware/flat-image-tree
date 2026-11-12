@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Flattened Image Tree Specification v1.0-15-gf0ab595 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=c13d60a3"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="icon" href="_static/fit-favicon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="spec-fullname-specversion">
+<h1>Flattened Image Tree Specification v1.0-15-gf0ab595<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<span id="document-license"></span><section id="copyright">
+<h2><span class="section-number">1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h2>
+<div class="line-block">
+<div class="line">Copyright 2008 Marian Balakowicz &lt;<a class="reference external" href="mailto:m8&#37;&#52;&#48;semihalf&#46;com">m8<span>&#64;</span>semihalf<span>&#46;</span>com</a>&gt;</div>
+<div class="line">Copyright 2008 Bartlomiej Sieka &lt;<a class="reference external" href="mailto:tur&#37;&#52;&#48;semihalf&#46;com">tur<span>&#64;</span>semihalf<span>&#46;</span>com</a>&gt;</div>
+<div class="line">Copyright 2022 Simon Glass &lt;<a class="reference external" href="mailto:sjg&#37;&#52;&#48;chromium&#46;com">sjg<span>&#64;</span>chromium<span>&#46;</span>com</a>&gt;</div>
+</div>
+<p>THIS SPECIFICATION PROVIDED “AS IS” AND WITHOUT ANY WARRANTY
+OF ANY KIND, INCLUDING, WITHOUT LIMITATION, ANY EXPRESS OR IMPLIED
+WARRANTY OF NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
+PARTICULAR PURPOSE. IN NO EVENT SHALL LINARO OR ANY MEMBER OF
+LINARO BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, EXEMPLARY,
+PUNITIVE, OR CONSEQUENTIAL DAMAGES, INCLUDING, WITHOUT LIMITATION, LOST
+PROFITS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+<p>Questions pertaining to this document, or the terms or conditions of its
+provision, should be addressed to:</p>
+<div class="line-block">
+<div class="line">Open Source Firmware Foundation</div>
+<div class="line">530 Lawrence Expy</div>
+<div class="line">PMB 992</div>
+<div class="line">Sunnyvale, CA 94085</div>
+<div class="line">United States</div>
+</div>
+<section id="license-information">
+<h3><span class="section-number">1.1. </span>License Information<a class="headerlink" href="#license-information" title="Link to this heading">¶</a></h3>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+</section>
+</section>
+<span id="document-acknowledgements"></span><section id="acknowledgements">
+<h2><span class="section-number">2. </span>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">¶</a></h2>
+<p>FIT (Flattened Image Tree) was developed in 2008 by Marian Balakowicz and
+Bartlomiej Sieka of <span class="target" id="index-0"></span>Semihalf, under the guidance of Wolfgang Denk,
+founder of Denx Software Engineering and creator of U-Boot.</p>
+<p>Since then, <span class="target" id="index-1"></span>FIT has been maintained and extended by the U-Boot
+community to deal with the developing needs of Open Source firmware.</p>
+<p>This specification builds on this previous work.</p>
+<p>FIT has stood the test of time due to its simplicity and extensibility.
+This specification aims to build on this work and provide a means for
+further improvement with a wider group of collaborators.</p>
+</section>
+<span id="document-revhistory"></span><section id="revision-history">
+<h2><span class="section-number">3. </span>Revision History<a class="headerlink" href="#revision-history" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">Revision History</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Revision</p></th>
+<th class="head"><p>Date</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0.8</p></td>
+<td><p>2023-AUG-9</p></td>
+<td><p>Initial prerelease version. Imported text from
+U-Boot source tree.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1.0</p></td>
+<td><p>2026-APR-11</p></td>
+<td><p>First release. Add security architecture and hash
+contents documentation, dm-verity support for
+filesystem images, shared image data via
+image-data property, multi-step loading and
+configuration cmdline property.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<span id="document-chapter4-introduction"></span><section id="introduction">
+<span id="chapter-introduction"></span><h2><span class="section-number">4. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
+<section id="purpose-and-scope">
+<h3><span class="section-number">4.1. </span>Purpose and Scope<a class="headerlink" href="#purpose-and-scope" title="Link to this heading">¶</a></h3>
+<p>The number of elements playing a role in the kernel booting process has
+increased over time and now typically includes the devicetree,
+<span class="target" id="index-0"></span>kernel image and
+possibly a ramdisk image. Generally, all must be placed in the system memory and
+booted together.</p>
+<p>For firmware images a similar process has taken place, with various binaries
+loaded at different addresses, such as ARM’s <span class="target" id="index-1"></span>ATF, <span class="target" id="index-2"></span>OpenSBI,
+<span class="target" id="index-3"></span>FPGA and <span class="target" id="index-4"></span>U-Boot itself.</p>
+<p>FIT provides a flexible and extensible format to deal with this complexity. It
+provides support for multiple components. It also supports multiple
+configurations, so that the same FIT can be used to boot multiple boards, with
+some components in common (e.g. kernel) and some specific to that board (e.g.
+devicetree).</p>
+<p>This specification, the Flattened Image Tree Specification (FITSpec),
+provides a suitable format which can be used to describe any set of files
+along with grouping and selection mechanisms.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#chapter-introduction"><span class="std std-numref">Chapter 4</span></a> introduces the purpose and
+background of FITSpec.</p></li>
+<li><p><a class="reference internal" href="#document-chapter5-source-file-format#chapter-source-file-format"><span class="std std-numref">Chapter 5</span></a> introduces the FIT concept
+and describes its logical structure and standard properties.
+certain classes of devices and specific device types.</p></li>
+<li><p><a class="reference internal" href="#document-chapter6-usage#chapter-usage"><span class="std std-numref">Chapter 6</span></a> describes how FIT is used in bootloaders
+to handle booting Operating Systems as well as firmware.</p></li>
+</ul>
+<p><strong>Conventions Used in this Document</strong></p>
+<p>The word <em>shall</em> is used to indicate mandatory requirements strictly to
+be followed in order to conform to the standard and from which no
+deviation is permitted (<em>shall</em> equals <em>is required to</em>).</p>
+<p>The word <em>should</em> is used to indicate that among several possibilities
+one is recommended as particularly suitable, without mentioning or
+excluding others; or that a certain course of action is preferred but
+not necessarily required; or that (in the negative form) a certain
+course of action is deprecated but not prohibited (<em>should</em> equals <em>is
+recommended that</em>).</p>
+<p>The word <em>may</em> is used to indicate a course of action permissible within
+the limits of the standard (<em>may</em> equals <em>is permitted</em>).</p>
+<p>Examples of devicetree constructs are frequently shown in <em>Devicetree
+Syntax</em> form. See <a class="reference internal" href="#document-references#dtspec" id="id1"><span>[dtspec]</span></a> for a description of this.</p>
+</section>
+<section id="relationship-to-dtspec">
+<h3><span class="section-number">4.2. </span>Relationship to Devicetree Specification<a class="headerlink" href="#relationship-to-dtspec" title="Link to this heading">¶</a></h3>
+<p>FITSpec is based on the <span class="target" id="index-5"></span>Devicetree Specification, in that it uses the
+same structure and shares some concepts.</p>
+</section>
+<section id="bit-and-64-bit-support">
+<h3><span class="section-number">4.3. </span>32-bit and 64-bit Support<a class="headerlink" href="#bit-and-64-bit-support" title="Link to this heading">¶</a></h3>
+<p>The FITSpec supports CPUs with both <span class="target" id="index-6"></span>32-bit and <span class="target" id="index-7"></span>64-bit
+addressing capabilities. Where applicable, sections of the FITSpec describe any
+requirements or considerations for 32-bit and 64-bit addressing.</p>
+</section>
+<section id="definition-of-terms">
+<h3><span class="section-number">4.4. </span>Definition of Terms<a class="headerlink" href="#definition-of-terms" title="Link to this heading">¶</a></h3>
+<dl class="simple glossary">
+<dt id="term-DTB">DTB<a class="headerlink" href="#term-DTB" title="Link to this term">¶</a></dt><dd><p>Devicetree blob. Compact binary representation of the devicetree.</p>
+</dd>
+<dt id="term-DTC">DTC<a class="headerlink" href="#term-DTC" title="Link to this term">¶</a></dt><dd><p>Devicetree compiler. An open source tool used to create DTB files
+from DTS files.</p>
+</dd>
+<dt id="term-DTS">DTS<a class="headerlink" href="#term-DTS" title="Link to this term">¶</a></dt><dd><p>Devicetree syntax. A textual representation of a devicetree
+consumed by the DTC. See Appendix A Devicetree Source Format
+(version 1).</p>
+</dd>
+</dl>
+</section>
+</section>
+<span id="document-chapter5-source-file-format"></span><section id="flattened-image-tree-fit-format">
+<span id="chapter-source-file-format"></span><h2><span class="section-number">5. </span>Flattened Image Tree (FIT) Format<a class="headerlink" href="#flattened-image-tree-fit-format" title="Link to this heading">¶</a></h2>
+<section id="introduction">
+<h3><span class="section-number">5.1. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h3>
+<p>FIT consists of a devicetree blob with nodes and properties following a certain
+schema. Therefore this document defines FIT by providing FDT (Flat Device Tree)
+bindings. These describe the final form of the FIT at the moment when it is
+used. The user perspective may be simpler, as some of the properties (like
+timestamps and hashes) are filled in automatically by available tooling, such
+as <cite>mkimage</cite>.</p>
+<p>To avoid confusion with the <span class="target" id="index-0"></span>kernel FDT the following
+naming convention is used:</p>
+<dl>
+<dt>FIT</dt><dd><p>Flattened Image Tree</p>
+<p>FIT is formally a flattened devicetree (in the libfdt meaning), which
+conforms to bindings defined in this document.</p>
+</dd>
+<dt><span class="target" id="index-1"></span>.its</dt><dd><p>image tree source</p>
+</dd>
+<dt><span class="target" id="index-2"></span>.fit</dt><dd><p>flattened image tree blob</p>
+<p>This was previously known as <span class="target" id="index-3"></span>.itb but has been renamed to <cite>.fit</cite>.</p>
+</dd>
+</dl>
+<section id="image-building-procedure">
+<h4><span class="section-number">5.1.1. </span>Image-building procedure<a class="headerlink" href="#image-building-procedure" title="Link to this heading">¶</a></h4>
+<p>The following picture shows how the FIT is prepared. Input consists of
+image source file (.its) and a set of data files. Image is created with the
+help of standard <span class="target" id="index-4"></span>U-Boot mkimage tool which in
+turn uses dtc (device tree compiler) to produce image tree blob (.fit). The
+resulting .fit file is the actual binary of a new FIT:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tqm5200.its
++
+vmlinux.bin.gz     mkimage + dtc               xfer to target
+eldk-4.2-ramdisk  --------------&gt; tqm5200.fit --------------&gt; boot
+tqm5200.dtb                          /|\
+                                      |
+                                 &#39;new FIT&#39;
+</pre></div>
+</div>
+<p>Steps:</p>
+<ol class="arabic simple">
+<li><p>Create .its file, automatically filled-in properties are omitted</p></li>
+<li><p>Call <span class="target" id="index-5"></span>mkimage tool on .its file</p></li>
+<li><p>mkimage calls dtc to create .fit image and assures that
+missing properties are added</p></li>
+<li><p>.fit (new FIT) is uploaded onto the target and used therein</p></li>
+</ol>
+</section>
+<section id="unique-identifiers">
+<h4><span class="section-number">5.1.2. </span>Unique identifiers<a class="headerlink" href="#unique-identifiers" title="Link to this heading">¶</a></h4>
+<p>To identify FIT sub-nodes representing images, hashes, configurations (which
+are defined in the following sections), the “unit name” of the given sub-node
+is used as its identifier as it assures uniqueness without additional
+checking required.</p>
+</section>
+<section id="external-data">
+<span id="externaldata"></span><span id="index-6"></span><h4><span class="section-number">5.1.3. </span>External data<a class="headerlink" href="#external-data" title="Link to this heading">¶</a></h4>
+<p>FIT is normally built initially with image data in the ‘data’ property of each
+image node. It is also possible for this data to reside outside the FIT itself.
+This allows the ‘FDT’ part of the FIT to be quite small, so that it can be
+loaded and scanned without loading a large amount of data. Then when an image is
+needed it can be loaded from an external source.</p>
+<p>External FITs use ‘data-offset’ or ‘data-position’ instead of ‘data’.</p>
+<p>The <span class="target" id="index-7"></span>mkimage tool can convert a FIT to use external data using the <cite>-E</cite>
+argument, optionally using <cite>-p</cite> to specific a fixed position.</p>
+<p>It is often desirable to align each image to a block size or cache-line size
+(e.g. 512 bytes), so that there is no need to copy it to an
+<span class="target" id="index-8"></span>aligned address when reading the image data. The mkimage tool provides
+a <cite>-B</cite> argument to support this.</p>
+</section>
+</section>
+<section id="root-node-properties">
+<h3><span class="section-number">5.2. </span>Root-node properties<a class="headerlink" href="#root-node-properties" title="Link to this heading">¶</a></h3>
+<p>The root node of the FIT should have the following layout:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/ o image-tree
+    |- description = &quot;image description&quot;
+    |- timestamp = &lt;12399321&gt;
+    |- #address-cells = &lt;1&gt;
+    |
+    o images
+    | |
+    | o image-1 {...}
+    | o image-2 {...}
+    | ...
+    |
+    o configurations
+      |- default = &quot;conf-1&quot;
+      |
+      o conf-1 {...}
+      o conf-2 {...}
+      ...
+</pre></div>
+</div>
+<section id="optional-property">
+<h4><span class="section-number">5.2.1. </span>Optional property<a class="headerlink" href="#optional-property" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>description</dt><dd><p>Textual description of the FIT</p>
+</dd>
+</dl>
+</section>
+<section id="mandatory-property">
+<h4><span class="section-number">5.2.2. </span>Mandatory property<a class="headerlink" href="#mandatory-property" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt><span class="target" id="index-9"></span>timestamp</dt><dd><p>Last image modification time being counted in seconds since
+1970-01-01 00:00:00 - to be automatically calculated by mkimage tool.</p>
+</dd>
+</dl>
+</section>
+<section id="conditionally-mandatory-property">
+<h4><span class="section-number">5.2.3. </span>Conditionally mandatory property<a class="headerlink" href="#conditionally-mandatory-property" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt><span class="target" id="index-10"></span>#address-cells</dt><dd><p>Number of 32bit cells required to represent entry and
+load addresses supplied within sub-image nodes. May be omitted when no
+entry or load addresses are used.</p>
+</dd>
+</dl>
+</section>
+<section id="mandatory-nodes">
+<h4><span class="section-number">5.2.4. </span>Mandatory nodes<a class="headerlink" href="#mandatory-nodes" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt><span class="target" id="index-11"></span>images</dt><dd><p>This node contains a set of sub-nodes, each of them representing
+single component sub-image (like <span class="target" id="index-12"></span>kernel, <span class="target" id="index-13"></span>ramdisk, etc.).
+At least one sub-image is required.</p>
+</dd>
+<dt><span class="target" id="index-14"></span>configurations</dt><dd><p>Contains a set of available configuration nodes and
+defines a default configuration.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="images-node">
+<h3><span class="section-number">5.3. </span>‘/images’ node<a class="headerlink" href="#images-node" title="Link to this heading">¶</a></h3>
+<p>This node is a container node for component sub-image nodes. Each sub-node of
+the ‘/images’ node should have the following layout:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o image-1
+    |- description = &quot;component sub-image description&quot;
+    |- data = /incbin/(&quot;path/to/data/file.bin&quot;)
+    |- type = &quot;sub-image type name&quot;
+    |- arch = &quot;ARCH name&quot;
+    |- os = &quot;OS name&quot;
+    |- compression = &quot;compression name&quot;
+    |- load = &lt;00000000&gt;
+    |- entry = &lt;00000000&gt;
+    |
+    o hash-1 {...}
+    o hash-2 {...}
+    o dm-verity {...}
+    o aslr-rand {...}
+    ...
+</pre></div>
+</div>
+<section id="mandatory-properties">
+<h4><span class="section-number">5.3.1. </span>Mandatory properties<a class="headerlink" href="#mandatory-properties" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>description</dt><dd><p>Textual description of the component sub-image</p>
+</dd>
+<dt><span class="target" id="index-15"></span>type</dt><dd><p>Name of component sub-image type. Supported types are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sub-image type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>invalid</p></td>
+<td><p>Invalid Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>aisimage</p></td>
+<td><p>Davinci AIS image</p></td>
+</tr>
+<tr class="row-even"><td><p>amlimage</p></td>
+<td><p>Amlogic Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>atmelimage</p></td>
+<td><p>ATMEL ROM-Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>copro</p></td>
+<td><p>Coprocessor Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>fdt_legacy</p></td>
+<td><p>legacy Image with Flat Device Tree</p></td>
+</tr>
+<tr class="row-even"><td><p>filesystem</p></td>
+<td><p>Filesystem Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>firmware</p></td>
+<td><p>Firmware</p></td>
+</tr>
+<tr class="row-even"><td><p>firmware_ivt</p></td>
+<td><p>Firmware with HABv4 IVT</p></td>
+</tr>
+<tr class="row-odd"><td><p>flat_dt</p></td>
+<td><p>Flat Device Tree</p></td>
+</tr>
+<tr class="row-even"><td><p>fpga</p></td>
+<td><p>FPGA Device Image (bitstream file, vendor specific)</p></td>
+</tr>
+<tr class="row-odd"><td><p>gpimage</p></td>
+<td><p>TI Keystone SPL Image</p></td>
+</tr>
+<tr class="row-even"><td><p>imx8image</p></td>
+<td><p>NXP i.MX8 Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>imx8mimage</p></td>
+<td><p>NXP i.MX8M Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>imximage</p></td>
+<td><p>Freescale i.MX Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>kernel</p></td>
+<td><p>Kernel Image</p></td>
+</tr>
+<tr class="row-even"><td><p>kernel_noload</p></td>
+<td><p>Kernel Image (no loading done)</p></td>
+</tr>
+<tr class="row-odd"><td><p>kwbimage</p></td>
+<td><p>Kirkwood Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>lpc32xximage</p></td>
+<td><p>LPC32XX Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>mtk_image</p></td>
+<td><p>MediaTek BootROM loadable Image</p></td>
+</tr>
+<tr class="row-even"><td><p>multi</p></td>
+<td><p>Multi-File Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>mxsimage</p></td>
+<td><p>Freescale MXS Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>omapimage</p></td>
+<td><p>TI OMAP SPL With GP CH</p></td>
+</tr>
+<tr class="row-odd"><td><p>pblimage</p></td>
+<td><p>Freescale PBL Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>pmmc</p></td>
+<td><p>TI Power Management Micro-Controller Firmware</p></td>
+</tr>
+<tr class="row-odd"><td><p>ramdisk</p></td>
+<td><p>RAMDisk Image</p></td>
+</tr>
+<tr class="row-even"><td><p>rkimage</p></td>
+<td><p>Rockchip Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>rksd</p></td>
+<td><p>Rockchip SD Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>rkspi</p></td>
+<td><p>Rockchip SPI Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>script</p></td>
+<td><p>Script</p></td>
+</tr>
+<tr class="row-even"><td><p>sfspl</p></td>
+<td><p>StarFive SPL Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>socfpgaimage</p></td>
+<td><p>Altera SoCFPGA CV/AV preloader</p></td>
+</tr>
+<tr class="row-even"><td><p>socfpgaimage_v1</p></td>
+<td><p>Altera SoCFPGA A10 preloader</p></td>
+</tr>
+<tr class="row-odd"><td><p>spkgimage</p></td>
+<td><p>Renesas SPKG Image</p></td>
+</tr>
+<tr class="row-even"><td><p>standalone</p></td>
+<td><p>Standalone Program</p></td>
+</tr>
+<tr class="row-odd"><td><p>stm32image</p></td>
+<td><p>STMicroelectronics STM32 Image</p></td>
+</tr>
+<tr class="row-even"><td><p>stm32imagev2</p></td>
+<td><p>STMicroelectronics STM32 Image V2.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sunxi_egon</p></td>
+<td><p>Allwinner eGON Boot Image</p></td>
+</tr>
+<tr class="row-even"><td><p>sunxi_toc0</p></td>
+<td><p>Allwinner TOC0 Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>tee</p></td>
+<td><p>Trusted Execution Environment Image</p></td>
+</tr>
+<tr class="row-even"><td><p>tfa-bl31</p></td>
+<td><p>Trusted Firmware-A BL31 Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>ublimage</p></td>
+<td><p>Davinci UBL image</p></td>
+</tr>
+<tr class="row-even"><td><p>vybridimage</p></td>
+<td><p>Vybrid Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>x86_setup</p></td>
+<td><p>x86 setup.bin</p></td>
+</tr>
+<tr class="row-even"><td><p>zynqimage</p></td>
+<td><p>Xilinx Zynq Boot Image</p></td>
+</tr>
+<tr class="row-odd"><td><p>zynqmpbif</p></td>
+<td><p>Xilinx ZynqMP Boot Image (bif)</p></td>
+</tr>
+<tr class="row-even"><td><p>zynqmpimage</p></td>
+<td><p>Xilinx ZynqMP Boot Image</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>compression</dt><dd><p><span class="target" id="index-16"></span>Compression used by included data. If no compression is used, the
+compression property should be set to “none”. If the data is compressed but
+it should not be uncompressed by the loader
+(e.g. <span class="target" id="index-17"></span>compressed ramdisk &lt;pair: ramdisk; compressed), this
+should also be set to “none”.</p>
+<p>Supported compression types are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Compression type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>none</p></td>
+<td><p>uncompressed</p></td>
+</tr>
+<tr class="row-odd"><td><p>bzip2</p></td>
+<td><p>bzip2 compressed</p></td>
+</tr>
+<tr class="row-even"><td><p>gzip</p></td>
+<td><p>gzip compressed</p></td>
+</tr>
+<tr class="row-odd"><td><p>lz4</p></td>
+<td><p>lz4 compressed</p></td>
+</tr>
+<tr class="row-even"><td><p>lzma</p></td>
+<td><p>lzma compressed</p></td>
+</tr>
+<tr class="row-odd"><td><p>lzo</p></td>
+<td><p>lzo compressed</p></td>
+</tr>
+<tr class="row-even"><td><p>zstd</p></td>
+<td><p>zstd compressed</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</section>
+<section id="conditionally-mandatory-properties">
+<h4><span class="section-number">5.3.2. </span>Conditionally mandatory properties<a class="headerlink" href="#conditionally-mandatory-properties" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>data</dt><dd><p>Path to the external file which contains this node’s binary data. Within
+the FIT this is the contents of the file. This is mandatory unless
+<span class="target" id="index-18"></span>external data is used or <code class="docutils literal notranslate"><span class="pre">image-data</span></code> is provided.</p>
+</dd>
+</dl>
+<dl id="prop-image-data">
+<dt>image-data</dt><dd><p>Unit name of another image node under <code class="docutils literal notranslate"><span class="pre">/images</span></code> whose binary data
+this node shares. This is a directive for the FIT producer
+(e.g. mkimage); when present, the producer arranges for both nodes
+to reference the same data (e.g. identical <code class="docutils literal notranslate"><span class="pre">data-offset</span></code> and
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code> in external-data mode). In an authored FIT the node
+does not include <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">data-offset</span></code>, <code class="docutils literal notranslate"><span class="pre">data-position</span></code> or
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code> - these are filled in by the producer. In a resolved
+FIT the property is retained alongside the data properties, as a
+record of the sharing relationship for tools that further process
+the FIT.</p>
+<p>The target node must not itself have an <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property;
+chains of references are not permitted.</p>
+<p>No other properties are inherited from the source node; all metadata
+must be set explicitly. See <a class="reference internal" href="#id12">Shared image data</a> for details and an
+example.</p>
+</dd>
+<dt>data-size</dt><dd><p>Size of the data in bytes. This is mandatory if <span class="target" id="index-19"></span>external data is
+used.</p>
+</dd>
+<dt>data-offset</dt><dd><p>Offset of the data in a separate image store. The image store is placed
+immediately after the last byte of the device tree binary, aligned to a
+4-byte boundary. This is mandatory if <span class="target" id="index-20"></span>external data is used, with an offset.</p>
+</dd>
+<dt>data-position</dt><dd><p>Machine address at which the data is to be found. This is a fixed address
+not relative to the loading of the FIT. This is mandatory if
+<span class="target" id="index-21"></span>external data is used with a fixed address.</p>
+</dd>
+<dt>os</dt><dd><p><span class="target" id="index-22"></span>OS name, mandatory for types “kernel”. Valid OS names are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>OS name</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>invalid</p></td>
+<td><p>Invalid OS</p></td>
+</tr>
+<tr class="row-odd"><td><p>4_4bsd</p></td>
+<td><p>4_4BSD</p></td>
+</tr>
+<tr class="row-even"><td><p>arm-trusted-firmware</p></td>
+<td><p>ARM Trusted Firmware</p></td>
+</tr>
+<tr class="row-odd"><td><p>dell</p></td>
+<td><p>Dell</p></td>
+</tr>
+<tr class="row-even"><td><p>efi</p></td>
+<td><p>EFI Firmware</p></td>
+</tr>
+<tr class="row-odd"><td><p>elf</p></td>
+<td><p>ELF Image</p></td>
+</tr>
+<tr class="row-even"><td><p>esix</p></td>
+<td><p>Esix</p></td>
+</tr>
+<tr class="row-odd"><td><p>freebsd</p></td>
+<td><p>FreeBSD</p></td>
+</tr>
+<tr class="row-even"><td><p>integrity</p></td>
+<td><p>INTEGRITY</p></td>
+</tr>
+<tr class="row-odd"><td><p>irix</p></td>
+<td><p>Irix</p></td>
+</tr>
+<tr class="row-even"><td><p>linux</p></td>
+<td><p>Linux</p></td>
+</tr>
+<tr class="row-odd"><td><p>ncr</p></td>
+<td><p>NCR</p></td>
+</tr>
+<tr class="row-even"><td><p>netbsd</p></td>
+<td><p>NetBSD</p></td>
+</tr>
+<tr class="row-odd"><td><p>openbsd</p></td>
+<td><p>OpenBSD</p></td>
+</tr>
+<tr class="row-even"><td><p>openrtos</p></td>
+<td><p>OpenRTOS</p></td>
+</tr>
+<tr class="row-odd"><td><p>opensbi</p></td>
+<td><p>RISC-V OpenSBI</p></td>
+</tr>
+<tr class="row-even"><td><p>ose</p></td>
+<td><p>Enea OSE</p></td>
+</tr>
+<tr class="row-odd"><td><p>plan9</p></td>
+<td><p>Plan 9</p></td>
+</tr>
+<tr class="row-even"><td><p>psos</p></td>
+<td><p>pSOS</p></td>
+</tr>
+<tr class="row-odd"><td><p>qnx</p></td>
+<td><p>QNX</p></td>
+</tr>
+<tr class="row-even"><td><p>rtems</p></td>
+<td><p>RTEMS</p></td>
+</tr>
+<tr class="row-odd"><td><p>sco</p></td>
+<td><p>SCO</p></td>
+</tr>
+<tr class="row-even"><td><p>solaris</p></td>
+<td><p>Solaris</p></td>
+</tr>
+<tr class="row-odd"><td><p>svr4</p></td>
+<td><p>SVR4</p></td>
+</tr>
+<tr class="row-even"><td><p>tee</p></td>
+<td><p>Trusted Execution Environment</p></td>
+</tr>
+<tr class="row-odd"><td><p>u-boot</p></td>
+<td><p>U-Boot</p></td>
+</tr>
+<tr class="row-even"><td><p>vxworks</p></td>
+<td><p>VxWorks</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>arch</dt><dd><p><span class="target" id="index-23"></span>Architecture name, mandatory for types: “standalone”, “kernel”,
+“firmware”, “ramdisk” and “fdt”. Valid architecture names are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Architecture type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>invalid</p></td>
+<td><p>Invalid ARCH</p></td>
+</tr>
+<tr class="row-odd"><td><p>alpha</p></td>
+<td><p>Alpha</p></td>
+</tr>
+<tr class="row-even"><td><p>arc</p></td>
+<td><p>ARC</p></td>
+</tr>
+<tr class="row-odd"><td><p>arm64</p></td>
+<td><p>AArch64</p></td>
+</tr>
+<tr class="row-even"><td><p>arm</p></td>
+<td><p>ARM</p></td>
+</tr>
+<tr class="row-odd"><td><p>avr32</p></td>
+<td><p>AVR32</p></td>
+</tr>
+<tr class="row-even"><td><p>blackfin</p></td>
+<td><p>Blackfin</p></td>
+</tr>
+<tr class="row-odd"><td><p>ia64</p></td>
+<td><p>IA64</p></td>
+</tr>
+<tr class="row-even"><td><p>m68k</p></td>
+<td><p>M68K</p></td>
+</tr>
+<tr class="row-odd"><td><p>microblaze</p></td>
+<td><p>MicroBlaze</p></td>
+</tr>
+<tr class="row-even"><td><p>mips64</p></td>
+<td><p>MIPS 64 Bit</p></td>
+</tr>
+<tr class="row-odd"><td><p>mips</p></td>
+<td><p>MIPS</p></td>
+</tr>
+<tr class="row-even"><td><p>nds32</p></td>
+<td><p>NDS32</p></td>
+</tr>
+<tr class="row-odd"><td><p>nios2</p></td>
+<td><p>NIOS II</p></td>
+</tr>
+<tr class="row-even"><td><p>or1k</p></td>
+<td><p>OpenRISC 1000</p></td>
+</tr>
+<tr class="row-odd"><td><p>powerpc</p></td>
+<td><p>PowerPC</p></td>
+</tr>
+<tr class="row-even"><td><p>ppc</p></td>
+<td><p>PowerPC</p></td>
+</tr>
+<tr class="row-odd"><td><p>riscv</p></td>
+<td><p>RISC-V</p></td>
+</tr>
+<tr class="row-even"><td><p>s390</p></td>
+<td><p>IBM S390</p></td>
+</tr>
+<tr class="row-odd"><td><p>sandbox</p></td>
+<td><p>Sandbox</p></td>
+</tr>
+<tr class="row-even"><td><p>sh</p></td>
+<td><p>SuperH</p></td>
+</tr>
+<tr class="row-odd"><td><p>sparc64</p></td>
+<td><p>SPARC 64 Bit</p></td>
+</tr>
+<tr class="row-even"><td><p>sparc</p></td>
+<td><p>SPARC</p></td>
+</tr>
+<tr class="row-odd"><td><p>x86_64</p></td>
+<td><p>AMD x86_64</p></td>
+</tr>
+<tr class="row-even"><td><p>x86</p></td>
+<td><p>Intel x86</p></td>
+</tr>
+<tr class="row-odd"><td><p>xtensa</p></td>
+<td><p>Xtensa</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>entry</dt><dd><p>Entry point address, address size is determined by
+‘#address-cells’ property of the root node.
+Mandatory for types: “firmware”, and “kernel”.</p>
+</dd>
+</dl>
+<dl id="prop-load">
+<dt>load</dt><dd><p>Load address, address size is determined by ‘#address-cells’
+property of the root node.
+Mandatory for types: “firmware”, and “kernel”.</p>
+</dd>
+<dt><span class="target" id="index-24"></span>compatible</dt><dd><p>Compatible method for loading image.
+Mandatory for types: “fpga”, and images that do not specify a load address.
+Supported compatible methods:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Compatible string</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>u-boot,fpga-legacy</p></td>
+<td><p>Generic fpga loading routine.</p></td>
+</tr>
+<tr class="row-odd"><td><p>u-boot,zynqmp-fpga-ddrauth</p></td>
+<td><p>Signed non-encrypted FPGA bitstream for
+Xilinx Zynq UltraScale+ (ZymqMP) device.</p></td>
+</tr>
+<tr class="row-even"><td><p>u-boot,zynqmp-fpga-enc</p></td>
+<td><p>Encrypted FPGA bitstream for Xilinx Zynq
+UltraScale+ (ZynqMP) device.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For fdt images, the node should not have a compatible for the model.
+The compatible here is not derived from the fdt, nor is it used to identify
+the fdt. Such usage belongs in the configuration node.</p>
+</div>
+</dd>
+</dl>
+<dl id="prop-phase">
+<dt><span class="target" id="index-25"></span>phase</dt><dd><p><span class="target" id="index-26"></span>U-Boot phase for which the image is intended.</p>
+<dl class="simple">
+<dt>“spl”</dt><dd><p>image is an SPL image</p>
+</dd>
+<dt>“u-boot”</dt><dd><p>image is a U-Boot image</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+<section id="optional-nodes">
+<h4><span class="section-number">5.3.3. </span>Optional nodes<a class="headerlink" href="#optional-nodes" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>hash-1</dt><dd><p>Each hash sub-node represents a separate hash or checksum
+calculated for node’s data according to specified algorithm.</p>
+</dd>
+<dt>signature-1</dt><dd><p>Each signature sub-node represents a separate signature
+calculated for node’s data according to specified algorithm.</p>
+</dd>
+<dt>dm-verity</dt><dd><p>For images of type <code class="docutils literal notranslate"><span class="pre">filesystem</span></code>, this sub-node carries dm-verity
+Merkle-tree metadata so that the bootloader can construct kernel
+command-line parameters for integrity-verified boot.
+See <a class="reference internal" href="#id3">dm-verity nodes</a>.</p>
+</dd>
+<dt>OS requests</dt><dd><p>For images of type <code class="docutils literal notranslate"><span class="pre">kernel</span></code> or <code class="docutils literal notranslate"><span class="pre">kernel_noload</span></code>,
+each sub-node whose compatible string starts with <code class="docutils literal notranslate"><span class="pre">vbe,</span></code>
+asks the bootloader to provide information, such as random seeds,
+to the OS when it boots.
+See <a class="reference internal" href="#id5">OS-request nodes</a>.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="hash-nodes">
+<span id="index-27"></span><h3><span class="section-number">5.4. </span>Hash nodes<a class="headerlink" href="#hash-nodes" title="Link to this heading">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o hash-1
+    |- algo = &quot;hash or checksum algorithm name&quot;
+    |- value = [hash or checksum value]
+</pre></div>
+</div>
+<section id="id1">
+<h4><span class="section-number">5.4.1. </span>Mandatory properties<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>algo</dt><dd><p><span class="target" id="index-28"></span>Algorithm name. Supported algorithms and their value sizes are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sub-image type</p></th>
+<th class="head"><p>Size (bytes)</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>crc16-ccitt</p></td>
+<td><p>2</p></td>
+<td><p>Cyclic Redundancy Check 16-bit
+(Consultative Committee for International
+Telegraphy and Telephony)</p></td>
+</tr>
+<tr class="row-odd"><td><p>crc32</p></td>
+<td><p>4</p></td>
+<td><p>Cyclic Redundancy Check 32-bit</p></td>
+</tr>
+<tr class="row-even"><td><p>md5</p></td>
+<td><p>16</p></td>
+<td><p>Message Digest 5 (MD5)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha1</p></td>
+<td><p>20</p></td>
+<td><p>Secure Hash Algorithm 1 (SHA1)</p></td>
+</tr>
+<tr class="row-even"><td><p>sha256</p></td>
+<td><p>32</p></td>
+<td><p>Secure Hash Algorithm 2 (SHA256)</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha384</p></td>
+<td><p>48</p></td>
+<td><p>Secure Hash Algorithm 2 (SHA384)</p></td>
+</tr>
+<tr class="row-even"><td><p>sha512</p></td>
+<td><p>64</p></td>
+<td><p>Secure Hash Algorithm 2 (SHA512)</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>value</dt><dd><p>Actual checksum or hash value.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="image-signature-nodes">
+<h3><span class="section-number">5.5. </span>Image-signature nodes<a class="headerlink" href="#image-signature-nodes" title="Link to this heading">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o signature-1
+    |- algo = &quot;algorithm name&quot;
+    |- key-name-hint = &quot;key name&quot;
+    |- value = [hash or checksum value]
+</pre></div>
+</div>
+<section id="id2">
+<h4><span class="section-number">5.5.1. </span>Mandatory properties<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<p><span class="target" id="fit-algorithm">FIT Algorithm</span>:</p>
+<dl>
+<dt>algo</dt><dd><p><span class="target" id="index-29"></span>Algorithm name. Supported algorithms and their value sizes are
+shown below. Note that the hash is specified separately from the signing
+algorithm, so it is possible to mix and match any SHA algorithm with any
+signing algorithm. The size of the signature relates to the signing
+algorithm, not the hash, since it is the hash that is signed.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Sub-image type</p></th>
+<th class="head"><p>Size (bytes)</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>sha1,rsa2048</p></td>
+<td><p>256</p></td>
+<td><p>SHA1 hash signed with 2048-bit
+Rivest–Shamir–Adleman algorithm</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha1,rsa3072</p></td>
+<td><p>384</p></td>
+<td><p>SHA1 hash signed with 3072-bit RSA</p></td>
+</tr>
+<tr class="row-even"><td><p>sha1,rsa4096</p></td>
+<td><p>512</p></td>
+<td><p>SHA1 hash signed with 4096-bit RSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>sha1,ecdsa256</p></td>
+<td><p>32</p></td>
+<td><p>SHA1 hash signed with 256-bit  Elliptic
+Curve Digital Signature Algorithm</p></td>
+</tr>
+<tr class="row-even"><td><p>sha256,…</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sha384,…</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sha512,…</p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>key-name-hint</dt><dd><p>Name of key to use for signing. The keys will normally be in
+a single directory (parameter -k to mkimage). For a given key &lt;name&gt;, its
+private key is stored in &lt;name&gt;.key and the certificate is stored in
+&lt;name&gt;.crt.</p>
+</dd>
+<dt>sign-images</dt><dd><p><em>Deprecated.</em> An unsorted list of property names on the parent
+configuration node identifying the images to sign. New FITs shall
+omit this property. The signer and verifier instead derive the
+set of referenced images automatically from the configuration’s
+string properties as described in <a class="reference internal" href="#document-chapter7-security#hash-contents"><span class="std std-ref">Hash contents</span></a>. This
+auto-discovery covers every image referenced by the configuration
+without requiring producers to keep the list in sync.</p>
+<p>Tools should ignore <code class="docutils literal notranslate"><span class="pre">sign-images</span></code> if present and apply the
+auto-discovery rule unconditionally. A future revision of this
+specification may remove the property entirely.</p>
+</dd>
+</dl>
+<p>The following properties are added as part of signing, and are mandatory:</p>
+<dl>
+<dt>value</dt><dd><p>Actual signature value. This is added by mkimage.</p>
+</dd>
+<dt>hashed-nodes</dt><dd><p>An unsorted list of nodes which were <span class="target" id="index-30"></span>hashed
+by the signer. Each is a string - the full path to node. Since this
+property is not itself protected by a hash, it serves only as a hint for
+the signer and must not be relied upon by the loader for validation
+purposes. A typical value might be:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>hashed-nodes = &quot;/&quot;, &quot;/configurations/conf-1&quot;, &quot;/images/kernel&quot;,
+    &quot;/images/kernel/hash-1&quot;, &quot;/images/fdt-1&quot;,
+    &quot;/images/fdt-1/hash-1&quot;;
+</pre></div>
+</div>
+</dd>
+<dt>hashed-strings</dt><dd><p>The start and size of the <span class="target" id="index-31"></span>string region of
+the FIT that was hashed. The start is normally 0, indicating the first byte
+of the string table. The size indicates the number of bytes hashed as part
+of signing.</p>
+</dd>
+</dl>
+<p>The following properties are added as part of signing, and are optional:</p>
+<dl class="simple">
+<dt>timestamp</dt><dd><p>Time when image was signed (standard Unix time_t format)</p>
+</dd>
+<dt>signer-name</dt><dd><p>Name of the signer (e.g. “mkimage”)</p>
+</dd>
+<dt>signer-version</dt><dd><p>Version string of the signer (e.g. “2013.01”)</p>
+</dd>
+<dt>comment</dt><dd><p>Additional information about the signer or image</p>
+</dd>
+<dt>padding</dt><dd><p>The padding algorithm, it may be pkcs-1.5 or pss,
+if no value is provided we assume pkcs-1.5</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="dm-verity-nodes">
+<span id="index-32"></span><span id="id3"></span><h3><span class="section-number">5.6. </span>dm-verity nodes<a class="headerlink" href="#dm-verity-nodes" title="Link to this heading">¶</a></h3>
+<p>Image nodes whose type is <code class="docutils literal notranslate"><span class="pre">filesystem</span></code> may contain an optional <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code>
+child node. The bootloader uses this metadata to construct <code class="docutils literal notranslate"><span class="pre">dm-mod.create</span></code>
+and <code class="docutils literal notranslate"><span class="pre">dm-mod.waitfor</span></code> kernel command-line parameters so that the kernel can set
+up a <a class="reference external" href="https://docs.kernel.org/admin-guide/device-mapper/verity.html">dm-verity</a> integrity
+target over the corresponding block device at boot.</p>
+<p>See <a class="reference internal" href="#document-chapter6-usage#verity-usage"><span class="std std-ref">dm-verity for filesystem images</span></a> for details on how a bootloader should translate these
+properties into kernel command-line parameters.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o dm-verity
+    |- data-block-size = &lt;data block size in bytes&gt;
+    |- hash-block-size = &lt;hash block size in bytes&gt;
+    |- num-data-blocks = &lt;number of data blocks&gt;
+    |- hash-start-block = &lt;hash tree start block&gt;
+    |- algo = &quot;hash algorithm name&quot;
+    |- digest = [root hash bytes]
+    |- salt = [salt bytes]
+</pre></div>
+</div>
+<p>The property names are intentionally aligned with the <a class="reference external" href="https://docs.kernel.org/admin-guide/device-mapper/verity.html">dm-verity construction
+parameters</a>
+defined by the Linux kernel. The <code class="docutils literal notranslate"><span class="pre">&lt;version&gt;</span></code> parameter is always <code class="docutils literal notranslate"><span class="pre">1</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">&lt;dev&gt;</span></code> / <code class="docutils literal notranslate"><span class="pre">&lt;hash_dev&gt;</span></code> both implicitly refer to the <code class="docutils literal notranslate"><span class="pre">/dev/fitN</span></code> block
+device that the Linux uImage.FIT block driver creates for this sub-image.</p>
+<section id="id4">
+<h4><span class="section-number">5.6.1. </span>Mandatory properties<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>data-block-size</dt><dd><p>The block size on the data device in bytes. Each block corresponds to one
+digest in the hash tree. Must be a power of two and at least 512;
+typically 4096.</p>
+</dd>
+<dt>hash-block-size</dt><dd><p>The size of a hash block in bytes. Must be a power of two and at least 512;
+typically 4096.</p>
+</dd>
+<dt>num-data-blocks</dt><dd><p>The number of data blocks on the data device. This corresponds to the
+<code class="docutils literal notranslate"><span class="pre">&lt;num_data_blocks&gt;</span></code> dm-verity parameter and the value reported by
+<code class="docutils literal notranslate"><span class="pre">veritysetup</span> <span class="pre">format</span></code>.</p>
+</dd>
+<dt>hash-start-block</dt><dd><p>Offset in <code class="docutils literal notranslate"><span class="pre">hash-block-size</span></code>-sized blocks from the start of the sub-image
+to the root block of the hash tree. Corresponds to the
+<code class="docutils literal notranslate"><span class="pre">&lt;hash_start_block&gt;</span></code> dm-verity parameter.</p>
+</dd>
+<dt>algo</dt><dd><p>The cryptographic hash algorithm used for dm-verity, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;sha256&quot;</span></code>.</p>
+</dd>
+<dt>digest</dt><dd><p>The root hash of the dm-verity Merkle tree, stored as a raw byte array.
+The length must match the output size of <code class="docutils literal notranslate"><span class="pre">algo</span></code>.</p>
+</dd>
+<dt>salt</dt><dd><p>Salt value, stored as a raw byte array.</p>
+</dd>
+</dl>
+</section>
+<section id="optional-properties">
+<h4><span class="section-number">5.6.2. </span>Optional properties<a class="headerlink" href="#optional-properties" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>restart-on-corruption</dt><dd><p>Boolean. Restart the system when a corrupted block is discovered.
+Corresponds to <code class="docutils literal notranslate"><span class="pre">restart_on_corruption</span></code>.</p>
+</dd>
+<dt>panic-on-corruption</dt><dd><p>Boolean. Panic the system when a corrupted block is discovered. Not
+compatible with <code class="docutils literal notranslate"><span class="pre">restart-on-corruption</span></code>. Corresponds to
+<code class="docutils literal notranslate"><span class="pre">panic_on_corruption</span></code>.</p>
+</dd>
+<dt>restart-on-error</dt><dd><p>Boolean. Restart the system when an I/O error is detected. Corresponds to
+<code class="docutils literal notranslate"><span class="pre">restart_on_error</span></code>.</p>
+</dd>
+<dt>panic-on-error</dt><dd><p>Boolean. Panic the system when an I/O error is detected. Not compatible
+with <code class="docutils literal notranslate"><span class="pre">restart-on-error</span></code>. Corresponds to <code class="docutils literal notranslate"><span class="pre">panic_on_error</span></code>.</p>
+</dd>
+<dt>check-at-most-once</dt><dd><p>Boolean. Verify data blocks only the first time they are read, reducing
+overhead on constrained systems at the cost of not detecting online
+tampering. Corresponds to <code class="docutils literal notranslate"><span class="pre">check_at_most_once</span></code>.</p>
+</dd>
+</dl>
+<p>When none of the error-handling properties are present, the kernel default
+behaviour (return I/O error) applies.</p>
+<p>Additional optional parameters defined by the kernel’s <a class="reference external" href="https://docs.kernel.org/admin-guide/device-mapper/verity.html">dm-verity target</a> may be added
+as properties in future revisions of this specification.</p>
+<p>These values correspond to the parameters passed to <code class="docutils literal notranslate"><span class="pre">dm-mod.create</span></code> on the
+kernel command line (see <a class="reference internal" href="#document-chapter6-usage#verity-usage"><span class="std std-ref">dm-verity for filesystem images</span></a>).</p>
+<p>Both the filesystem payload data and the dm-verity Merkle-tree hash data are
+expected to reside inside the same sub-image.</p>
+</section>
+</section>
+<section id="os-request-nodes">
+<span id="index-33"></span><span id="id5"></span><h3><span class="section-number">5.7. </span>OS-request nodes<a class="headerlink" href="#os-request-nodes" title="Link to this heading">¶</a></h3>
+<p>An OS can ask the bootloader for information it needs early in boot,
+such as random data to seed its random-number generator,
+by adding OS-request nodes to its image node.
+OS requests come from Verified Boot for Embedded <a class="reference internal" href="#document-references#vbe" id="id6"><span>[VBE]</span></a>,
+hence the <code class="docutils literal notranslate"><span class="pre">vbe,</span></code> prefix on their compatible strings and properties.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o aslr-rand
+    |- compatible = &quot;vbe,aslr-rand&quot;
+    |- vbe,size = &lt;8&gt;
+    |- vbe,required
+</pre></div>
+</div>
+<p>The node name should be descriptive but is not otherwise specified.
+It must not start with <code class="docutils literal notranslate"><span class="pre">hash</span></code> or <code class="docutils literal notranslate"><span class="pre">signature</span></code>,
+nor be <code class="docutils literal notranslate"><span class="pre">cipher</span></code> or <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code>,
+since tools such as U-Boot use those names to identify other image sub-nodes.
+The bootloader identifies each request by its compatible string,
+and ignores sub-nodes which do not have one starting with <code class="docutils literal notranslate"><span class="pre">vbe,</span></code>.</p>
+<p>The bootloader passes what was requested to the OS in the <code class="docutils literal notranslate"><span class="pre">/chosen</span></code> node of
+the devicetree,
+using the standard property for each request,
+as described by the devicetree schema <a class="reference internal" href="#document-references#dtschema" id="id7"><span>[dtschema]</span></a>
+and listed in <a class="reference internal" href="#table-os-requests"><span class="std std-numref">Table 5.1</span></a>.
+The OS then needs no knowledge of OS requests to use the result,
+and a bootloader which does not implement OS requests can still provide the
+same properties by other means.</p>
+<p>OS requests therefore only apply when the bootloader passes a devicetree to the
+OS.
+On a boot path which cannot deliver the <code class="docutils literal notranslate"><span class="pre">/chosen</span></code> properties,
+every request is unsatisfiable (see <a class="reference internal" href="#handling-requests">Handling requests</a>).</p>
+<section id="id8">
+<h4><span class="section-number">5.7.1. </span>Mandatory properties<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>compatible</dt><dd><p>The request, as a single string <code class="docutils literal notranslate"><span class="pre">&quot;vbe,&lt;request&gt;&quot;</span></code>.
+See <a class="reference internal" href="#table-os-requests"><span class="std std-numref">Table 5.1</span></a> for the defined requests.</p>
+</dd>
+</dl>
+</section>
+<section id="id9">
+<h4><span class="section-number">5.7.2. </span>Conditionally mandatory properties<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>vbe,size</dt><dd><p>The number of bytes of data requested, as a 32-bit value.
+<a class="reference internal" href="#table-os-requests"><span class="std std-numref">Table 5.1</span></a> says whether each request needs this property
+and which sizes are valid.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h4><span class="section-number">5.7.3. </span>Optional properties<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>vbe,required</dt><dd><p>Boolean.
+The OS cannot run correctly without this request.
+See <a class="reference internal" href="#handling-requests">Handling requests</a>.</p>
+</dd>
+</dl>
+</section>
+<section id="defined-requests">
+<h4><span class="section-number">5.7.4. </span>Defined requests<a class="headerlink" href="#defined-requests" title="Link to this heading">¶</a></h4>
+<span id="table-os-requests"></span><table class="docutils align-default" id="id20">
+<caption><span class="caption-number">Table 5.1 </span><span class="caption-text">OS requests</span><a class="headerlink" href="#id20" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Compatible</p></th>
+<th class="head"><p>vbe,size</p></th>
+<th class="head"><p>Provided in /chosen</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>vbe,aslr-rand</p></td>
+<td><p>Optional,
+must be 8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kaslr-seed</span></code>: 64 bits of random data,
+which the OS uses to randomise its
+address-space layout</p></td>
+</tr>
+<tr class="row-odd"><td><p>vbe,random-seed</p></td>
+<td><p>Mandatory,
+at least 1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rng-seed</span></code>: at least <code class="docutils literal notranslate"><span class="pre">vbe,size</span></code> bytes
+of random data, which the OS uses to seed
+its random-number generator</p></td>
+</tr>
+</tbody>
+</table>
+<p>The bootloader must take the random data for both requests from a
+cryptographically secure source which provides fresh, unpredictable data,
+such as a hardware random-number generator or a properly seeded deterministic
+random-bit generator (DRBG).
+If it has no such source, the request is unsatisfiable.
+The OS may treat <code class="docutils literal notranslate"><span class="pre">rng-seed</span></code> as having full entropy.
+The bootloader must not use the same data for <code class="docutils literal notranslate"><span class="pre">kaslr-seed</span></code> and <code class="docutils literal notranslate"><span class="pre">rng-seed</span></code>.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">kaslr-seed</span></code> or <code class="docutils literal notranslate"><span class="pre">rng-seed</span></code> value already present in the devicetree
+passed with the OS is not fresh, so the bootloader replaces it,
+whatever its size.
+For <code class="docutils literal notranslate"><span class="pre">vbe,random-seed</span></code>, <code class="docutils literal notranslate"><span class="pre">vbe,size</span></code> is a minimum:
+if the bootloader would otherwise provide a longer fresh seed of its own,
+it provides that instead,
+rather than shortening it to the requested size.</p>
+</section>
+<section id="handling-requests">
+<h4><span class="section-number">5.7.5. </span>Handling requests<a class="headerlink" href="#handling-requests" title="Link to this heading">¶</a></h4>
+<p>A bootloader which does not implement OS requests ignores the request nodes
+and boots the OS as usual,
+so <code class="docutils literal notranslate"><span class="pre">vbe,required</span></code> only has an effect with a bootloader which implements them.</p>
+<p>Such a bootloader may be unable to handle a request because:</p>
+<ul class="simple">
+<li><p>it does not implement that particular request (it is <em>unsupported</em>),</p></li>
+<li><p>it implements the request but cannot provide it, e.g. there is no suitable
+random source, the size is larger than it can provide, or no devicetree is
+passed to the OS (it is <em>unsatisfiable</em>), or</p></li>
+<li><p>the request does not follow this specification, e.g. a mandatory
+<code class="docutils literal notranslate"><span class="pre">vbe,size</span></code> is missing or its value is not valid for the request
+(it is <em>malformed</em>).</p></li>
+</ul>
+<p>If such a request has <code class="docutils literal notranslate"><span class="pre">vbe,required</span></code>, the bootloader must not boot the OS.
+Otherwise it skips the request, should report it, and boots the OS anyway.</p>
+<p>An image should hold at most one request with each compatible string.
+If it holds more than one, the bootloader handles them as a single request
+with the largest <code class="docutils literal notranslate"><span class="pre">vbe,size</span></code>,
+which is required if any of them has <code class="docutils literal notranslate"><span class="pre">vbe,required</span></code>.</p>
+</section>
+<section id="signing">
+<h4><span class="section-number">5.7.6. </span>Signing<a class="headerlink" href="#signing" title="Link to this heading">¶</a></h4>
+<p>OS-request nodes are included in a configuration signature
+(see <a class="reference internal" href="#document-chapter7-security#hash-contents"><span class="std std-ref">Hash contents</span></a>),
+so a signed FIT protects their properties,
+including <code class="docutils literal notranslate"><span class="pre">vbe,required</span></code>.
+A FIT signed by a tool which does not include them fails to verify with a
+bootloader which does,
+so it must be signed again.</p>
+</section>
+<section id="compatibility">
+<h4><span class="section-number">5.7.7. </span>Compatibility<a class="headerlink" href="#compatibility" title="Link to this heading">¶</a></h4>
+<p>This section revises the earlier OS-request definitions referenced from
+<a class="reference internal" href="#document-references#vbe" id="id11"><span>[VBE]</span></a>.
+Those return the data in a <code class="docutils literal notranslate"><span class="pre">data</span></code> property of a copy of each request node
+under <code class="docutils literal notranslate"><span class="pre">/chosen</span></code>, rather than in the standard properties,
+and default <code class="docutils literal notranslate"><span class="pre">vbe,aslr-rand</span></code> to 4 bytes.
+Some versions of U-Boot use <code class="docutils literal notranslate"><span class="pre">vbe,random-rand</span></code> in place of
+<code class="docutils literal notranslate"><span class="pre">vbe,random-seed</span></code>;
+a bootloader may accept it as another name for <code class="docutils literal notranslate"><span class="pre">vbe,random-seed</span></code>.</p>
+</section>
+</section>
+<section id="shared-image-data">
+<span id="id12"></span><h3><span class="section-number">5.8. </span>Shared image data<a class="headerlink" href="#shared-image-data" title="Link to this heading">¶</a></h3>
+<p>When multiple configurations need to load the same binary at different
+addresses, the <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property allows an image node to share another
+node’s binary data rather than duplicating it. The referencing node carries
+its own <code class="docutils literal notranslate"><span class="pre">load</span></code>, <code class="docutils literal notranslate"><span class="pre">entry</span></code> and other metadata, but obtains the binary
+payload from the source node.</p>
+<p>Example: two configurations load the same kernel binary at different
+addresses without duplicating the data:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>images {
+    kernel-1 {
+        description = &quot;Linux kernel&quot;;
+        data = /incbin/(&quot;Image&quot;);
+        type = &quot;kernel&quot;;
+        arch = &quot;arm64&quot;;
+        os = &quot;linux&quot;;
+        compression = &quot;none&quot;;
+        load = &lt;0x40200000&gt;;
+        entry = &lt;0x40200000&gt;;
+        hash-1 {
+            algo = &quot;sha256&quot;;
+        };
+    };
+    kernel-board-b {
+        description = &quot;Linux kernel at alternate address&quot;;
+        image-data = &quot;kernel-1&quot;;
+        type = &quot;kernel&quot;;
+        arch = &quot;arm64&quot;;
+        os = &quot;linux&quot;;
+        compression = &quot;none&quot;;
+        load = &lt;0x80200000&gt;;
+        entry = &lt;0x80200000&gt;;
+        hash-1 {
+            algo = &quot;sha256&quot;;
+        };
+    };
+};
+configurations {
+    default = &quot;conf-board-a&quot;;
+    conf-board-a {
+        kernel = &quot;kernel-1&quot;;
+        fdt = &quot;fdt-board-a&quot;;
+    };
+    conf-board-b {
+        kernel = &quot;kernel-board-b&quot;;
+        fdt = &quot;fdt-board-b&quot;;
+    };
+};
+</pre></div>
+</div>
+<p>Both <code class="docutils literal notranslate"><span class="pre">kernel-1</span></code> and <code class="docutils literal notranslate"><span class="pre">kernel-board-b</span></code> are full image nodes. The FIT
+producer (e.g. mkimage) resolves the <code class="docutils literal notranslate"><span class="pre">image-data</span></code> reference so that
+both nodes point to the same binary payload. In external-data mode both
+nodes reference the same data region, avoiding duplication. In inline
+mode the producer copies the data into both nodes. Each node has its own
+hash, which covers the same bytes. Because the referencing node is a
+normal image node it is included in the configuration signature with no
+special handling.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property is retained in the resolved FIT alongside
+the produced <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">data-offset</span></code> or <code class="docutils literal notranslate"><span class="pre">data-size</span></code> properties. This
+lets a producer that later re-processes the FIT (e.g. to convert between
+inline and external-data mode) recognise the sharing relationship without
+having to compare byte content. If <code class="docutils literal notranslate"><span class="pre">image-data</span></code> and the data
+properties disagree the FIT is malformed and the producer must reject
+it.</p>
+<p>Chained references are not permitted: the target of <code class="docutils literal notranslate"><span class="pre">image-data</span></code> must
+not itself carry an <code class="docutils literal notranslate"><span class="pre">image-data</span></code> property.</p>
+<p>No properties are inherited from the source node; all metadata must be
+set explicitly. Only the binary payload is shared.</p>
+<p>FIT consumers (e.g. bootloaders) shall ignore the <code class="docutils literal notranslate"><span class="pre">image-data</span></code>
+property. The <code class="docutils literal notranslate"><span class="pre">data</span></code>, <code class="docutils literal notranslate"><span class="pre">data-offset</span></code> and <code class="docutils literal notranslate"><span class="pre">data-size</span></code> properties are
+authoritative.</p>
+</section>
+<section id="configurations-node">
+<h3><span class="section-number">5.9. </span>‘/configurations’ node<a class="headerlink" href="#configurations-node" title="Link to this heading">¶</a></h3>
+<p>The ‘configurations’ node creates convenient, labeled
+<span class="target" id="index-34"></span>boot configurations,
+which combine together <span class="target" id="index-35"></span>kernel images with their
+<span class="target" id="index-36"></span>ramdisks and fdt blobs.</p>
+<p>The ‘configurations’ node has the following structure:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o configurations
+    |- default = &quot;default configuration sub-node unit name&quot;
+    |
+    o config-1 {...}
+    o config-2 {...}
+    ...
+</pre></div>
+</div>
+<section id="id13">
+<h4><span class="section-number">5.9.1. </span>Optional property<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>default</dt><dd><p>Selects one of the configuration sub-nodes as a default configuration.</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h4><span class="section-number">5.9.2. </span>Mandatory nodes<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>configuration-sub-node-unit-name</dt><dd><p>At least one configuration sub-node is required.</p>
+</dd>
+</dl>
+</section>
+<section id="id15">
+<h4><span class="section-number">5.9.3. </span>Optional nodes<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>signature-1</dt><dd><p>Each signature sub-node represents a separate signature
+calculated for the configuration according to specified algorithm.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="configuration-nodes">
+<h3><span class="section-number">5.10. </span>Configuration nodes<a class="headerlink" href="#configuration-nodes" title="Link to this heading">¶</a></h3>
+<p>Each configuration has the following structure:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o config-1
+    |- description = &quot;configuration description&quot;;
+    |- kernel = &quot;kernel sub-node unit name&quot;;
+    |- cmdline = &quot;command line for next boot stage&quot;;
+    |- fdt = &quot;fdt sub-node unit-name&quot; [, &quot;fdt overlay sub-node unit-name&quot;, ...];
+    |- ramdisk = &quot;ramdisk sub-node unit-name&quot;;
+    |- loadables = &quot;loadables sub-node unit-name&quot; [, ...];
+    |- script = &quot;script sub-node unit-name&quot;;
+    |- compatible = &quot;vendor,board-style device tree compatible string&quot;;
+    o signature-1 {...}
+</pre></div>
+</div>
+<section id="id16">
+<h4><span class="section-number">5.10.1. </span>Mandatory properties<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>description</dt><dd><p>Textual configuration description.</p>
+</dd>
+</dl>
+</section>
+<section id="id17">
+<h4><span class="section-number">5.10.2. </span>Conditionally mandatory property<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>kernel or firmware</dt><dd><p>Unit name of the corresponding <span class="target" id="index-37"></span>kernel or <span class="target" id="index-38"></span>firmware
+(u-boot, op-tee, etc) image. If both “kernel” and “firmware” are specified,
+control is passed to the firmware image. For <a class="reference internal" href="#load-only">load_only</a> images, these two
+properties are optional.</p>
+</dd>
+</dl>
+</section>
+<section id="id18">
+<h4><span class="section-number">5.10.3. </span>Optional properties<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>cmdline</dt><dd><p>Command line passed to the next boot stage, e.g. the operating system
+kernel. The value is an UTF-8 encoded string.</p>
+</dd>
+<dt>fdt</dt><dd><p>Unit name of the corresponding fdt blob (component image node of a
+“fdt type”). Additional fdt overlay nodes can be supplied which signify
+that the resulting device tree blob is generated by the first base fdt
+blob with all subsequent overlays applied.</p>
+</dd>
+<dt>fpga</dt><dd><p>Unit name of the corresponding fpga bitstream blob
+(component image node of a “fpga type”).</p>
+</dd>
+<dt>loadables</dt><dd><p>Unit name containing a list of additional binaries to be
+loaded at their given locations. “loadables” is a comma-separated list
+of strings. <span class="target" id="index-39"></span>U-Boot will load each binary at its given load address
+(see <a class="reference internal" href="#prop-load"><span class="std std-ref">load</span></a>) and may optionally invoke additional post-processing
+steps on this binary based on its component image node type.</p>
+</dd>
+<dt>ramdisk</dt><dd><p>Unit name of the corresponding ramdisk to be loaded at the given location.</p>
+</dd>
+<dt>script</dt><dd><p>The image to use when loading a <span class="target" id="index-40"></span>U-Boot script (for use with the
+source command).</p>
+</dd>
+<dt>compatible</dt><dd><p>The root compatible string of the bootloader device tree that
+this configuration shall automatically match. If this property is not
+provided, the compatible string will be
+extracted from the fdt blob instead. This is only possible if the fdt is
+not compressed, so images with compressed fdts that want to use compatible
+string matching must always provide this property.</p>
+<p>Note that U-Boot requires the <span class="target" id="index-41"></span>CONFIG_FIT_BEST_MATCH option to be
+enabled for this matching to work.</p>
+</dd>
+</dl>
+<dl class="simple" id="load-only">
+<dt>load-only</dt><dd><p>Indicates that this configuration does not necessarily contain an executable
+image, i.e. kernel or firmware. The configuration’s images may be loaded
+into memory for use by the executable image, which comes from another
+configuration or FIT. See see <a class="reference internal" href="#document-chapter6-usage#multi-step"><span class="std std-ref">Multi-step loading</span></a>.</p>
+</dd>
+</dl>
+<p>The FDT blob is required to properly boot FDT-based kernel, so the minimal
+configuration for 2.6 FDT kernel is (kernel, fdt) pair.</p>
+<p>Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
+‘struct bd_info’ must be passed instead of FDT blob, thus fdt property <em>must
+not</em> be specified in a configuration node.</p>
+</section>
+</section>
+<section id="configuration-signature-nodes">
+<h3><span class="section-number">5.11. </span>Configuration-signature nodes<a class="headerlink" href="#configuration-signature-nodes" title="Link to this heading">¶</a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>o signature-1
+    |- algo = &quot;algorithm name&quot;
+    |- key-name-hint = &quot;key name&quot;
+    |- sign-images = &quot;path1&quot;, &quot;path2&quot;;  /* deprecated */
+    |- value = [hash or checksum value]
+    |- hashed-strings = &lt;0 len&gt;
+</pre></div>
+</div>
+<section id="id19">
+<h4><span class="section-number">5.11.1. </span>Mandatory properties<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>algo</dt><dd><p>See <a class="reference internal" href="#fit-algorithm">FIT Algorithm</a>.</p>
+</dd>
+<dt>key-name-hint</dt><dd><p>Name of key to use for signing. The keys will normally be in
+a single directory (parameter -k to mkimage). For a given key &lt;name&gt;, its
+private key is stored in &lt;name&gt;.key and the certificate is stored in
+&lt;name&gt;.crt.</p>
+</dd>
+</dl>
+<p>The following properties are added as part of signing, and are mandatory:</p>
+<dl class="simple">
+<dt>value</dt><dd><p>Actual signature value. This is added by mkimage.</p>
+</dd>
+</dl>
+<p>The following properties are added as part of signing, and are optional:</p>
+<dl class="simple">
+<dt>timestamp</dt><dd><p>Time when image was signed (standard Unix time_t format)</p>
+</dd>
+<dt>signer-name</dt><dd><p>Name of the signer (e.g. “mkimage”)</p>
+</dd>
+<dt>signer-version</dt><dd><p>Version string of the signer (e.g. “2013.01”)</p>
+</dd>
+<dt>comment</dt><dd><p>Additional information about the signer or image</p>
+</dd>
+<dt>padding</dt><dd><p>The padding algorithm, it may be pkcs-1.5 or pss,
+if no value is provided we assume pkcs-1.5</p>
+</dd>
+</dl>
+</section>
+</section>
+</section>
+<span id="document-chapter6-usage"></span><section id="flattened-image-tree-fit-usage">
+<span id="chapter-usage"></span><h2><span class="section-number">6. </span>Flattened Image Tree (FIT) Usage<a class="headerlink" href="#flattened-image-tree-fit-usage" title="Link to this heading">¶</a></h2>
+<section id="introduction">
+<h3><span class="section-number">6.1. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h3>
+<p>This section describes how FIT is typically used. This is not necessarily
+proscriptive but may be useful for those implementing this specification.</p>
+</section>
+<section id="boot-process">
+<h3><span class="section-number">6.2. </span>Boot process<a class="headerlink" href="#boot-process" title="Link to this heading">¶</a></h3>
+<p>At some point in the boot process, the bootloader select and boot an Operating
+System. To do this, it follows these steps:</p>
+<ol class="arabic simple">
+<li><p>Load a FIT into memory</p></li>
+<li><p>Select a configuration to boot</p></li>
+<li><p>Load the images from the selected configuration</p></li>
+<li><p>Fix up the devicetree</p></li>
+<li><p>Jump to the OS</p></li>
+</ol>
+<p>Each of these is now dealt with in turn.</p>
+<section id="load-a-fit-into-memory">
+<h4><span class="section-number">6.2.1. </span>Load a FIT into memory<a class="headerlink" href="#load-a-fit-into-memory" title="Link to this heading">¶</a></h4>
+<p>The bootloader provides a way to select a FIT to load into memory. This is
+typically on boot media available to the bootloader, such as eMMC or UFS.</p>
+<p>There may be multiple FITs available. The mechanism for locating and selecting
+a FIT is not defined by this specification. See for example <a class="reference internal" href="#document-references#vbe" id="id1"><span>[VBE]</span></a>.</p>
+<p>The bootloader may load the entire FIT into memory at once, before processing
+it. For simple applications where there are just a few images, this is the
+easiest approach.</p>
+<p>Where there are many configuration and several images, such that only a subset
+of the available images will actually be used on any one boot, it is inefficient
+to load the entire FIT, since most of the loaded data will not be used. In this
+case, an external-data FIT can be used. See <a class="reference internal" href="#document-chapter5-source-file-format#externaldata"><span class="std std-ref">External data</span></a>.</p>
+<p>In this case, the bootloader reads the FDT header (say 64 bytes), checks that
+it is valid, then reads enough more bytes to bring in <code class="docutils literal notranslate"><span class="pre">totalsize</span></code> bytes
+(<code class="docutils literal notranslate"><span class="pre">totalsize</span></code> is the second 32-bit word in the header). Typically this will be
+a few KB of data, consisting just of the FIT metadata. Later, the bootloader can
+read more data from the FIT as it needs to load each image.</p>
+<p>Another case that sometimes comes up is loading images from a FIT into internal
+SRAM, which may be very limited. In that case it may be useful to align images
+on a storage-device’s block boundary (see <code class="docutils literal notranslate"><span class="pre">-B</span></code> flag in <a class="reference internal" href="#document-chapter5-source-file-format#externaldata"><span class="std std-ref">External data</span></a>).
+The bootloader can then avoid needing bounce buffers and other complications.</p>
+</section>
+<section id="select-a-configuration-to-boot">
+<h4><span class="section-number">6.2.2. </span>Select a configuration to boot<a class="headerlink" href="#select-a-configuration-to-boot" title="Link to this heading">¶</a></h4>
+<p>The FIT typically contains more than one configuration. It is common to use a
+separate configuration for each supported model. The configuration contains
+a <code class="docutils literal notranslate"><span class="pre">compatible</span></code> stringlist which indicates which models the configuration is
+compatible with.</p>
+<p>The bootloader itself typically has a compatible stringlist, indicating the
+model that it is running on. For U-Boot this is in the root node of the
+devicetree used by U-Boot, typically exactly the same devicetree as is used by
+Linux for that model. For other bootloaders, the stringlist may be hard-coded,
+or obtained by some other means.</p>
+<p>The bootloader should loop through each configuration to find the best match to
+its own compatible string. The best match is the configuration which matches
+earliest string in the bootloader’s compatible stringlist.</p>
+<p>For example, imagine the bootloader has <code class="docutils literal notranslate"><span class="pre">compatible</span> <span class="pre">=</span> <span class="pre">&quot;foo,bar&quot;,</span> <span class="pre">&quot;bim,bam&quot;</span></code>
+and the FIT has two configurations:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>config-1 {
+    compatible = &quot;foo,bar&quot;;
+    fdt = &quot;fdt-1&quot;;
+    ...
+};
+config-2 {
+    compatible = &quot;bim,bam&quot;, &quot;baz,biz&quot;;
+    fdt = &quot;fdt-2&quot;;
+    ...
+};
+</pre></div>
+</div>
+<p>Here, the bootloader chooses <code class="docutils literal notranslate"><span class="pre">config-1</span></code> since it is a better match. The first
+string in the bootloader’s compatible list, <code class="docutils literal notranslate"><span class="pre">&quot;foo,bar&quot;</span></code>, matches a compatible
+string in the root of <code class="docutils literal notranslate"><span class="pre">fdt1</span></code>. Although <code class="docutils literal notranslate"><span class="pre">&quot;bim,bam&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">fdt2</span></code> matches the
+second string, this isn’t as good a match as <code class="docutils literal notranslate"><span class="pre">fdt1</span></code>.</p>
+<p>If several configurations are equally good matches (they match at the same
+position in the bootloader’s compatible stringlist), the one named by the
+<code class="docutils literal notranslate"><span class="pre">default</span></code> property is selected. This disambiguates a FIT whose configurations
+share a compatible string, for example a base devicetree plus overlay
+combinations for a single model, without relying on the order of the
+configuration nodes.</p>
+<p>In U-Boot this algorithm is handled by <code class="docutils literal notranslate"><span class="pre">fit_conf_find_compat()</span></code> and enabled
+by the <code class="docutils literal notranslate"><span class="pre">CONFIG_FIT_BEST_MATCH</span></code> option.</p>
+<p>Sometime models have multiple PCB revisions or different minor variants, often
+referred to as SKUs. For this reason, bootloaders may want to select
+configurations in a finer-grained way. In this case, rather than using the
+compatible stringlist in its devicetree, if any, it constructs a single string
+using the base name along with any available suffixes, each beginning with a
+hyphen. The best match algorithm is then run using that string.</p>
+<p>The following compatible-string suffixes may be used to this end. They must be
+provided in this order (&lt;n&gt; is an integer &gt;= 0):</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">-rev&lt;n&gt;</span></code></dt><dd><p>Board revision number, typically referring to a revision of the PCB to fix
+a problem or adjust component selection. The intention is that the board is
+the same design, just with some minor fixes or improvements. The first
+revision is typically <code class="docutils literal notranslate"><span class="pre">rev0</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">-sku&lt;n&gt;</span></code></dt><dd><p>Board variant, called a SKU (Stock-Keeping Unit) which is a unique code that
+identifies a model variant. This may encode differences in the display,
+WiFi and the like, but where the same PCB design (and revision) is used.
+The base SKU is typically <code class="docutils literal notranslate"><span class="pre">sku0</span></code>.</p>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>compatible = &quot;google,kevin-rev15&quot;;
+compatible = &quot;google,kevin-rev15-sku2&quot;;
+</pre></div>
+</div>
+<p>When matching, the bootloader should build the most specific string it can using
+any available revision / SKU information, then try to match that. If the most
+specific string fails (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;google,kevin-rev15-sku2&quot;</span></code>), it should fall back
+to just <code class="docutils literal notranslate"><span class="pre">&quot;google,kevin-rev15&quot;</span></code> and then <code class="docutils literal notranslate"><span class="pre">&quot;google,kevin-sku2&quot;</span></code>. If nothing
+matches, then it should try without any additions, i.e. <code class="docutils literal notranslate"><span class="pre">&quot;google,kevin&quot;</span></code>.</p>
+<p>This multi-stage process uses the same ‘best match’ approach as above. Each
+attempt finds the best match given the compatible string being searched. Where
+a stage does not find any match, the next stage begins. As soon as a match is
+found, searching stops, using the best match found in the stage.</p>
+<p>Other suffixes may be added in future.</p>
+</section>
+<section id="load-the-images-from-the-selected-configuration">
+<h4><span class="section-number">6.2.3. </span>Load the images from the selected configuration<a class="headerlink" href="#load-the-images-from-the-selected-configuration" title="Link to this heading">¶</a></h4>
+<p>The configuration contains a number of images. One of these is the OS itself.
+Another is typically a devicetree blob, which provides information about
+available devices, useful for the OS as it boots and runs. Another image may be
+a ramdisk (or initrd) which provides an initial root disk for the OS to use,
+before it is able to access the real root disk.</p>
+<p>The bootloader reads each image from the FIT and ‘loads’ it to the correct
+address. This address may be provided by the image’s <code class="docutils literal notranslate"><span class="pre">load</span></code> property
+(see <a class="reference internal" href="#document-chapter5-source-file-format#prop-load"><span class="std std-ref">load</span></a>), but if not provided, the bootloader can load it to any
+suitable address. In some cases it may be possible to avoid loading the image
+and just refer to the image data within the FIT itself.</p>
+</section>
+<section id="fix-up-the-devicetree">
+<h4><span class="section-number">6.2.4. </span>Fix up the devicetree<a class="headerlink" href="#fix-up-the-devicetree" title="Link to this heading">¶</a></h4>
+<p>Many Operating Systems use devicetree blobs for configuration. As a result, most
+bootloaders provide a way to update the devicetree in the FIT before passing it
+to the OS. This may be used to pass command-line parameters to Linux, to select
+the console device to use, or to pass the ramdisk to the OS. It is also common
+to enable or disable certain devicetree nodes based on the hardware
+in use.</p>
+<p>The fixups required depend on the OS and its expectations. The result is a
+devicetree slightly modified from the FIT version.</p>
+<p>If the OS image contains OS requests (see <a class="reference internal" href="#document-chapter5-source-file-format#os-request-nodes"><span class="std std-ref">OS-request nodes</span></a>), the
+bootloader handles them at this point, adding the requested information to the
+<code class="docutils literal notranslate"><span class="pre">/chosen</span></code> node. It should do this after any other fixup which sets the same
+properties, so that the OS receives at least what it asked for.</p>
+</section>
+<section id="jump-to-the-os">
+<h4><span class="section-number">6.2.5. </span>Jump to the OS<a class="headerlink" href="#jump-to-the-os" title="Link to this heading">¶</a></h4>
+<p>Once everything is ready, the bootloader jumps to the OS. At this point the FIT
+is no longer in use. The OS typically does not see the FIT itself and only cares
+about the images that were loaded. At this point, the FIT has served its
+purpose.</p>
+</section>
+</section>
+<section id="firmware-usage">
+<h3><span class="section-number">6.3. </span>Firmware usage<a class="headerlink" href="#firmware-usage" title="Link to this heading">¶</a></h3>
+<p>As firmware has become more complex, with multiple binaries loaded at each
+phase of the boot, it has become common to use FIT to load firmware.</p>
+<p>In this case, there is the concept of a boot phase (see <a class="reference internal" href="#document-chapter5-source-file-format#prop-phase"><span class="std std-ref">phase</span></a>),
+indicating which phase each image is for.</p>
+<p>In this case the bootloader itself is likely split into multiple phases. For
+U-Boot, a common approach is for SPL (Secondary Program Loader) to load U-Boot
+proper, along with <span class="target" id="index-0"></span>ATF and any other images required by U-Boot proper.</p>
+<p>FIT processing for firmware images is no different from the approach described
+above, except that any image with a <code class="docutils literal notranslate"><span class="pre">phase</span></code> property is only loaded if the
+phase matches the phase being loaded. So, for example, SPL loads U-Boot proper
+so will only load images with a phase of “u-boot”. If TPL is in use (the phase
+before SPL), then TPL will only load images with a phase of “spl”. This allows
+all images to be provided in a single FIT, with each phase pulling out what is
+needed as the boot proceeds.</p>
+</section>
+<section id="multi-step-loading">
+<span id="multi-step"></span><h3><span class="section-number">6.4. </span>Multi-step loading<a class="headerlink" href="#multi-step-loading" title="Link to this heading">¶</a></h3>
+<p>The most common use of a FIT is where each configuration contains everything
+needed to boot. For example, on ARM systems a configuration contains a kernel,
+devicetree(s) and a ramdisk if needed. This approach is widely used on embedded
+systems.</p>
+<p>This approach is not always desirable, however, particularly when the firmware
+and the OS are supplied by different parties. In that case, the devicetree may
+be provided by the firmware with the other pieces coming from the OS. This
+means that FIT may omit the devicetree images.</p>
+<p>With devicetree in particular, it is common for the OS to provide its own
+version, or perhaps a devicetree overlay to add some new nodes and properties.</p>
+<p>Obviously if the OS has to provide a devicetree for every device, the OS files
+would become very large. A middle path could be that the hardware vendor
+provides a FIT on a boot partition, containing devicetrees for hardware
+supported by that vendor. Then the bootloader can load that FIT to get just the
+devicetree, followed by the main FIT to load the OS.</p>
+<p>To enable this last case, add a <a class="reference internal" href="#document-chapter5-source-file-format#load-only"><span class="std std-ref">load-only</span></a> property to the configuration.
+This signals to the bootloader that it should not require an executable (i.e.
+kernel or firmware), nor should it try to boot with this configuration. Booting
+then becomes a two-step process: load one FIT to obtain the devicetree, then
+another to obtain the OS. Only the second FIT is booted.</p>
+<p>Specifically, the ‘load-only’ property adjusts the meaning of loading a FIT, so
+that implementors should follow the following behaviour:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>‘load-only’ present</p></th>
+<th class="head"><p>Executable present</p></th>
+<th class="head"><p>Behaviour</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>no</p></td>
+<td><p>no</p></td>
+<td><p>Raise an error</p></td>
+</tr>
+<tr class="row-odd"><td><p>yes</p></td>
+<td><p>no</p></td>
+<td><p>Only load the images</p></td>
+</tr>
+<tr class="row-even"><td><p>no</p></td>
+<td><p>yes</p></td>
+<td><p>Execute binary</p></td>
+</tr>
+<tr class="row-odd"><td><p>yes</p></td>
+<td><p>yes</p></td>
+<td><p>Execute binary</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dm-verity-for-filesystem-images">
+<span id="verity-usage"></span><h3><span class="section-number">6.5. </span>dm-verity for filesystem images<a class="headerlink" href="#dm-verity-for-filesystem-images" title="Link to this heading">¶</a></h3>
+<p>A FIT may contain <code class="docutils literal notranslate"><span class="pre">filesystem</span></code>-type sub-images that carry a <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code>
+child node (see <a class="reference internal" href="#document-chapter5-source-file-format#dm-verity-nodes"><span class="std std-ref">dm-verity nodes</span></a>). Such images bundle both the
+filesystem payload and the dm-verity Merkle-tree hash data inside the same
+sub-image. A Linux block driver exposes each loadable sub-image as
+<code class="docutils literal notranslate"><span class="pre">/dev/fit0</span></code>, <code class="docutils literal notranslate"><span class="pre">/dev/fit1</span></code>, etc.</p>
+<p>When a <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node is present, the bootloader should translate its
+properties into kernel command-line parameters so that the kernel can activate
+a dm-verity integrity target at boot, before mounting the root filesystem.
+Two parameters are needed:</p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">dm-mod.waitfor</span></code></dt><dd><p>Tells <code class="docutils literal notranslate"><span class="pre">dm-init</span></code> to wait for the block device to appear before creating
+mapped devices. The bootloader should list the <code class="docutils literal notranslate"><span class="pre">/dev/fitN</span></code> device that
+corresponds to the sub-image:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>dm-mod.waitfor=/dev/fit0
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">dm-mod.create</span></code></dt><dd><p>Defines a device-mapper table using the <code class="docutils literal notranslate"><span class="pre">--concise</span></code> format accepted by
+<code class="docutils literal notranslate"><span class="pre">dmsetup</span></code>. The general form for a verity target is:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;name&gt;,&lt;uuid&gt;,&lt;minor&gt;,ro,
+  0 &lt;num_sectors&gt; verity &lt;version&gt;
+  &lt;dev&gt; &lt;hash_dev&gt;
+  &lt;data_block_size&gt; &lt;hash_block_size&gt;
+  &lt;num_data_blocks&gt; &lt;hash_start_block&gt;
+  &lt;algorithm&gt; &lt;digest&gt; &lt;salt&gt;
+  [&lt;#opt_params&gt; &lt;opt_params&gt;]
+</pre></div>
+</div>
+<p>Because both the filesystem data and the hash tree reside inside the same
+<code class="docutils literal notranslate"><span class="pre">/dev/fitN</span></code> device, <code class="docutils literal notranslate"><span class="pre">&lt;dev&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;hash_dev&gt;</span></code> are identical and shall
+be set by the bootloader. The <code class="docutils literal notranslate"><span class="pre">&lt;version&gt;</span></code> is always <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+<section id="field-mapping">
+<h4><span class="section-number">6.5.1. </span>Field mapping<a class="headerlink" href="#field-mapping" title="Link to this heading">¶</a></h4>
+<p>The following table shows how each dm-verity construction parameter
+is derived from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node properties.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>dm-verity parameter</p></th>
+<th class="head"><p>Source</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code></p></td>
+<td><p>The unit name of the <code class="docutils literal notranslate"><span class="pre">/images</span></code> sub-node that contains the
+<code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> child node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;uuid&gt;</span></code></p></td>
+<td><p>May be left empty (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;minor&gt;</span></code></p></td>
+<td><p>May be left empty (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;num_sectors&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">num-data-blocks</span> <span class="pre">*</span> <span class="pre">(data-block-size</span> <span class="pre">/</span> <span class="pre">512)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;version&gt;</span></code></p></td>
+<td><p>Always <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;dev&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;hash_dev&gt;</span></code></p></td>
+<td><p>Both set to the <code class="docutils literal notranslate"><span class="pre">/dev/fitN</span></code> block device that the uImage.FIT block
+driver creates for this sub-image.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;data_block_size&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data-block-size</span></code> from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;hash_block_size&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">hash-block-size</span></code> from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;num_data_blocks&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">num-data-blocks</span></code> from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;hash_start_block&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">hash-start-block</span></code> from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;algorithm&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">algo</span></code> from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;digest&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">digest</span></code> from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node, hex-encoded.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;salt&gt;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">salt</span></code> from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node, hex-encoded.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;opt_params&gt;</span></code></p></td>
+<td><p>Constructed from the boolean option properties present in the
+<code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node (e.g. <code class="docutils literal notranslate"><span class="pre">restart-on-corruption</span></code>,
+<code class="docutils literal notranslate"><span class="pre">panic-on-error</span></code>). The bootloader collects every option property that
+is present, converts the property name from hyphenated to underscored
+form (e.g. <code class="docutils literal notranslate"><span class="pre">restart-on-corruption</span></code> becomes <code class="docutils literal notranslate"><span class="pre">restart_on_corruption</span></code>),
+counts them, and appends <code class="docutils literal notranslate"><span class="pre">&lt;count&gt;</span> <span class="pre">&lt;option&gt;</span> <span class="pre">[&lt;option&gt;</span> <span class="pre">...]</span></code> to the
+target line.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example">
+<h4><span class="section-number">6.5.2. </span>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h4>
+<p>Given a <code class="docutils literal notranslate"><span class="pre">filesystem</span></code> sub-image node named <code class="docutils literal notranslate"><span class="pre">rootfs-1</span></code>,
+exposed as <code class="docutils literal notranslate"><span class="pre">/dev/fit0</span></code>, whose <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node contains:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>dm-verity {
+    data-block-size = &lt;4096&gt;;
+    hash-block-size = &lt;4096&gt;;
+    num-data-blocks = &lt;204800&gt;;
+    hash-start-block = &lt;204800&gt;;
+    algo = &quot;sha256&quot;;
+    digest = [ac 87 db 56 30 3c 9c 1d a4 33 d7 20 9b 5a 6e f3
+              e4 77 9d f1 41 20 0c bd 7c 15 7d cb 8d d8 9c 42];
+    salt = [5e bf e8 7f 7d f3 23 5b 80 a1 17 eb c4 07 8e 44
+            f5 50 45 48 7a d4 a9 65 81 d1 ad b5 64 61 5b 51];
+    panic-on-corruption;
+    panic-on-error;
+};
+</pre></div>
+</div>
+<p>The bootloader constructs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>dm-mod.waitfor=/dev/fit0
+
+dm-mod.create=&quot;rootfs-1,,, ro,
+  0 1638400 verity 1
+  /dev/fit0 /dev/fit0
+  4096 4096 204800 204800 sha256
+  ac87db56303c9c1da433d7209b5a6ef3e4779df141200cbd7c157dcb8dd89c42
+  5ebfe87f7df3235b80a117ebc4078e44f55045487ad4a96581d1adb564615b51
+  2 panic_on_corruption panic_on_error&quot;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The newlines inside the <code class="docutils literal notranslate"><span class="pre">dm-mod.create</span></code> value above are
+for readability only. The actual kernel command-line
+parameter must be a single line.</p>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">num_sectors</span></code> = 204800 × (4096 / 512) = 1638400. <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the image
+unit name <code class="docutils literal notranslate"><span class="pre">rootfs-1</span></code>; <code class="docutils literal notranslate"><span class="pre">&lt;uuid&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;minor&gt;</span></code> are left empty; <code class="docutils literal notranslate"><span class="pre">ro</span></code>
+indicates a read-only target. <code class="docutils literal notranslate"><span class="pre">&lt;dev&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;hash_dev&gt;</span></code> are both
+<code class="docutils literal notranslate"><span class="pre">/dev/fit0</span></code> because the filesystem data and the Merkle tree reside in the same
+sub-image. The two boolean properties <code class="docutils literal notranslate"><span class="pre">panic-on-corruption</span></code> and
+<code class="docutils literal notranslate"><span class="pre">panic-on-error</span></code> become the optional-parameter suffix <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">panic_on_corruption</span>
+<span class="pre">panic_on_error</span></code> (count followed by underscore-separated names). The remaining
+fields map directly from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node properties.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When preparing the sub-image with <code class="docutils literal notranslate"><span class="pre">veritysetup</span> <span class="pre">format</span></code>, pass
+<code class="docutils literal notranslate"><span class="pre">--no-superblock</span></code> so that the hash tree starts directly after
+the data blocks. By default <code class="docutils literal notranslate"><span class="pre">veritysetup</span></code> writes a one-block
+on-disk superblock between data and hash tree, which would shift
+<code class="docutils literal notranslate"><span class="pre">hash-start-block</span></code> to <code class="docutils literal notranslate"><span class="pre">num-data-blocks</span> <span class="pre">+</span> <span class="pre">1</span></code>. The kernel
+dm-verity target never reads this superblock — all parameters
+are supplied via <code class="docutils literal notranslate"><span class="pre">dm-mod.create</span></code> — so it is unnecessary when
+the metadata is already stored in the FIT <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node.</p>
+</div>
+</section>
+</section>
+</section>
+<span id="document-chapter7-security"></span><section id="security">
+<span id="chapter-security"></span><h2><span class="section-number">7. </span>Security<a class="headerlink" href="#security" title="Link to this heading">¶</a></h2>
+<section id="introduction">
+<h3><span class="section-number">7.1. </span>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h3>
+<p>FIT has robust security features. When enabled, each FIT configuration has
+one or more signatures. These protect the configuration and the images it
+refers to. The bootloader must check the signatures against a public key which
+it has stored elsewhere.</p>
+<p>If any configuration fails its signature check, then it must be ignored. Images
+must each include a suitable hash node so that they are protected against
+modification. Once each image is loaded, its hash must be computed and checked
+against the hash in the FIT. The exception is <code class="docutils literal notranslate"><span class="pre">filesystem</span></code>-type images that
+carry a <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node: their integrity is delegated to the kernel’s
+dm-verity target rather than verified by the bootloader.</p>
+<p>For more information on FIT security, see
+<a class="reference external" href="https://docs.u-boot.org/en/latest/usage/fit/signature.html">U-Boot’s documentation</a>.
+The mechanism is also widely covered in conference talks, some of which are
+listed at <a class="reference external" href="https://elinux.org/Boot_Loaders#U-Boot">elinux.org</a>.</p>
+</section>
+<section id="architecture">
+<h3><span class="section-number">7.2. </span>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h3>
+<p>FIT security uses a two-level scheme: image hashing and configuration signing.</p>
+<section id="image-hashing">
+<h4><span class="section-number">7.2.1. </span>Image hashing<a class="headerlink" href="#image-hashing" title="Link to this heading">¶</a></h4>
+<p>Each image node contains one or more hash sub-nodes. Each hash sub-node holds
+the algorithm name (e.g. <code class="docutils literal notranslate"><span class="pre">sha256</span></code>) and the resulting digest of the image
+data. The hash covers the image content only, so the loader can verify that the
+image data has not been modified after the hash was computed.</p>
+<p>Hashing alone does not provide authentication, since an attacker who can modify
+the image data can also replace the hash. Authentication comes from the
+configuration signature, described next.</p>
+</section>
+<section id="configuration-signing">
+<h4><span class="section-number">7.2.2. </span>Configuration signing<a class="headerlink" href="#configuration-signing" title="Link to this heading">¶</a></h4>
+<p>Each configuration node may contain one or more signature sub-nodes. A
+configuration signature covers:</p>
+<ul class="simple">
+<li><p>the configuration node itself (including its references to images),</p></li>
+<li><p>each image node referenced by the configuration,</p></li>
+<li><p>the hash sub-nodes of those images,</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> sub-nodes of those images (where present),</p></li>
+<li><p>the OS-request sub-nodes of those images (where present), and</p></li>
+<li><p>the root (<code class="docutils literal notranslate"><span class="pre">/</span></code>) node of the FIT.</p></li>
+</ul>
+<p>Because the signature covers the hash sub-nodes, the image data is
+transitively protected: any change to the image data invalidates the hash,
+and any change to the hash invalidates the configuration signature.</p>
+<p>This design means that image data is protected without being directly included
+in the configuration signature. The <code class="docutils literal notranslate"><span class="pre">data</span></code> property (and related properties
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code>, <code class="docutils literal notranslate"><span class="pre">data-position</span></code> and <code class="docutils literal notranslate"><span class="pre">data-offset</span></code>) of image nodes are
+explicitly excluded from the signed region, since image-data integrity is already
+guaranteed by the image hash.</p>
+<p>This two-level design has an important consequence: the same image can appear
+in multiple configurations, each with its own signature, without duplicating
+the image data or requiring it to be signed multiple times.</p>
+</section>
+<section id="configuration-signing-compared-to-image-signing">
+<h4><span class="section-number">7.2.3. </span>Configuration signing compared to image signing<a class="headerlink" href="#configuration-signing-compared-to-image-signing" title="Link to this heading">¶</a></h4>
+<p>Signing each image independently is vulnerable to a mix-and-match attack, where
+an attacker combines legitimately signed images into a configuration that was
+never intended. For example, an attacker could pair a signed kernel with a
+different signed devicetree to change the system’s behaviour, even though both
+images carry valid signatures.</p>
+<p>Configuration signing prevents this, because the signature binds a specific
+set of images together. A loader that verifies the configuration signature
+knows that this exact combination of images was approved by the signer.</p>
+</section>
+<section id="verification-procedure">
+<h4><span class="section-number">7.2.4. </span>Verification procedure<a class="headerlink" href="#verification-procedure" title="Link to this heading">¶</a></h4>
+<p>The bootloader verifies a configuration as follows:</p>
+<ol class="arabic">
+<li><p>Locate the configuration’s signature node and verify the signature against
+a trusted public key.</p></li>
+<li><p>The signature covers certain FDT nodes and a region of the string table
+(see <a class="reference internal" href="#hash-contents"><span class="std std-ref">Hash contents</span></a> below). Rebuild the list of nodes that should
+have been signed (the root node, the configuration node, each referenced
+image node, its hash sub-nodes, any <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> sub-node and any
+OS-request sub-nodes) and verify
+that the hash of those nodes
+matches the signature.</p></li>
+<li><p>For each image referenced by the configuration, compute the hash of the
+image data and compare it against the <code class="docutils literal notranslate"><span class="pre">value</span></code> in the image’s hash
+sub-node. This step may be deferred until the image is actually loaded,
+which can be some time after the configuration is selected.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">filesystem</span></code>-type images that carry a <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> child node and
+are being used to launch Linux, the bootloader <em>may</em> omit loading the
+image into RAM and skip this hash check entirely. Instead, the bootloader
+shall derive kernel command-line parameters from the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> node as
+described in <a class="reference internal" href="#document-chapter6-usage#verity-usage"><span class="std std-ref">dm-verity for filesystem images</span></a>, delegating integrity verification to the
+kernel’s dm-verity target at mount time.</p>
+</li>
+</ol>
+<p>If any step fails, the configuration must be rejected.</p>
+</section>
+</section>
+<section id="hash-contents">
+<span id="id1"></span><h3><span class="section-number">7.3. </span>Hash contents<a class="headerlink" href="#hash-contents" title="Link to this heading">¶</a></h3>
+<p>This section defines exactly which bytes are included when computing the hash
+for a signature. A FIT is a flattened devicetree (FDT), so the hash operates
+on the FDT binary structure as defined in the Devicetree Specification
+<a class="reference internal" href="#document-references#dtspec" id="id2"><span>[dtspec]</span></a>.</p>
+<p>The input to the hash is the concatenation of two regions: a set of nodes from
+the FDT structure block, followed by a region of the FDT strings block.</p>
+<section id="structure-block">
+<h4><span class="section-number">7.3.1. </span>Structure block<a class="headerlink" href="#structure-block" title="Link to this heading">¶</a></h4>
+<p>The signer and verifier each construct a <strong>node list</strong>: the set of FDT nodes
+whose content is included in the hash. For a configuration signature this list
+contains:</p>
+<ul class="simple">
+<li><p>the root (<code class="docutils literal notranslate"><span class="pre">/</span></code>) node,</p></li>
+<li><p>the configuration node (e.g. <code class="docutils literal notranslate"><span class="pre">/configurations/conf-1</span></code>),</p></li>
+<li><p>each image node referenced by the configuration
+(e.g. <code class="docutils literal notranslate"><span class="pre">/images/kernel</span></code>, <code class="docutils literal notranslate"><span class="pre">/images/fdt-1</span></code>),</p></li>
+<li><p>the hash sub-nodes of those image nodes
+(e.g. <code class="docutils literal notranslate"><span class="pre">/images/kernel/hash-1</span></code>, <code class="docutils literal notranslate"><span class="pre">/images/fdt-1/hash-1</span></code>),</p></li>
+<li><p>any cipher sub-nodes of those image nodes (e.g. <code class="docutils literal notranslate"><span class="pre">/images/kernel/cipher-1</span></code>),</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">dm-verity</span></code> sub-node of any <code class="docutils literal notranslate"><span class="pre">filesystem</span></code>-type image node that carries one
+(e.g. <code class="docutils literal notranslate"><span class="pre">/images/rootfs-1/dm-verity</span></code>), and</p></li>
+<li><p>any OS-request sub-nodes of those image nodes, i.e. those with a compatible
+string starting with <code class="docutils literal notranslate"><span class="pre">vbe,</span></code>, whatever the image type
+(e.g. <code class="docutils literal notranslate"><span class="pre">/images/kernel/aslr-rand</span></code>, see <a class="reference internal" href="#document-chapter5-source-file-format#os-request-nodes"><span class="std std-ref">OS-request nodes</span></a>).</p></li>
+</ul>
+<p>An image node is “referenced by the configuration” if it is named by
+any string property of the configuration node, except for the following
+properties which are excluded:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">description</span></code> - textual description of the configuration,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compatible</span></code> - board compatible string(s) used for configuration
+matching, and</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code> - reserved name; not used on a configuration node itself.</p></li>
+</ul>
+<p>All other string properties are treated as image references and their
+named image nodes are added to the node list. For each such property,
+if no image node with the named unit name exists under <code class="docutils literal notranslate"><span class="pre">/images</span></code>, the
+property is skipped (a missing reference is not an error during node-list
+construction).</p>
+<p>The signer walks the FDT structure block sequentially and includes or excludes
+each token according to the following rules:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code></dt><dd><p>The token and the node’s unit name are included if the node or its parent
+is in the node list.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code></dt><dd><p>Included under the same condition as <code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_PROP</span></code></dt><dd><p>The token, the property length word, the string-table offset word, and the
+property data are all included if the containing node is in the node list
+<strong>and</strong> the property name is not one of the excluded properties: <code class="docutils literal notranslate"><span class="pre">data</span></code>,
+<code class="docutils literal notranslate"><span class="pre">data-size</span></code>, <code class="docutils literal notranslate"><span class="pre">data-position</span></code> and <code class="docutils literal notranslate"><span class="pre">data-offset</span></code>. These are excluded
+because image-data integrity is covered by image hashes instead.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_NOP</span></code></dt><dd><p>Included if the containing node is in the node list.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">FDT_END</span></code></dt><dd><p>Always included.</p>
+</dd>
+</dl>
+<p>Note that the “or its parent” condition in the <code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code> and
+<code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code> rules means that sub-nodes of listed nodes contribute their
+structural tokens to the hash, even though they are not themselves in the node
+list. For example, the signature sub-nodes of the configuration node have their
+<code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code> and <code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code> tokens included, but their properties
+are excluded (since <code class="docutils literal notranslate"><span class="pre">FDT_PROP</span></code> requires the node itself to be in the list).</p>
+<p>All included bytes are fed into the hash in the order they appear in the
+structure block. Padding bytes that are part of the FDT token alignment are
+included as they appear.</p>
+</section>
+<section id="strings-block">
+<h4><span class="section-number">7.3.2. </span>Strings block<a class="headerlink" href="#strings-block" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">hashed-strings</span></code> property in the signature node records the start offset
+and size of the region of the FDT strings block that is hashed. The start is
+normally 0 (the beginning of the strings block). Only property names that
+are referenced by the signed nodes need to appear in this region; the signer
+must ensure that the region is large enough to cover them.</p>
+<p>After hashing the structure-block regions, the hash algorithm continues with
+the strings-block region to produce the final digest.</p>
+</section>
+<section id="id3">
+<h4><span class="section-number">7.3.3. </span>Image hashing<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p>For image hash nodes (<code class="docutils literal notranslate"><span class="pre">/images/image-name/hash-1</span></code>), the hash is computed
+over the image’s <code class="docutils literal notranslate"><span class="pre">data</span></code> property value only (i.e. the raw image content,
+not any FDT metadata). The algorithm is given by the hash node’s <code class="docutils literal notranslate"><span class="pre">algo</span></code>
+property and the resulting digest is stored in its <code class="docutils literal notranslate"><span class="pre">value</span></code> property.</p>
+</section>
+<section id="worked-example">
+<h4><span class="section-number">7.3.4. </span>Worked example<a class="headerlink" href="#worked-example" title="Link to this heading">¶</a></h4>
+<p>This section walks through a concrete FIT to show exactly which bytes are
+included in a configuration signature hash.</p>
+<section id="source">
+<h5><span class="section-number">7.3.4.1. </span>Source<a class="headerlink" href="#source" title="Link to this heading">¶</a></h5>
+<p>Consider the following minimal FIT source:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/ {
+    description = &quot;Example FIT&quot;;
+    #address-cells = &lt;1&gt;;
+
+    images {
+        kernel {
+            data = /incbin/(&quot;vmlinuz&quot;);
+            type = &quot;kernel&quot;;
+            arch = &quot;arm64&quot;;
+            os = &quot;linux&quot;;
+            compression = &quot;none&quot;;
+            load = &lt;0x40000000&gt;;
+            entry = &lt;0x40000000&gt;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+            };
+        };
+        fdt-1 {
+            data = /incbin/(&quot;board.dtb&quot;);
+            type = &quot;flat_dt&quot;;
+            arch = &quot;arm64&quot;;
+            compression = &quot;none&quot;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+            };
+        };
+    };
+    configurations {
+        default = &quot;conf-1&quot;;
+        conf-1 {
+            description = &quot;Boot Linux&quot;;
+            compatible = &quot;vendor,board&quot;;
+            kernel = &quot;kernel&quot;;
+            fdt = &quot;fdt-1&quot;;
+            signature-1 {
+                algo = &quot;sha256,rsa2048&quot;;
+                key-name-hint = &quot;dev&quot;;
+            };
+        };
+    };
+};
+</pre></div>
+</div>
+</section>
+<section id="after-signing">
+<h5><span class="section-number">7.3.4.2. </span>After signing<a class="headerlink" href="#after-signing" title="Link to this heading">¶</a></h5>
+<p>During signing, the signer adds a <code class="docutils literal notranslate"><span class="pre">value</span></code> property to each hash node
+containing the image digest, and adds <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">hashed-nodes</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hashed-strings</span></code> and other properties to the signature node. The
+resulting FIT looks like this:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/ {
+    description = &quot;Example FIT&quot;;
+    timestamp = &lt;0x67d96bac&gt;;
+    #address-cells = &lt;1&gt;;
+
+    images {
+        kernel {
+            data = &lt;...kernel data...&gt;;
+            type = &quot;kernel&quot;;
+            arch = &quot;arm64&quot;;
+            os = &quot;linux&quot;;
+            compression = &quot;none&quot;;
+            load = &lt;0x40000000&gt;;
+            entry = &lt;0x40000000&gt;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+                value = &lt;...32-byte SHA-256 digest of kernel data...&gt;;
+            };
+        };
+        fdt-1 {
+            data = &lt;...devicetree data...&gt;;
+            type = &quot;flat_dt&quot;;
+            arch = &quot;arm64&quot;;
+            compression = &quot;none&quot;;
+            hash-1 {
+                algo = &quot;sha256&quot;;
+                value = &lt;...32-byte SHA-256 digest of devicetree data...&gt;;
+            };
+        };
+    };
+    configurations {
+        default = &quot;conf-1&quot;;
+        conf-1 {
+            description = &quot;Boot Linux&quot;;
+            compatible = &quot;vendor,board&quot;;
+            kernel = &quot;kernel&quot;;
+            fdt = &quot;fdt-1&quot;;
+            signature-1 {
+                algo = &quot;sha256,rsa2048&quot;;
+                key-name-hint = &quot;dev&quot;;
+                value = &lt;...256-byte RSA-2048 signature...&gt;;
+                hashed-nodes = &quot;/&quot;, &quot;/configurations/conf-1&quot;,
+                    &quot;/images/kernel&quot;, &quot;/images/kernel/hash-1&quot;,
+                    &quot;/images/fdt-1&quot;, &quot;/images/fdt-1/hash-1&quot;;
+                hashed-strings = &lt;0x00000000 0x000000d4&gt;;
+                timestamp = &lt;0x67d96bac&gt;;
+                signer-name = &quot;mkimage&quot;;
+                signer-version = &quot;2025.04-rc3&quot;;
+            };
+        };
+    };
+};
+</pre></div>
+</div>
+</section>
+<section id="node-list">
+<h5><span class="section-number">7.3.4.3. </span>Node list<a class="headerlink" href="#node-list" title="Link to this heading">¶</a></h5>
+<p>For the configuration signature <code class="docutils literal notranslate"><span class="pre">/configurations/conf-1/signature-1</span></code>, the
+node list is:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/configurations/conf-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/kernel</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/kernel/hash-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/fdt-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/images/fdt-1/hash-1</span></code></p></li>
+</ul>
+</section>
+<section id="what-is-hashed">
+<h5><span class="section-number">7.3.4.4. </span>What is hashed<a class="headerlink" href="#what-is-hashed" title="Link to this heading">¶</a></h5>
+<p>The following shows the signed FIT with <strong>bold</strong> indicating the parts that are
+included in the configuration signature hash. Lines in normal weight are not
+hashed. Note that node braces (<code class="docutils literal notranslate"><span class="pre">{</span></code> and <code class="docutils literal notranslate"><span class="pre">}</span></code>) represent <code class="docutils literal notranslate"><span class="pre">FDT_BEGIN_NODE</span></code>
+and <code class="docutils literal notranslate"><span class="pre">FDT_END_NODE</span></code> tokens respectively; these are included whenever the node
+or its parent is in the node list.</p>
+<pre class="literal-block"><strong>/ {</strong>
+    <strong>description = &quot;Example FIT&quot;;</strong>
+    <strong>timestamp = &lt;0x67d96bac&gt;;</strong>
+    <strong>#address-cells = &lt;1&gt;;</strong>
+
+    <strong>images {</strong>
+        <strong>kernel {</strong>
+            data = &lt;...kernel data...&gt;;
+            <strong>type = &quot;kernel&quot;;</strong>
+            <strong>arch = &quot;arm64&quot;;</strong>
+            <strong>os = &quot;linux&quot;;</strong>
+            <strong>compression = &quot;none&quot;;</strong>
+            <strong>load = &lt;0x40000000&gt;;</strong>
+            <strong>entry = &lt;0x40000000&gt;;</strong>
+            <strong>hash-1 {</strong>
+                <strong>algo = &quot;sha256&quot;;</strong>
+                <strong>value = &lt;...32-byte SHA-256 digest...&gt;;</strong>
+            <strong>};</strong>
+        <strong>};</strong>
+        <strong>fdt-1 {</strong>
+            data = &lt;...devicetree data...&gt;;
+            <strong>type = &quot;flat_dt&quot;;</strong>
+            <strong>arch = &quot;arm64&quot;;</strong>
+            <strong>compression = &quot;none&quot;;</strong>
+            <strong>hash-1 {</strong>
+                <strong>algo = &quot;sha256&quot;;</strong>
+                <strong>value = &lt;...32-byte SHA-256 digest...&gt;;</strong>
+            <strong>};</strong>
+        <strong>};</strong>
+    <strong>};</strong>
+    <strong>configurations {</strong>
+        default = &quot;conf-1&quot;;
+        <strong>conf-1 {</strong>
+            <strong>description = &quot;Boot Linux&quot;;</strong>
+            <strong>compatible = &quot;vendor,board&quot;;</strong>
+            <strong>kernel = &quot;kernel&quot;;</strong>
+            <strong>fdt = &quot;fdt-1&quot;;</strong>
+            <strong>signature-1 {</strong>
+                algo = &quot;sha256,rsa2048&quot;;
+                key-name-hint = &quot;dev&quot;;
+                value = &lt;...256-byte RSA-2048 signature...&gt;;
+                hashed-nodes = &quot;/&quot;, &quot;/configurations/conf-1&quot;, ...;
+                hashed-strings = &lt;0x00000000 0x000000d4&gt;;
+                timestamp = &lt;0x67d96bac&gt;;
+                signer-name = &quot;mkimage&quot;;
+                signer-version = &quot;2025.04-rc3&quot;;
+            <strong>};</strong>
+        <strong>};</strong>
+    <strong>};</strong>
+<strong>};</strong>
+
+Strings block:
+<strong>description\0</strong>
+<strong>timestamp\0</strong>
+<strong>#address-cells\0</strong>
+<strong>type\0</strong>
+<strong>arch\0</strong>
+<strong>os\0</strong>
+<strong>compression\0</strong>
+<strong>load\0</strong>
+<strong>entry\0</strong>
+<strong>algo\0</strong>
+<strong>value\0</strong>
+<strong>compatible\0</strong>
+<strong>kernel\0</strong>
+<strong>fdt\0</strong>
+default\0
+padding\0</pre>
+<p>Key points to note:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">data</span></code> properties of both image nodes are excluded since image-data
+integrity is verified separately through the hash nodes.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">default</span></code> property of the <code class="docutils literal notranslate"><span class="pre">configurations</span></code> node is not hashed because
+that node is not in the node list (only its parent <code class="docutils literal notranslate"><span class="pre">/</span></code> is). This is safe
+because the bootloader selects a configuration by its own logic, not by
+trusting the default.</p></li>
+<li><p>All properties of <code class="docutils literal notranslate"><span class="pre">signature-1</span></code> are excluded because that node is not in the
+node list. Its braces are included because its parent <code class="docutils literal notranslate"><span class="pre">conf-1</span></code> is. This is
+safe because the signature itself is verified against a trusted public key,
+not by hashing.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">images</span></code> and <code class="docutils literal notranslate"><span class="pre">configurations</span></code> nodes have no properties of their own,
+but their braces are included because their parent <code class="docutils literal notranslate"><span class="pre">/</span></code> is in the node list.
+This serves as a structural sanity check, ensuring that an attacker cannot
+inject unexpected nodes into the tree without detection.</p></li>
+<li><p>The strings-block region contains the property name strings referenced by the
+hashed nodes. Although the string-table offset in each <code class="docutils literal notranslate"><span class="pre">FDT_PROP</span></code> token is
+hashed, the string at that offset must also be protected; otherwise an
+attacker could rename a property (e.g. changing <code class="docutils literal notranslate"><span class="pre">algo</span></code> to something
+unrecognised) to trick the bootloader into skipping verification. The hashed
+region should therefore always start at offset 0.</p></li>
+</ul>
+<p>The complete byte sequence (structure-block regions plus strings-block region)
+is hashed with SHA-256. The resulting digest is then signed with the RSA-2048
+private key to produce the signature <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+</section>
+</section>
+</section>
+</section>
+<span id="document-references"></span><section id="references">
+<h2><span class="section-number">8. </span>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="dtspec" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>dtspec<span class="fn-bracket">]</span></span>
+<p>Devicetree Specification
+<a class="reference external" href="https://www.devicetree.org/specifications">https://www.devicetree.org/specifications</a></p>
+</div>
+<div class="citation" id="dtschema" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>dtschema<span class="fn-bracket">]</span></span>
+<p>Devicetree schema, including the /chosen node properties
+<a class="reference external" href="https://github.com/devicetree-org/dt-schema">https://github.com/devicetree-org/dt-schema</a></p>
+</div>
+<div class="citation" id="vbe" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>VBE<span class="fn-bracket">]</span></span>
+<p>Verified Boot for Embedded (VBE)
+<a class="reference external" href="https://docs.u-boot.org/en/latest/develop/vbe.html">https://docs.u-boot.org/en/latest/develop/vbe.html</a></p>
+</div>
+</div>
+</section>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/fit-logo.svg" alt="Logo of Flattened Image Tree Specification"/>
+            </a></p>
+<h1 class="logo"><a href="#">Flattened Image Tree Specification</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=open-source-firmware&repo=flat-image-tree&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="#document-license">1. Copyright</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-acknowledgements">2. Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-revhistory">3. Revision History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter4-introduction">4. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter5-source-file-format">5. Flattened Image Tree (FIT) Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter6-usage">6. Flattened Image Tree (FIT) Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-chapter7-security">7. Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#document-references">8. References</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2023, Marian Balakowicz <m8@semihalf.com>.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
