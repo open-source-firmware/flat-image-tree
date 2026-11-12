@@ -1155,6 +1155,23 @@ treating ``vbe,random-rand`` as ``vbe,random-seed``.
 If it holds more than one, the request is malformed,
 and it is required if any of them has ``vbe,required``.
 
+Signing
+~~~~~~~
+
+OS-request nodes are included in a configuration signature
+(see :ref:`hash_contents`),
+so a signed FIT protects their properties,
+including ``vbe,required``.
+A FIT with OS-request nodes verifies only with a bootloader which builds the
+node list in the same way as the tool which signed it,
+so the two must be updated together.
+A FIT signed by a tool which does not include them fails to verify with a
+bootloader which does,
+so it must be signed again, and the reverse also fails.
+A verifier must not fall back to the earlier node list,
+since the request nodes would then not be protected.
+FITs without OS-request nodes are not affected.
+
 Compatibility
 ~~~~~~~~~~~~~
 
