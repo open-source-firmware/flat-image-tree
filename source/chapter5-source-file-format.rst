@@ -518,7 +518,7 @@ sign-images
     configuration node identifying the images to sign. New FITs shall
     omit this property. The signer and verifier instead derive the
     set of referenced images automatically from the configuration's
-    string properties as described in :ref:`hash_contents`. This
+    image references as described in :ref:`hash_contents`. This
     auto-discovery covers every image referenced by the configuration
     without requiring producers to keep the list in sync.
 
@@ -1122,6 +1122,18 @@ configuration for 2.6 FDT kernel is (kernel, fdt) pair.
 Older, 2.4 kernel and 2.6 non-FDT kernel do not use FDT blob, in such cases
 'struct bd_info' must be passed instead of FDT blob, thus fdt property *must
 not* be specified in a configuration node.
+
+.. _config_image_refs:
+
+Image references
+~~~~~~~~~~~~~~~~
+
+The only non-image properties of a configuration node are ``description``,
+``compatible``, ``cmdline`` and ``load-only``.
+
+Every other property is an image reference and shall be a non-empty
+stringlist, each string being the unit name of an image node under
+'/images'. See :ref:`hash_contents` for how image references are signed.
 
 
 Configuration-signature nodes
