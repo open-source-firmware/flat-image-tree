@@ -139,19 +139,18 @@ contains:
   (e.g. ``/images/rootfs-1/dm-verity``).
 
 An image node is "referenced by the configuration" if it is named by
-any string property of the configuration node, except for the following
-properties which are excluded:
+any property of the configuration node, except for the following
+non-image properties (see :ref:`config_image_refs`):
 
 - ``description`` - textual description of the configuration,
 - ``compatible`` - board compatible string(s) used for configuration
-  matching, and
-- ``default`` - reserved name; not used on a configuration node itself.
+  matching,
+- ``cmdline`` - command line for the next boot stage, and
+- ``load-only`` - marker for configurations without an executable image.
 
-All other string properties are treated as image references and their
-named image nodes are added to the node list. For each such property,
-if no image node with the named unit name exists under ``/images``, the
-property is skipped (a missing reference is not an error during node-list
-construction).
+If any other property is not a non-empty stringlist or names an image node
+that does not exist under ``/images``, the signer shall not sign the
+configuration and the verifier shall reject it.
 
 The signer walks the FDT structure block sequentially and includes or excludes
 each token according to the following rules:
