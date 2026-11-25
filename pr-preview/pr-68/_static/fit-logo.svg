@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="fit-logo.svg"
+   inkscape:export-filename="fit-favicon.png"
+   inkscape:export-xdpi="46.586014"
+   inkscape:export-ydpi="46.586014"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.0772321"
+     inkscape:cx="351.8276"
+     inkscape:cy="587.61707"
+     inkscape:window-width="1375"
+     inkscape:window-height="985"
+     inkscape:window-x="542"
+     inkscape:window-y="239"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient2764"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop2762" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g6196">
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#90067f;stroke-width:3;stroke-dasharray:none;stroke-opacity:1"
+         id="rect111"
+         width="78.784203"
+         height="78.784203"
+         x="42.4352"
+         y="94.875908" />
+      <text
+         xml:space="preserve"
+         style="font-size:29.6369px;fill:#90067f;fill-opacity:1;stroke:#90067f;stroke-width:1;stroke-dasharray:none;stroke-opacity:1"
+         x="59.985836"
+         y="169.45703"
+         id="text5904"><tspan
+           sodipodi:role="line"
+           id="tspan5902"
+           style="font-size:29.6369px;fill:#90067f;fill-opacity:1;stroke:#90067f;stroke-width:1;stroke-dasharray:none;stroke-opacity:1"
+           x="59.985836"
+           y="169.45703">FIT</tspan></text>
+      <rect
+         style="fill:#060790;fill-opacity:1;stroke:none;stroke-width:1;stroke-dasharray:none;stroke-opacity:1"
+         id="rect6008"
+         width="15.240253"
+         height="15.2375"
+         x="49.050709"
+         y="101.32629" />
+      <rect
+         style="fill:#067990;fill-opacity:1;stroke:none;stroke-width:1;stroke-dasharray:none;stroke-opacity:1"
+         id="rect6008-8"
+         width="15.240253"
+         height="15.2375"
+         x="74.526558"
+         y="101.32629" />
+      <rect
+         style="fill:#f7367c;fill-opacity:1;stroke:none;stroke-width:1;stroke-dasharray:none;stroke-opacity:1"
+         id="rect6008-7"
+         width="15.240253"
+         height="15.2375"
+         x="100.00241"
+         y="101.32629" />
+      <text
+         xml:space="preserve"
+         style="font-size:54.6462px;fill:#90067f;fill-opacity:1;stroke:#90067f;stroke-width:1.20247;stroke-dasharray:none;stroke-opacity:1"
+         x="149.54651"
+         y="-52.146683"
+         id="text6106"
+         transform="matrix(0,0.81906645,-1.2209022,0,0,0)"><tspan
+           sodipodi:role="line"
+           id="tspan6104"
+           style="stroke-width:1.20247;stroke-dasharray:none"
+           x="149.54651"
+           y="-52.146683">}</tspan></text>
+    </g>
+  </g>
+</svg>
