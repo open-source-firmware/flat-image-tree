@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Flattened Image Tree Specification v1.0-17-g3d8b443 documentation</title>
+    <title>Flattened Image Tree Specification v1.0-18-g5dfa6a5 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <script src="_static/documentation_options.js?v=18156899"></script>
+    <script src="_static/documentation_options.js?v=0e103d0a"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="icon" href="_static/fit-favicon.png"/>
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="spec-fullname-specversion">
-<h1>Flattened Image Tree Specification v1.0-17-g3d8b443<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
+<h1>Flattened Image Tree Specification v1.0-18-g5dfa6a5<a class="headerlink" href="#spec-fullname-specversion" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-license"></span><section id="copyright">
 <h2><span class="section-number">1. </span>Copyright<a class="headerlink" href="#copyright" title="Link to this heading">¶</a></h2>
@@ -751,14 +751,39 @@ not relative to the loading of the FIT. This is mandatory if
 </table>
 </dd>
 <dt>entry</dt><dd><p>Entry point address, address size is determined by
-‘#address-cells’ property of the root node.
-Mandatory for types: “firmware”, and “kernel”.</p>
+‘#address-cells’ property of the root node.</p>
+<p>A FIT image’s data may itself be an executable container, such as
+an ELF or PE binary, in which case the container carries its own
+entry point. When <code class="docutils literal notranslate"><span class="pre">entry</span></code> is omitted the bootloader determines
+the entry point as follows: if the image data is an ELF or PE
+binary (or another container the bootloader recognises) it may
+parse the container and use the entry point recorded inside it;
+otherwise, as a fallback, the entry point is assumed to be equal
+to the effective load address, so execution starts at the first
+instruction of the loaded image.</p>
+<p>Producers requiring a specific entry point shall set the <code class="docutils literal notranslate"><span class="pre">entry</span></code>
+property explicitly rather than relying on container parsing.</p>
 </dd>
 </dl>
 <dl id="prop-load">
 <dt>load</dt><dd><p>Load address, address size is determined by ‘#address-cells’
-property of the root node.
-Mandatory for types: “firmware”, and “kernel”.</p>
+property of the root node.</p>
+<p>When omitted, the bootloader chooses an effective load address
+appropriate for the image type and target platform (e.g. a free,
+suitably-aligned region of RAM). If the bootloader cannot
+determine a suitable load address, it shall refuse to boot the
+image.</p>
+<p>The bootloader is allowed, but not required, to use the image
+data address (the location of the image’s data bytes - whether
+inline via <code class="docutils literal notranslate"><span class="pre">data</span></code>, in an attached store via <code class="docutils literal notranslate"><span class="pre">data-offset</span></code> or
+at a fixed address via <code class="docutils literal notranslate"><span class="pre">data-position</span></code>) as the load address.
+Producers requiring a specific address shall set the <code class="docutils literal notranslate"><span class="pre">load</span></code>
+property explicitly. Image producers shall not rely on a
+particular fallback address being chosen by the bootloader;
+doing so creates a hidden coupling between the FIT layout and
+runtime behaviour, which breaks for inline FITs (where data
+alignment is constrained by the FDT structure) and for external
+FITs whose placement may vary.</p>
 </dd>
 <dt><span class="target" id="index-24"></span>compatible</dt><dd><p>Compatible method for loading image.
 Mandatory for types: “fpga”, and images that do not specify a load address.
