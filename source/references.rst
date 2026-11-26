@@ -5,6 +5,8 @@ References
 
 .. [dtspec] Devicetree Specification
    https://www.devicetree.org/specifications
+.. [dtschema] Devicetree schema, including the /chosen node properties
+   https://github.com/devicetree-org/dt-schema
 .. [VBE] Verified Boot for Embedded (VBE)
    https://docs.u-boot.org/en/latest/develop/vbe.html
 .. [mediatypes] IANA Media Types
@@ -15,3 +17,5 @@ References
    https://libpng.org/pub/png/spec/1.2/PNG-Contents.html
 .. [osrelease] os-release - Operating system identification
    https://www.freedesktop.org/software/systemd/man/latest/os-release.html
+.. [UEFI] Unified Extensible Firmware Interface (UEFI) Specification
+   https://uefi.org/specifications
